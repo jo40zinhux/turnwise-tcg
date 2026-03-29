@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"turnwise-tcg","appId":"1:1057324438192:android:e844f452d2a7d4bda9a175","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"turnwise-tcg","configurations":{"android":"1:1057324438192:android:e844f452d2a7d4bda9a175","ios":"1:1057324438192:ios:ecbcf59b903b0142a9a175"}}}}}}
