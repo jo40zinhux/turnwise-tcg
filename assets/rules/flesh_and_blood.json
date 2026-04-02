@@ -1,0 +1,64 @@
+{
+    "gameId": "flesh_and_blood",
+    "name": "Flesh and Blood",
+    "phases": [
+        {
+            "id": "start",
+            "title": "Start Phase",
+            "description": "Trigger start of turn effects and check state.",
+            "iconCode": "play_arrow"
+        },
+        {
+            "id": "action",
+            "title": "Action Phase",
+            "description": "Play action cards, attack, play non-actions.",
+            "iconCode": "flash_on"
+        },
+        {
+            "id": "end",
+            "title": "End Phase",
+            "description": "Clear pitch zone, put equipment in graveyard, draw to intellect.",
+            "iconCode": "pan_tool"
+        }
+    ],
+    "actions": [
+        {
+            "id": "play_action",
+            "name": "Jogar Ação",
+            "allowedPhases": ["action"],
+            "validations": ["action_point"],
+            "trackUsage": true
+        },
+        {
+            "id": "pitch",
+            "name": "Gerar Recursos (Pitch)",
+            "allowedPhases": ["action"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "attack",
+            "name": "Atacar",
+            "allowedPhases": ["action"],
+            "validations": ["action_point"],
+            "requiresTarget": true,
+            "trackUsage": true
+        },
+        {
+            "id": "defend",
+            "name": "Defender",
+            "allowedPhases": ["action"],
+            "validations": [],
+            "trackUsage": true
+        }
+    ],
+    "validations": [
+        {
+            "id": "action_point",
+            "type": "resource",
+            "params": {},
+            "errorMessage": "Você precisa de um Action Point para realizar {actionName}."
+        }
+    ],
+    "statusEffects": []
+}

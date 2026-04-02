@@ -1,23 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:turnwise_tcg/features/match/domain/match_phase.dart';
+import '../../../core/utils/icon_mapper.dart';
+import '../domain/turn_phase.dart';
 import 'providers/match_providers.dart';
 
 class MatchScreen extends ConsumerWidget {
-  const MatchScreen({super.key});
+  final String gameId;
+
+  const MatchScreen({super.key, required this.gameId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentPhase = ref.watch(matchStateProvider);
-    final notifier = ref.read(matchStateProvider.notifier);
+    final rulesAsync = ref.watch(gameRulesProvider(gameId));
+
+    return Scaffold(
+      appBar: AppBar(
+        title: rulesAsync.when(
+          data: (rules) => Text(rules.name),
+          loading: () => const Text('Loading Match...'),
+          error: (_, __) => const Text('Error'),
+        ),
+      ),
+      body: SafeArea(
+        child: rulesAsync.when(
+          data: (rules) => _MatchBody(gameId: gameId),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) =>
+              Center(child: Text('Failed to load rules: $error')),
+        ),
+      ),
+    );
+  }
+}
+
+class _MatchBody extends ConsumerWidget {
+  final String gameId;
+
+  const _MatchBody({required this.gameId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rules = ref.watch(gameRulesProvider(gameId)).value!;
+    final matchState = ref.watch(matchStateProvider(gameId));
+    final notifier = ref.read(matchStateProvider(gameId).notifier);
 
     // Listen for feedback messages to show friendly SnackBars
-    ref.listen(matchStateProvider, (previous, next) {
-      if (notifier.currentFeedback != null) {
+    ref.listen(matchStateProvider(gameId), (previous, next) {
+      if (next.currentFeedback != null) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(notifier.currentFeedback!),
+            content: Text(
+              next.currentFeedback!,
+              style: const TextStyle(color: Colors.white),
+            ),
             behavior: SnackBarBehavior.floating,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -29,116 +65,114 @@ class MatchScreen extends ConsumerWidget {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Practice Match'),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Header
-              const Text(
-                'Turn Phases Checklist',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Follow the flow below. Use the icons for help.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white54,
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Phases list
-              Expanded(
-                child: ListView.separated(
-                  itemCount: MatchPhase.values.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final phase = MatchPhase.values[index];
-                    final isCurrent = currentPhase == phase;
-                    final isPast =
-                        MatchPhase.values.indexOf(currentPhase) > index;
-
-                    return _PhaseTile(
-                      phase: phase,
-                      isCurrent: isCurrent,
-                      isPast: isPast,
-                    );
-                  },
-                ),
-              ),
-
-              // Action Buttons area to test blockers
-              const Divider(color: Colors.white12),
-              const SizedBox(height: 16),
-              const Text(
-                'Simulate Actions:',
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white70),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () =>
-                          notifier.attemptInvalidAction('atacar oponente'),
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.surface),
-                      child: const Text('Atacar'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () =>
-                          notifier.attemptInvalidAction('baixar carta'),
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.surface),
-                      child: const Text('Jogar Carta'),
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Main Next Phase button
-              ElevatedButton(
-                onPressed: () {
-                  notifier.nextPhase();
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                ),
-                child: Text(
-                  currentPhase == MatchPhase.end ? 'End Turn' : 'Next Phase',
-                  style: const TextStyle(fontSize: 18),
-                ),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header
+          const Text(
+            'Turn Phases Checklist',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w300,
+            ),
           ),
-        ),
+          const SizedBox(height: 8),
+          const Text(
+            'Follow the flow below. Use the icons for help.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white54,
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Phases list
+          Expanded(
+            child: ListView.separated(
+              itemCount: rules.phases.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final phase = rules.phases[index];
+                final isCurrent = matchState.currentPhaseIndex == index;
+                final isPast = matchState.currentPhaseIndex > index;
+
+                return _PhaseTile(
+                  phase: phase,
+                  isCurrent: isCurrent,
+                  isPast: isPast,
+                );
+              },
+            ),
+          ),
+
+          // Action Buttons area to test blockers
+          const Divider(color: Colors.white12),
+          const SizedBox(height: 16),
+          const Text(
+            'Simulate Actions:',
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white70),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: rules.actions.map((action) {
+              int? maxAllowed;
+              for (final validationId in action.validations) {
+                try {
+                  final validation = rules.validations.firstWhere((v) => v.id == validationId);
+                  if (validation.type == 'limit') {
+                    maxAllowed = validation.params['max'] as int? ?? 1;
+                    break;
+                  }
+                } catch (_) {}
+              }
+
+              final currentUsage = matchState.actionUsageCount[action.id] ?? 0;
+              final isExhausted = maxAllowed != null && currentUsage >= maxAllowed;
+
+              return Opacity(
+                opacity: isExhausted ? 0.5 : 1.0,
+                child: ElevatedButton(
+                  onPressed: () => notifier.attemptAction(action.id),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: isExhausted ? Theme.of(context).colorScheme.primary : null),
+                  child: Text(action.name),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+
+          // Main Next Phase button
+          ElevatedButton(
+            onPressed: () {
+              notifier.nextPhase();
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+            ),
+            child: Text(
+              matchState.currentPhaseIndex == rules.phases.length - 1
+                  ? 'End Turn'
+                  : 'Next Phase',
+              style: const TextStyle(fontSize: 18),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _PhaseTile extends StatelessWidget {
-  final MatchPhase phase;
+  final TurnPhase phase;
   final bool isCurrent;
   final bool isPast;
 
@@ -164,6 +198,8 @@ class _PhaseTile extends StatelessWidget {
       iconColor = theme.colorScheme.primary.withOpacity(0.5);
     }
 
+    final computedIcon = getIconFromString(phase.iconCode);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
@@ -177,7 +213,7 @@ class _PhaseTile extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            isPast ? Icons.check_circle_rounded : phase.icon,
+            isPast ? Icons.check_circle_rounded : computedIcon,
             color: iconColor,
             size: 28,
           ),

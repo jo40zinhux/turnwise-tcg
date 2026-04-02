@@ -1,0 +1,86 @@
+{
+    "gameId": "lorcana",
+    "name": "Disney Lorcana",
+    "phases": [
+        {
+            "id": "ready",
+            "title": "Ready Phase",
+            "description": "Ready all your cards in play.",
+            "iconCode": "refresh"
+        },
+        {
+            "id": "set",
+            "title": "Set Phase",
+            "description": "Check for effects that happen at the start of turn.",
+            "iconCode": "bolt"
+        },
+        {
+            "id": "draw",
+            "title": "Draw Phase",
+            "description": "Draw a card from the top of your deck.",
+            "iconCode": "copy_outlined"
+        },
+        {
+            "id": "main",
+            "title": "Main Phase",
+            "description": "Add Ink, play cards, quest or challenge.",
+            "iconCode": "stars"
+        }
+    ],
+    "actions": [
+        {
+            "id": "ink",
+            "name": "Adicionar Ink",
+            "allowedPhases": ["main"],
+            "validations": ["ink_limit"],
+            "trackUsage": true
+        },
+        {
+            "id": "play_character",
+            "name": "Jogar Personagem",
+            "allowedPhases": ["main"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "play_item",
+            "name": "Jogar Item",
+            "allowedPhases": ["main"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "play_action",
+            "name": "Jogar Ação",
+            "allowedPhases": ["main"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "quest",
+            "name": "Fazer Quest",
+            "allowedPhases": ["main"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "challenge",
+            "name": "Desafiar",
+            "allowedPhases": ["main"],
+            "validations": [],
+            "requiresTarget": true,
+            "trackUsage": true
+        }
+    ],
+    "validations": [
+        {
+            "id": "ink_limit",
+            "type": "limit",
+            "params": {
+                "max": 1
+            },
+            "errorMessage": "Você só pode adicionar uma carta como ink por turno."
+        }
+    ],
+    "statusEffects": []
+}

@@ -90,12 +90,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
           routes: [
             GoRoute(
-              path: 'match',
+              path: 'match/:gameId',
               name: 'match',
               pageBuilder: (context, state) => _buildFadeTransitionPage(
                 context: context,
                 state: state,
-                child: const MatchScreen(),
+                child: MatchScreen(
+                  gameId: state.pathParameters['gameId'] ?? 'practice_tcg',
+                ),
               ),
             ),
           ]),

@@ -1,0 +1,65 @@
+{
+  "gameId": "practice_tcg",
+  "name": "Practice TCG",
+  "phases": [
+    {
+      "id": "draw",
+      "title": "Draw Phase",
+      "description": "Start your turn by drawing a card.",
+      "iconCode": "copy_outlined"
+    },
+    {
+      "id": "main1",
+      "title": "Main Phase 1",
+      "description": "Play cards, summon creatures or prepare your board.",
+      "iconCode": "back_hand_rounded"
+    },
+    {
+      "id": "combat",
+      "title": "Combat Phase",
+      "description": "Declare attacks and engage the opponent.",
+      "iconCode": "sports_martial_arts_rounded"
+    },
+    {
+      "id": "main2",
+      "title": "Main Phase 2",
+      "description": "Final preparations before ending your turn.",
+      "iconCode": "shield_rounded"
+    },
+    {
+      "id": "end",
+      "title": "End Phase",
+      "description": "Cleanup effects and pass the turn.",
+      "iconCode": "front_hand_rounded"
+    }
+  ],
+  "actions": [
+    {
+      "id": "atacar oponente",
+      "name": "Atacar",
+      "allowedPhases": ["combat"],
+      "validations": ["validate_combat"]
+    },
+    {
+      "id": "baixar carta",
+      "name": "Jogar Carta",
+      "allowedPhases": ["main1", "main2"],
+      "validations": ["validate_main_phase"]
+    }
+  ],
+  "validations": [
+    {
+      "id": "validate_combat",
+      "type": "block_wrong_phase",
+      "params": {},
+      "errorMessage": "Você deve focar no combate agora. Cartas só podem ser jogadas nas Main Phases."
+    },
+    {
+      "id": "validate_main_phase",
+      "type": "block_wrong_phase",
+      "params": {},
+      "errorMessage": "Ação de {actionName} bloqueada nesta fase do jogo. Revise as regras do seu TCG."
+    }
+  ],
+  "statusEffects": []
+}

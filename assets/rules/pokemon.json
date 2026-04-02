@@ -1,0 +1,118 @@
+{
+    "gameId": "pokemon",
+    "name": "Pokemon TCG",
+    "phases": [
+        {
+            "id": "draw",
+            "title": "Draw Phase",
+            "description": "Comprar carta do topo do baralho.",
+            "iconCode": "copy_outlined"
+        },
+        {
+            "id": "actions",
+            "title": "Ações do turno",
+            "description": "Baixar Pokémon, anexar energia, usar itens e apoiadores.",
+            "iconCode": "back_hand_rounded"
+        },
+        {
+            "id": "attack",
+            "title": "Atacar",
+            "description": "Declarar um ataque, resolver dano, encerra o turno.",
+            "iconCode": "sports_mma"
+        }
+    ],
+    "actions": [
+        {
+            "id": "play_basic",
+            "name": "Baixar Pokémon Básico",
+            "allowedPhases": ["actions"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "evolve",
+            "name": "Evoluir Pokémon",
+            "allowedPhases": ["actions"],
+            "validations": ["evolve_rule"],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "attach_energy",
+            "name": "Anexar Energia",
+            "allowedPhases": ["actions"],
+            "validations": ["energy_limit"],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "item",
+            "name": "Usar Item",
+            "allowedPhases": ["actions"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "supporter",
+            "name": "Usar Apoiador",
+            "allowedPhases": ["actions"],
+            "validations": ["supporter_limit"],
+            "trackUsage": true
+        },
+        {
+            "id": "ability",
+            "name": "Usar Habilidade",
+            "allowedPhases": ["actions", "attack"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "retreat",
+            "name": "Recuar",
+            "allowedPhases": ["actions"],
+            "validations": ["retreat_limit"],
+            "trackUsage": true
+        },
+        {
+            "id": "attack",
+            "name": "Declarar Ataque",
+            "allowedPhases": ["attack"],
+            "validations": [],
+            "requiresTarget": true,
+            "trackUsage": true
+        }
+    ],
+    "validations": [
+        {
+            "id": "energy_limit",
+            "type": "limit",
+            "params": {"max": 1},
+            "errorMessage": "Você só pode anexar uma energia por turno."
+        },
+        {
+            "id": "supporter_limit",
+            "type": "limit",
+            "params": {"max": 1},
+            "errorMessage": "Você só pode usar um apoiador por turno."
+        },
+        {
+            "id": "retreat_limit",
+            "type": "limit",
+            "params": {"max": 1},
+            "errorMessage": "Você só pode recuar seu ativo uma vez por turno."
+        },
+        {
+            "id": "evolve_rule",
+            "type": "condition",
+            "params": {},
+            "errorMessage": "Não é possível evoluir um Pokémon no turno em que ele entrou em jogo."
+        }
+    ],
+    "statusEffects": [
+        "poison",
+        "burn",
+        "confusion",
+        "paralysis",
+        "sleep"
+    ]
+}

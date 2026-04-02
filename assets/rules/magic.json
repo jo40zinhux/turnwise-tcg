@@ -1,0 +1,90 @@
+{
+    "gameId": "magic",
+    "name": "Magic: The Gathering",
+    "phases": [
+        {
+            "id": "untap",
+            "title": "Untap Phase",
+            "description": "Desvire suas permanentes.",
+            "iconCode": "refresh"
+        },
+        {
+            "id": "upkeep",
+            "title": "Upkeep Phase",
+            "description": "Resolva habilidades que desencadeiam no início da manutenção. Compre sua carta.",
+            "iconCode": "copy_outlined"
+        },
+        {
+            "id": "main1",
+            "title": "Main Phase 1",
+            "description": "Baixe terrenos, conjure mágicas, use habilidades.",
+            "iconCode": "fireplace"
+        },
+        {
+            "id": "combat",
+            "title": "Combat Phase",
+            "description": "Declare atacantes, bloqueadores e resolva dano.",
+            "iconCode": "sports_martial_arts_rounded"
+        },
+        {
+            "id": "main2",
+            "title": "Main Phase 2",
+            "description": "Ações pós-combate.",
+            "iconCode": "shield_rounded"
+        },
+        {
+            "id": "end",
+            "title": "End Step",
+            "description": "Fim do turno e descarte até tamanho da mão.",
+            "iconCode": "dark_mode"
+        }
+    ],
+    "actions": [
+        {
+            "id": "play_land",
+            "name": "Baixar Terreno",
+            "allowedPhases": ["main1", "main2"],
+            "validations": ["land_limit"],
+            "trackUsage": true
+        },
+        {
+            "id": "cast_spell",
+            "name": "Conjurar Mágica",
+            "allowedPhases": ["main1", "main2"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "cast_instant",
+            "name": "Mágica Instantânea",
+            "allowedPhases": ["untap", "upkeep", "main1", "combat", "main2", "end"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "activate_ability",
+            "name": "Ativar Habilidade",
+            "allowedPhases": ["untap", "upkeep", "main1", "combat", "main2", "end"],
+            "validations": [],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "declare_attacker",
+            "name": "Declarar Atacante",
+            "allowedPhases": ["combat"],
+            "validations": [],
+            "requiresTarget": true,
+            "trackUsage": true
+        }
+    ],
+    "validations": [
+        {
+            "id": "land_limit",
+            "type": "limit",
+            "params": {"max": 1},
+            "errorMessage": "Você só pode baixar um terreno por turno."
+        }
+    ],
+    "statusEffects": []
+}
