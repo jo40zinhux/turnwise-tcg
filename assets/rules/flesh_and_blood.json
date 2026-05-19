@@ -60,5 +60,9 @@
             "errorMessage": "Você precisa de um Action Point para realizar {actionName}."
         }
     ],
-    "statusEffects": []
+    "statusEffects": [],
+    "metadata": {
+        "themeColor": "redAccent",
+        "iconCode": "bloodtype"
+    }
 }

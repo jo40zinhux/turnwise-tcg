@@ -114,5 +114,9 @@
         "confusion",
         "paralysis",
         "sleep"
-    ]
+    ],
+    "metadata": {
+        "themeColor": "yellow700",
+        "iconCode": "catching_pokemon"
+    }
 }

@@ -86,5 +86,9 @@
             "errorMessage": "Você só pode baixar um terreno por turno."
         }
     ],
-    "statusEffects": []
+    "statusEffects": [],
+    "metadata": {
+        "themeColor": "greenAccent",
+        "iconCode": "fireplace"
+    }
 }

@@ -82,5 +82,9 @@
             "errorMessage": "Você só pode adicionar uma carta como ink por turno."
         }
     ],
-    "statusEffects": []
+    "statusEffects": [],
+    "metadata": {
+        "themeColor": "purpleAccent",
+        "iconCode": "auto_awesome"
+    }
 }

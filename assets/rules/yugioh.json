@@ -1,0 +1,177 @@
+{
+    "gameId": "yugioh",
+    "name": "Yu-Gi-Oh! TCG",
+    "phases": [
+        {
+            "id": "draw",
+            "title": "Draw Phase",
+            "description": "Compre 1 carta do topo do baralho.",
+            "iconCode": "copy_outlined"
+        },
+        {
+            "id": "standby",
+            "title": "Standby Phase",
+            "description": "Resolva efeitos ativados durante a Standby Phase.",
+            "iconCode": "hourglass_top"
+        },
+        {
+            "id": "main1",
+            "title": "Main Phase 1",
+            "description": "Invoque monstros, ative mágicas e prepare o campo.",
+            "iconCode": "back_hand_rounded"
+        },
+        {
+            "id": "battle",
+            "title": "Battle Phase",
+            "description": "Declare ataques e resolva batalhas.",
+            "iconCode": "sports_mma"
+        },
+        {
+            "id": "main2",
+            "title": "Main Phase 2",
+            "description": "Faça ações adicionais após o combate.",
+            "iconCode": "dashboard_customize"
+        },
+        {
+            "id": "end",
+            "title": "End Phase",
+            "description": "Resolva efeitos de fim de turno.",
+            "iconCode": "dark_mode"
+        }
+    ],
+    "actions": [
+        {
+            "id": "normal_summon",
+            "name": "Normal Summon",
+            "allowedPhases": [
+                "main1",
+                "main2"
+            ],
+            "validations": [
+                "normal_summon_limit"
+            ],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "special_summon",
+            "name": "Special Summon",
+            "allowedPhases": [
+                "main1",
+                "main2"
+            ],
+            "validations": [],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "set_monster",
+            "name": "Setar Monstro",
+            "allowedPhases": [
+                "main1",
+                "main2"
+            ],
+            "validations": [
+                "normal_summon_limit"
+            ],
+            "trackUsage": true
+        },
+        {
+            "id": "activate_spell",
+            "name": "Ativar Spell",
+            "allowedPhases": [
+                "main1",
+                "main2",
+                "battle"
+            ],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "set_spell_trap",
+            "name": "Setar Spell/Trap",
+            "allowedPhases": [
+                "main1",
+                "main2"
+            ],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "change_battle_position",
+            "name": "Mudar Posição de Batalha",
+            "allowedPhases": [
+                "main1",
+                "main2"
+            ],
+            "validations": [
+                "battle_position_limit"
+            ],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "declare_attack",
+            "name": "Declarar Ataque",
+            "allowedPhases": [
+                "battle"
+            ],
+            "validations": [
+                "attack_position_check"
+            ],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "activate_quick_effect",
+            "name": "Ativar Quick Effect",
+            "allowedPhases": [
+                "draw",
+                "standby",
+                "main1",
+                "battle",
+                "main2",
+                "end"
+            ],
+            "validations": [],
+            "trackUsage": true
+        }
+    ],
+    "validations": [
+        {
+            "id": "normal_summon_limit",
+            "type": "limit",
+            "params": {
+                "max": 1
+            },
+            "errorMessage": "Você só pode realizar um Normal Summon ou Set por turno."
+        },
+        {
+            "id": "battle_position_limit",
+            "type": "limit",
+            "params": {
+                "max": 1
+            },
+            "errorMessage": "Um monstro só pode mudar sua posição de batalha uma vez por turno."
+        },
+        {
+            "id": "attack_position_check",
+            "type": "condition",
+            "params": {},
+            "errorMessage": "Somente monstros em posição de ataque podem declarar ataque."
+        }
+    ],
+    "statusEffects": [],
+    "victoryConditions": {
+        "lifePoints": 0,
+        "deckOut": true,
+        "description": "Reduza os Life Points do oponente para 0 ou faça o oponente não conseguir comprar carta."
+    },
+    "metadata": {
+        "supportsMultiplayer": false,
+        "supportsTeams": true,
+        "genre": "Combo / Battle TCG",
+        "themeColor": "purple",
+        "iconCode": "diamond"
+    }
+}

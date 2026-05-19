@@ -1,0 +1,179 @@
+{
+    "gameId": "riftbound",
+    "name": "Riftbound",
+    "phases": [
+        {
+            "id": "awaken",
+            "title": "Awaken Phase",
+            "description": "Prepare suas cartas exauridas.",
+            "iconCode": "refresh"
+        },
+        {
+            "id": "beginning",
+            "title": "Beginning Phase",
+            "description": "Pontue battlefields controlados, canalize runes e compre uma carta.",
+            "iconCode": "copy_outlined"
+        },
+        {
+            "id": "action",
+            "title": "Action Phase",
+            "description": "Jogue cartas, mova unidades e ative habilidades.",
+            "iconCode": "back_hand_rounded"
+        },
+        {
+            "id": "showdown",
+            "title": "Showdown Phase",
+            "description": "Resolva batalhas e confrontos em battlefields.",
+            "iconCode": "sports_mma"
+        },
+        {
+            "id": "end",
+            "title": "End Phase",
+            "description": "Resolva efeitos de fim de turno.",
+            "iconCode": "dark_mode"
+        }
+    ],
+    "actions": [
+        {
+            "id": "channel_runes",
+            "name": "Canalizar Runes",
+            "allowedPhases": [
+                "beginning"
+            ],
+            "validations": [
+                "rune_limit"
+            ],
+            "trackUsage": true
+        },
+        {
+            "id": "draw_card",
+            "name": "Comprar Carta",
+            "allowedPhases": [
+                "beginning"
+            ],
+            "validations": [
+                "draw_limit"
+            ],
+            "trackUsage": true
+        },
+        {
+            "id": "play_unit",
+            "name": "Jogar Unit",
+            "allowedPhases": [
+                "action"
+            ],
+            "validations": [
+                "energy_cost_check"
+            ],
+            "trackUsage": true
+        },
+        {
+            "id": "play_spell",
+            "name": "Jogar Spell",
+            "allowedPhases": [
+                "action",
+                "showdown"
+            ],
+            "validations": [
+                "energy_cost_check"
+            ],
+            "trackUsage": true
+        },
+        {
+            "id": "play_gear",
+            "name": "Jogar Gear",
+            "allowedPhases": [
+                "action"
+            ],
+            "validations": [
+                "energy_cost_check"
+            ],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "move_unit",
+            "name": "Mover Unit",
+            "allowedPhases": [
+                "action"
+            ],
+            "validations": [
+                "unit_ready_check"
+            ],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "start_showdown",
+            "name": "Iniciar Showdown",
+            "allowedPhases": [
+                "showdown"
+            ],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "attack",
+            "name": "Declarar Ataque",
+            "allowedPhases": [
+                "showdown"
+            ],
+            "validations": [
+                "unit_ready_check"
+            ],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
+            "id": "activate_ability",
+            "name": "Ativar Habilidade",
+            "allowedPhases": [
+                "action"
+            ],
+            "validations": [],
+            "trackUsage": true
+        }
+    ],
+    "validations": [
+        {
+            "id": "rune_limit",
+            "type": "limit",
+            "params": {
+                "max": 1
+            },
+            "errorMessage": "Você já canalizou runes neste turno."
+        },
+        {
+            "id": "draw_limit",
+            "type": "limit",
+            "params": {
+                "max": 1
+            },
+            "errorMessage": "Você já comprou carta nesta fase."
+        },
+        {
+            "id": "energy_cost_check",
+            "type": "resource",
+            "params": {},
+            "errorMessage": "Você não possui energia suficiente para esta ação."
+        },
+        {
+            "id": "unit_ready_check",
+            "type": "condition",
+            "params": {},
+            "errorMessage": "A unidade precisa estar pronta para executar esta ação."
+        }
+    ],
+    "statusEffects": [],
+    "victoryConditions": {
+        "pointsToWin": 8,
+        "description": "Controle battlefields e alcance 8 pontos para vencer."
+    },
+    "metadata": {
+        "supportsMultiplayer": true,
+        "supportsTeams": true,
+        "genre": "Battlefield Control TCG",
+        "themeColor": "deepPurpleAccent",
+        "iconCode": "grass"
+    }
+}
