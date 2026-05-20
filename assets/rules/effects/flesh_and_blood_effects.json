@@ -1,0 +1,34 @@
+{
+    "effectsLibrary": [
+        {
+            "id": "frailty",
+            "name": "Frailty",
+            "type": "modifier",
+            "effect": {
+                "attackReduction": 1
+            }
+        },
+        {
+            "id": "inertia",
+            "name": "Inertia",
+            "type": "trigger",
+            "trigger": "end_turn"
+        },
+        {
+            "id": "bloodrot_pox",
+            "name": "Bloodrot Pox",
+            "type": "trigger",
+            "trigger": "end_turn"
+        },
+        {
+            "id": "dominate",
+            "name": "Dominate",
+            "type": "block_restriction"
+        },
+        {
+            "id": "go_again",
+            "name": "Go Again",
+            "type": "modifier"
+        }
+    ]
+}

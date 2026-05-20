@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-
 import '../../features/splash/presentation/splash_screen.dart';
+import '../observability/router_analytics_observer_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/auth/providers/auth_providers.dart';
@@ -16,17 +15,14 @@ import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/match_history/presentation/match_summary_screen.dart';
 import '../../features/match_history/domain/match_summary_args.dart';
 
-final analytics = FirebaseAnalytics.instance;
-
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
   final hasCompletedOnboarding = ref.watch(onboardingStateProvider);
+  final analyticsObservers = ref.watch(routerAnalyticsObserversProvider);
 
   return GoRouter(
     initialLocation: '/',
-    observers: [
-      FirebaseAnalyticsObserver(analytics: analytics),
-    ],
+    observers: analyticsObservers,
     redirect: (context, state) {
       final isAuthLoading = authState.isLoading;
       final user = authState.value;

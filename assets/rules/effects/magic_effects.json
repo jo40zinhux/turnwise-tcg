@@ -1,0 +1,63 @@
+{
+    "effectsLibrary": [
+        {
+            "id": "spell_lock",
+            "name": "Spell Lock",
+            "type": "action_lock",
+            "blockedActions": [
+                "cast_spell"
+            ],
+            "duration": {
+                "type": "continuous"
+            }
+        },
+        {
+            "id": "artifact_lock",
+            "name": "Artifact Lock",
+            "type": "action_lock",
+            "blockedActions": [
+                "play_artifact"
+            ]
+        },
+        {
+            "id": "creature_cannot_attack",
+            "name": "Cannot Attack",
+            "type": "attack_restriction"
+        },
+        {
+            "id": "creature_cannot_block",
+            "name": "Cannot Block",
+            "type": "block_restriction"
+        },
+        {
+            "id": "silence",
+            "name": "Silence",
+            "type": "action_lock",
+            "blockedActions": [
+                "cast_spell"
+            ]
+        },
+        {
+            "id": "skip_draw_step",
+            "name": "Skip Draw Step",
+            "type": "phase_skip",
+            "skippedPhase": "draw"
+        },
+        {
+            "id": "mana_cost_increase",
+            "name": "Mana Tax",
+            "type": "modifier",
+            "effect": {
+                "manaCostIncrease": 1
+            }
+        },
+        {
+            "id": "summoning_sickness",
+            "name": "Summoning Sickness",
+            "type": "attack_restriction",
+            "duration": {
+                "type": "until_next_turn"
+            }
+        }
+    ]
+}

@@ -40,6 +40,8 @@ void main() {
       expect(AnalyticsEvents.matchResumed, 'match_resumed');
       expect(AnalyticsEvents.actionBlocked, 'action_blocked');
       expect(AnalyticsEvents.matchCompleted, 'match_completed');
+      expect(AnalyticsEvents.googleSignIn, 'google_sign_in');
+      expect(AnalyticsEvents.appleSignIn, 'apple_sign_in');
     });
   });
 }

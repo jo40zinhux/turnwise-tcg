@@ -56,80 +56,53 @@ class _MatchSummaryScreenState extends ConsumerState<MatchSummaryScreen> {
       },
       child: Scaffold(
         body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: AppSpacing.screenHorizontal,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      AppSpacing.gapXl,
-                      _OutcomeHero(
-                        visual: visual,
-                        gameName: widget.args.gameName,
-                        outcomeLabel: MatchOutcomeLabels.label(_record.outcome),
-                      ),
-                      AppSpacing.gapLg,
-                      _StatsCard(record: _record),
-                      if (_record.notes != null &&
-                          _record.notes!.trim().isNotEmpty) ...[
-                        AppSpacing.gapMd,
-                        _NotesCard(notes: _record.notes!.trim()),
-                      ],
-                      if (_achievements.isNotEmpty) ...[
-                        AppSpacing.gapLg,
-                        Text(
-                          _achievements.length == 1
-                              ? 'Nova conquista'
-                              : 'Novas conquistas',
-                          style: AppTypography.cardTitle(context),
-                        ),
-                        AppSpacing.gapMd,
-                        for (final achievement in _achievements)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: AppSpacing.md,
-                            ),
-                            child: _AchievementTile(achievement: achievement),
-                          ),
-                      ],
-                      AppSpacing.gapXl,
-                    ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(
+              left: AppSpacing.lg,
+              right: AppSpacing.lg,
+              top: AppSpacing.xl,
+              bottom: AppSpacing.xl,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _OutcomeHero(
+                  visual: visual,
+                  gameName: widget.args.gameName,
+                  outcomeLabel: MatchOutcomeLabels.label(_record.outcome),
+                ),
+                AppSpacing.gapLg,
+                _StatsCard(record: _record),
+                if (_record.notes != null &&
+                    _record.notes!.trim().isNotEmpty) ...[
+                  AppSpacing.gapMd,
+                  _NotesCard(notes: _record.notes!.trim()),
+                ],
+                if (_achievements.isNotEmpty) ...[
+                  AppSpacing.gapLg,
+                  Text(
+                    _achievements.length == 1
+                        ? 'Nova conquista'
+                        : 'Novas conquistas',
+                    style: AppTypography.cardTitle(context),
                   ),
-                ),
-              ),
-              Padding(
-                padding: AppSpacing.screenHorizontal.copyWith(
-                  bottom: AppSpacing.lg,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    FilledButton(
-                      onPressed: () => _goHome(context),
-                      child: const Text('Ir para o início'),
+                  AppSpacing.gapMd,
+                  for (final achievement in _achievements)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: _AchievementTile(achievement: achievement),
                     ),
-                    AppSpacing.gapSm,
-                    OutlinedButton(
-                      onPressed: () => context.goNamed('history'),
-                      child: const Text('Ver histórico'),
-                    ),
-                    if (_record.outcome != MatchOutcome.abandoned) ...[
-                      AppSpacing.gapXs,
-                      TextButton(
-                        onPressed: () => _playAgain(context),
-                        child: Text(
-                          'Nova partida — ${widget.args.gameName}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ],
+                ],
+                AppSpacing.gapXl,
+                _SummaryActions(
+                  gameName: widget.args.gameName,
+                  showPlayAgain: _record.outcome != MatchOutcome.abandoned,
+                  onGoHome: () => _goHome(context),
+                  onViewHistory: () => context.goNamed('history'),
+                  onPlayAgain: () => _playAgain(context),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -144,6 +117,66 @@ class _MatchSummaryScreenState extends ConsumerState<MatchSummaryScreen> {
     context.goNamed(
       'match',
       pathParameters: {'gameId': _record.gameId},
+    );
+  }
+}
+
+/// Primary actions at the end of the scroll — avoids overlap with content above.
+class _SummaryActions extends StatelessWidget {
+  final String gameName;
+  final bool showPlayAgain;
+  final VoidCallback onGoHome;
+  final VoidCallback onViewHistory;
+  final VoidCallback onPlayAgain;
+
+  const _SummaryActions({
+    required this.gameName,
+    required this.showPlayAgain,
+    required this.onGoHome,
+    required this.onViewHistory,
+    required this.onPlayAgain,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withOpacity(0.92),
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withOpacity(0.35),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FilledButton(
+              onPressed: onGoHome,
+              child: const Text('Ir para o início'),
+            ),
+            AppSpacing.gapSm,
+            OutlinedButton(
+              onPressed: onViewHistory,
+              child: const Text('Ver histórico'),
+            ),
+            if (showPlayAgain) ...[
+              AppSpacing.gapXs,
+              TextButton(
+                onPressed: onPlayAgain,
+                child: Text(
+                  'Nova partida — $gameName',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

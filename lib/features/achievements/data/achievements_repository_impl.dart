@@ -4,7 +4,6 @@ import '../domain/achievement_definition.dart';
 import '../domain/achievements_repository.dart';
 import '../domain/user_achievement.dart';
 import 'bundled_achievements_datasource.dart';
-import 'firestore_achievements_datasource.dart';
 import 'hive_achievements_datasource.dart';
 
 typedef AchievementsCloudSync = Future<void> Function(

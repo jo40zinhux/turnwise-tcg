@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:turnwise_tcg/features/match/data/bundled_effects_datasource.dart';
 import 'package:turnwise_tcg/features/match/data/bundled_rules_datasource.dart';
 import 'package:turnwise_tcg/features/match/data/cached_rules_repository.dart';
 import 'package:turnwise_tcg/features/match/data/file_rules_cache_datasource.dart';
+import 'package:turnwise_tcg/features/match/domain/game_effects_bundle.dart';
 
 class _FakeBundledRulesDataSource extends BundledRulesDataSource {
   _FakeBundledRulesDataSource({this.json, this.throws = false});
@@ -16,6 +18,15 @@ class _FakeBundledRulesDataSource extends BundledRulesDataSource {
     }
     return json!;
   }
+}
+
+class _FakeBundledEffectsDataSource extends BundledEffectsDataSource {
+  final GameEffectsBundle? bundle;
+
+  _FakeBundledEffectsDataSource({this.bundle});
+
+  @override
+  Future<GameEffectsBundle?> loadEffectsBundle(String gameId) async => bundle;
 }
 
 class _FakeFileRulesCacheDataSource extends FileRulesCacheDataSource {
@@ -47,6 +58,7 @@ void main() {
       final cache = _FakeFileRulesCacheDataSource();
       final repository = CachedRulesRepository(
         bundled: _FakeBundledRulesDataSource(json: sampleRulesJson),
+        effects: _FakeBundledEffectsDataSource(),
         cache: cache,
       );
 
@@ -61,6 +73,7 @@ void main() {
         ..store['pokemon'] = sampleRulesJson;
       final repository = CachedRulesRepository(
         bundled: _FakeBundledRulesDataSource(throws: true),
+        effects: _FakeBundledEffectsDataSource(),
         cache: cache,
       );
 
@@ -72,6 +85,7 @@ void main() {
     test('throws when bundle and cache are unavailable', () async {
       final repository = CachedRulesRepository(
         bundled: _FakeBundledRulesDataSource(throws: true),
+        effects: _FakeBundledEffectsDataSource(),
         cache: _FakeFileRulesCacheDataSource(),
       );
 

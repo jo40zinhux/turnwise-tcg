@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/firebase/firebase_bootstrap.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
-import 'firebase_options.dart';
 import 'features/auth/providers/auth_providers.dart';
 import 'features/match_history/data/hive_initializer.dart';
+import 'features/sync/presentation/cloud_sync_bootstrap.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,20 +16,16 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    debugPrint('Firebase init error (likely needs flutterfire configure): $e');
-  }
+  await bootstrapFirebase();
 
   runApp(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],
-      child: const TurnWiseApp(),
+      child: const CloudSyncBootstrap(
+        child: TurnWiseApp(),
+      ),
     ),
   );
 }

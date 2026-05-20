@@ -18,6 +18,7 @@ class MatchSessionRestore {
     return MatchEngineState(
       currentPhaseIndex: safeIndex,
       actionUsageCount: Map<String, int>.from(session.actionUsageCount),
+      effectsState: session.effectsState,
     );
   }
 

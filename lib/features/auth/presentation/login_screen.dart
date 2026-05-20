@@ -21,7 +21,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleSignIn(
     Future<AuthResult> Function() signIn, {
-    bool trackGuest = false,
+    void Function()? onSuccess,
   }) async {
     if (_isLoading) return;
 
@@ -31,9 +31,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (result.isSuccess) {
-      if (trackGuest) {
-        ref.read(appAnalyticsProvider).logGuestSignIn();
-      }
+      final analytics = ref.read(appAnalyticsProvider);
+      onSuccess?.call();
+      await analytics.setUserId(result.userId);
       return;
     }
 
@@ -89,7 +89,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? null
                         : () => _handleSignIn(
                               auth.signInAnonymously,
-                              trackGuest: true,
+                              onSuccess: () => ref
+                                  .read(appAnalyticsProvider)
+                                  .logGuestSignIn(),
                             ),
                     icon: const Icon(Icons.sports_esports_outlined),
                     label: const Text('Jogar sem conta'),
@@ -110,14 +112,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     icon: Icons.g_mobiledata_rounded,
                     label: 'Continuar com Google',
                     enabled: !_isLoading,
-                    onPressed: () => _handleSignIn(auth.signInWithGoogle),
+                    onPressed: () => _handleSignIn(
+                      auth.signInWithGoogle,
+                      onSuccess: () =>
+                          ref.read(appAnalyticsProvider).logGoogleSignIn(),
+                    ),
                   ),
                   AppSpacing.gapMd,
                   _LoginButton(
                     icon: Icons.apple_rounded,
                     label: 'Continuar com Apple',
                     enabled: !_isLoading,
-                    onPressed: () => _handleSignIn(auth.signInWithApple),
+                    onPressed: () => _handleSignIn(
+                      auth.signInWithApple,
+                      onSuccess: () =>
+                          ref.read(appAnalyticsProvider).logAppleSignIn(),
+                    ),
                   ),
                   const Spacer(),
                 ],

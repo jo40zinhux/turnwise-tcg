@@ -19,4 +19,22 @@ class FirestoreAchievementsDataSource {
         .doc(achievement.achievementId)
         .set(achievement.toJson(), SetOptions(merge: true));
   }
+
+  Future<List<UserAchievement>> fetchAll(String userId) async {
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('achievements')
+        .get();
+
+    final achievements = <UserAchievement>[];
+    for (final doc in snapshot.docs) {
+      try {
+        achievements.add(UserAchievement.fromJson(doc.data()));
+      } catch (_) {
+        // Skip malformed documents.
+      }
+    }
+    return achievements;
+  }
 }

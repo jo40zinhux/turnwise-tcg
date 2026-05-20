@@ -6,5 +6,7 @@ abstract final class AnalyticsEvents {
   static const phaseAdvanced = 'phase_advanced';
   static const actionBlocked = 'action_blocked';
   static const guestSignIn = 'guest_sign_in';
+  static const googleSignIn = 'google_sign_in';
+  static const appleSignIn = 'apple_sign_in';
   static const achievementUnlocked = 'achievement_unlocked';
 }

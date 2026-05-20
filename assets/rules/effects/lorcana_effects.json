@@ -1,0 +1,32 @@
+{
+    "effectsLibrary": [
+        {
+            "id": "exerted",
+            "name": "Exerted",
+            "type": "status",
+            "blockedActions": [
+                "challenge"
+            ]
+        },
+        {
+            "id": "cannot_challenge",
+            "name": "Cannot Challenge",
+            "type": "attack_restriction"
+        },
+        {
+            "id": "cannot_quest",
+            "name": "Cannot Quest",
+            "type": "action_lock"
+        },
+        {
+            "id": "evasive",
+            "name": "Evasive",
+            "type": "modifier"
+        },
+        {
+            "id": "bodyguard",
+            "name": "Bodyguard",
+            "type": "targeting_modifier"
+        }
+    ]
+}

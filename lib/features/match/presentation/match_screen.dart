@@ -24,6 +24,8 @@ import '../../timer/presentation/widgets/match_timer_bar.dart';
 import '../../match_history/domain/match_summary_args.dart';
 import '../../timer/presentation/widgets/timer_profile_picker_sheet.dart';
 import 'widgets/match_actions_panel.dart';
+import 'widgets/match_checkup_banner.dart';
+import 'widgets/match_effects_panel.dart';
 import 'widgets/match_phase_progress.dart';
 
 class MatchScreen extends ConsumerStatefulWidget {
@@ -378,6 +380,27 @@ class _MatchBodyState extends ConsumerState<_MatchBody> {
                       AppSpacing.gapLg,
                       const Divider(),
                       AppSpacing.gapMd,
+                      if (matchState.effectsState.pendingCheckups.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: MatchCheckupBanner(
+                            reminder:
+                                matchState.effectsState.pendingCheckups.first,
+                            onDismiss: () => notifier.dismissCheckup(
+                              matchState
+                                  .effectsState.pendingCheckups.first.id,
+                            ),
+                          ),
+                        ),
+                      MatchEffectsPanel(
+                        rules: widget.rules,
+                        activeEffects: matchState.effectsState.activeEffects,
+                        lockedActionIds:
+                            matchState.effectsState.lockedActionIds,
+                        onApplyEffect: notifier.applyEffect,
+                        onRemoveEffect: notifier.removeActiveEffect,
+                      ),
+                      AppSpacing.gapLg,
                       Text(
                         'Ações disponíveis',
                         style: AppTypography.label(context),
@@ -388,6 +411,7 @@ class _MatchBodyState extends ConsumerState<_MatchBody> {
                         actionUsageCount: matchState.actionUsageCount,
                         maxUsageForAction: (action) =>
                             engine.maxUsagePerTurn(widget.rules, action),
+                        isActionLocked: notifier.isActionLocked,
                         onActionPressed: notifier.attemptAction,
                         onActionUnavailable: feedbackService.actionUnavailable,
                       ),

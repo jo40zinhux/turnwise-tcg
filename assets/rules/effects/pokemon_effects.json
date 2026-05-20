@@ -1,0 +1,110 @@
+{
+    "effectsLibrary": [
+        {
+            "id": "item_lock",
+            "name": "Item Lock",
+            "type": "action_lock",
+            "blockedActions": [
+                "item"
+            ],
+            "duration": {
+                "type": "until_end_opponent_turn"
+            },
+            "description": "O jogador não pode usar cartas Item."
+        },
+        {
+            "id": "supporter_lock",
+            "name": "Supporter Lock",
+            "type": "action_lock",
+            "blockedActions": [
+                "supporter"
+            ],
+            "duration": {
+                "type": "until_end_turn"
+            }
+        },
+        {
+            "id": "ability_lock",
+            "name": "Ability Lock",
+            "type": "ability_lock",
+            "blockedActions": [
+                "ability"
+            ],
+            "duration": {
+                "type": "continuous"
+            }
+        },
+        {
+            "id": "attack_lock",
+            "name": "Attack Lock",
+            "type": "attack_restriction",
+            "blockedActions": [
+                "attack"
+            ],
+            "duration": {
+                "type": "until_end_turn"
+            }
+        },
+        {
+            "id": "retreat_lock",
+            "name": "Retreat Lock",
+            "type": "action_lock",
+            "blockedActions": [
+                "retreat"
+            ],
+            "duration": {
+                "type": "until_end_turn"
+            }
+        },
+        {
+            "id": "poison",
+            "name": "Poison",
+            "type": "status",
+            "trigger": "pokemon_checkup",
+            "effect": {
+                "damage": 10
+            },
+            "description": "Recebe dano entre turnos."
+        },
+        {
+            "id": "burn",
+            "name": "Burn",
+            "type": "status",
+            "trigger": "pokemon_checkup",
+            "effect": {
+                "damage": 20,
+                "coinFlipRemove": true
+            }
+        },
+        {
+            "id": "sleep",
+            "name": "Sleep",
+            "type": "status",
+            "trigger": "pokemon_checkup",
+            "effect": {
+                "coinFlipWakeUp": true
+            }
+        },
+        {
+            "id": "paralysis",
+            "name": "Paralysis",
+            "type": "status",
+            "blockedActions": [
+                "attack",
+                "retreat"
+            ],
+            "duration": {
+                "type": "until_end_turn"
+            }
+        },
+        {
+            "id": "confusion",
+            "name": "Confusion",
+            "type": "status",
+            "trigger": "before_attack",
+            "effect": {
+                "coinFlipAttackCheck": true
+            }
+        }
+    ]
+}

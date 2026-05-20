@@ -1,0 +1,35 @@
+{
+    "effectsLibrary": [
+        {
+            "id": "cannot_attack_leader",
+            "name": "Cannot Attack Leader",
+            "type": "attack_restriction"
+        },
+        {
+            "id": "cannot_attack_character",
+            "name": "Cannot Attack Character",
+            "type": "attack_restriction"
+        },
+        {
+            "id": "rested",
+            "name": "Rested",
+            "type": "status",
+            "blockedActions": [
+                "attack"
+            ]
+        },
+        {
+            "id": "cannot_activate_blocker",
+            "name": "Cannot Activate Blocker",
+            "type": "ability_lock"
+        },
+        {
+            "id": "cost_increase",
+            "name": "Cost Increase",
+            "type": "modifier",
+            "effect": {
+                "costIncrease": 1
+            }
+        }
+    ]
+}

@@ -1,27 +1,40 @@
 import 'action_rule.dart';
+import 'effect_engine.dart';
 import 'game_rules.dart';
 import 'match_engine_state.dart';
 import 'match_feedback.dart';
 
 class MatchEngine {
+  final EffectEngine _effects;
+
+  MatchEngine({EffectEngine? effects}) : _effects = effects ?? EffectEngine();
+
+  EffectEngine get effects => _effects;
+
   MatchEngineState nextPhase(MatchEngineState state, GameRules rules) {
     if (rules.phases.isEmpty) return state;
 
-    if (state.currentPhaseIndex < rules.phases.length - 1) {
-      return state.copyWith(
-        currentPhaseIndex: state.currentPhaseIndex + 1,
-        clearFeedback: true,
+    final isLastPhase = state.currentPhaseIndex >= rules.phases.length - 1;
+    final newTurnStarted = isLastPhase;
+
+    var next = _effects.onPhaseTransition(
+      state,
+      rules,
+      newTurnStarted: newTurnStarted,
+    );
+
+    if (isLastPhase) {
+      next = next.copyWith(
+        currentPhaseIndex: 0,
+        actionUsageCount: const {},
+        feedback: _turnFeedback(next),
       );
+      return next;
     }
 
-    return state.copyWith(
-      currentPhaseIndex: 0,
-      actionUsageCount: const {},
-      feedback: const MatchFeedback(
-        message:
-            'Novo turno iniciado! Não esqueça de desvirar suas cartas.',
-        type: MatchFeedbackType.info,
-      ),
+    return next.copyWith(
+      currentPhaseIndex: state.currentPhaseIndex + 1,
+      clearFeedback: true,
     );
   }
 
@@ -30,6 +43,11 @@ class MatchEngine {
     GameRules rules,
     String actionId,
   ) {
+    final block = _effects.validateActionBlock(state, rules, actionId);
+    if (block != null) {
+      return state.copyWith(feedback: block);
+    }
+
     final action = rules.actions.firstWhere(
       (a) => a.id == actionId,
       orElse: () => throw Exception('Action not found: $actionId'),
@@ -71,13 +89,36 @@ class MatchEngine {
     final updatedUsages = Map<String, int>.from(state.actionUsageCount);
     updatedUsages[action.id] = (updatedUsages[action.id] ?? 0) + 1;
 
-    return state.copyWith(
+    var next = state.copyWith(
       actionUsageCount: updatedUsages,
       feedback: MatchFeedback(
         message: '${action.name} registada.',
         type: MatchFeedbackType.success,
       ),
     );
+
+    next = _effects.applyEffectsFromAction(next, rules, actionId);
+    return next;
+  }
+
+  MatchEngineState applyEffect(
+    MatchEngineState state,
+    GameRules rules,
+    String effectDefinitionId,
+  ) {
+    return _effects.applyEffect(state, rules, effectDefinitionId);
+  }
+
+  MatchEngineState removeEffect(MatchEngineState state, String instanceId) {
+    return _effects.removeEffect(state, instanceId);
+  }
+
+  MatchEngineState dismissCheckup(MatchEngineState state, String checkupId) {
+    return _effects.dismissCheckup(state, checkupId);
+  }
+
+  bool isActionLocked(MatchEngineState state, String actionId) {
+    return _effects.lockedActionIds(state).contains(actionId);
   }
 
   int? maxUsagePerTurn(GameRules rules, ActionRule action) {
@@ -93,6 +134,21 @@ class MatchEngine {
       }
     }
     return null;
+  }
+
+  MatchFeedback _turnFeedback(MatchEngineState state) {
+    if (state.effectsState.pendingCheckups.isNotEmpty) {
+      final first = state.effectsState.pendingCheckups.first;
+      return MatchFeedback(
+        message: first.message,
+        type: MatchFeedbackType.info,
+      );
+    }
+
+    return const MatchFeedback(
+      message: 'Novo turno iniciado! Não esqueça de desvirar suas cartas.',
+      type: MatchFeedbackType.info,
+    );
   }
 
   String _phaseErrorMessage(ActionRule action, GameRules rules) {

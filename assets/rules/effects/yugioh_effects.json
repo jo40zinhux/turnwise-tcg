@@ -1,0 +1,55 @@
+{
+    "effectsLibrary": [
+        {
+            "id": "special_summon_lock",
+            "name": "Special Summon Lock",
+            "type": "summon_lock",
+            "blockedActions": [
+                "special_summon"
+            ]
+        },
+        {
+            "id": "monster_effect_negate",
+            "name": "Monster Effect Negation",
+            "type": "ability_lock",
+            "blockedActions": [
+                "activate_monster_effect"
+            ]
+        },
+        {
+            "id": "spell_lock",
+            "name": "Spell Lock",
+            "type": "action_lock",
+            "blockedActions": [
+                "activate_spell"
+            ]
+        },
+        {
+            "id": "trap_lock",
+            "name": "Trap Lock",
+            "type": "action_lock",
+            "blockedActions": [
+                "activate_trap"
+            ]
+        },
+        {
+            "id": "cannot_attack",
+            "name": "Cannot Attack",
+            "type": "attack_restriction"
+        },
+        {
+            "id": "battle_position_lock",
+            "name": "Battle Position Lock",
+            "type": "action_lock",
+            "blockedActions": [
+                "change_battle_position"
+            ]
+        },
+        {
+            "id": "banish_on_leave",
+            "name": "Banish On Leave",
+            "type": "trigger",
+            "trigger": "leave_field"
+        }
+    ]
+}

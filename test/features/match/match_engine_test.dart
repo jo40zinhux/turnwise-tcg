@@ -43,7 +43,7 @@ void main() {
         errorMessage: 'Cannot play {actionName} again',
       ),
     ],
-    statusEffects: const [],
+    effects: const [],
   );
 
   group('MatchEngine', () {

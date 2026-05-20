@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1057324438192-p0g5l7grfab4jedik5pba0kt7snkjp1m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cubitdev.turnwise",
+            "certificate_hash": "53dd090c78f8a22c11aa728b32dc032ecf5f9a8c"
+          }
+        },
+        {
           "client_id": "1057324438192-4l0fn5h94oauv94430orbc7lmuv3sf17.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "1057324438192-4l0fn5h94oauv94430orbc7lmuv3sf17.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1057324438192-5u4jmtuvgdjo7on8cuil8mgpn7a7ftgs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cubitdev.turnwise"
+              }
             }
           ]
         }

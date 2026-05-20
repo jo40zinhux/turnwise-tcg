@@ -63,6 +63,24 @@ class AppAnalytics {
     await _log(AnalyticsEvents.guestSignIn, const {});
   }
 
+  Future<void> logGoogleSignIn() async {
+    await _log(AnalyticsEvents.googleSignIn, const {});
+  }
+
+  Future<void> logAppleSignIn() async {
+    await _log(AnalyticsEvents.appleSignIn, const {});
+  }
+
+  Future<void> setUserId(String? userId) async {
+    final analytics = _analytics;
+    if (analytics == null) return;
+    try {
+      await analytics.setUserId(id: userId);
+    } catch (e, stack) {
+      debugPrint('Analytics setUserId failed: $e\n$stack');
+    }
+  }
+
   Future<void> logAchievementUnlocked({
     required String achievementId,
   }) async {

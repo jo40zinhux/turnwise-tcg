@@ -12,7 +12,6 @@ import '../../domain/finish_match_use_case.dart';
 import '../../domain/match_history_repository.dart';
 import '../../domain/match_record.dart';
 import '../../../match/presentation/providers/match_providers.dart';
-import '../../../achievements/domain/achievement_definition.dart';
 import '../../../achievements/presentation/providers/achievements_providers.dart';
 import '../../../home/presentation/providers/home_dashboard_providers.dart';
 import '../../../stats/presentation/providers/match_stats_providers.dart';

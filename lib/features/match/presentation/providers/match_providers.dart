@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/observability/app_analytics_provider.dart';
+import '../../data/bundled_effects_datasource.dart';
 import '../../data/bundled_rules_datasource.dart';
 import '../../data/cached_rules_repository.dart';
 import '../../data/file_rules_cache_datasource.dart';
 import '../../domain/game_rules.dart';
+import '../../domain/match_effects_state.dart';
 import '../../domain/match_engine.dart';
 import '../../domain/match_engine_state.dart';
 import '../../domain/match_feedback.dart';
@@ -20,6 +22,11 @@ final bundledRulesDataSourceProvider = Provider<BundledRulesDataSource>((ref) {
   return BundledRulesDataSource();
 });
 
+final bundledEffectsDataSourceProvider =
+    Provider<BundledEffectsDataSource>((ref) {
+  return BundledEffectsDataSource();
+});
+
 final fileRulesCacheDataSourceProvider =
     Provider<FileRulesCacheDataSource>((ref) {
   return FileRulesCacheDataSource();
@@ -28,6 +35,7 @@ final fileRulesCacheDataSourceProvider =
 final rulesRepositoryProvider = Provider<RulesRepository>((ref) {
   return CachedRulesRepository(
     bundled: ref.watch(bundledRulesDataSourceProvider),
+    effects: ref.watch(bundledEffectsDataSourceProvider),
     cache: ref.watch(fileRulesCacheDataSourceProvider),
   );
 });
@@ -47,6 +55,7 @@ class MatchState {
 
   int get currentPhaseIndex => engineState.currentPhaseIndex;
   Map<String, int> get actionUsageCount => engineState.actionUsageCount;
+  MatchEffectsState get effectsState => engineState.effectsState;
   MatchFeedback? get feedback => engineState.feedback;
 
   MatchState copyWith({MatchEngineState? engineState}) {
@@ -118,6 +127,38 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
     );
   }
 
+  void applyEffect(String effectDefinitionId) {
+    final rules = _rules;
+    if (rules == null) return;
+
+    state = MatchState(
+      engineState: _engine.applyEffect(
+        state.engineState,
+        rules,
+        effectDefinitionId,
+      ),
+    );
+    _persistPhaseToSession();
+  }
+
+  void removeActiveEffect(String instanceId) {
+    state = MatchState(
+      engineState: _engine.removeEffect(state.engineState, instanceId),
+    );
+    _persistPhaseToSession();
+  }
+
+  void dismissCheckup(String checkupId) {
+    state = MatchState(
+      engineState: _engine.dismissCheckup(state.engineState, checkupId),
+    );
+    _persistPhaseToSession();
+  }
+
+  bool isActionLocked(String actionId) {
+    return _engine.isActionLocked(state.engineState, actionId);
+  }
+
   void reconcilePhaseIndex(int phaseCount) {
     final clamped = MatchSessionRestore.clampPhaseIndex(
       state.currentPhaseIndex,
@@ -137,6 +178,7 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
         startedAt: session.startedAt ?? DateTime.now(),
         currentPhaseIndex: state.currentPhaseIndex,
         actionUsageCount: state.actionUsageCount,
+        effectsState: state.effectsState,
       ),
     );
   }

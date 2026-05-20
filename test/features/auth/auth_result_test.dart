@@ -4,10 +4,11 @@ import 'package:turnwise_tcg/features/auth/domain/auth_result.dart';
 void main() {
   group('AuthResult', () {
     test('success state', () {
-      const result = AuthResult.success();
+      const result = AuthResult.success(userId: 'uid-1');
       expect(result.isSuccess, isTrue);
       expect(result.isCancelled, isFalse);
       expect(result.message, isNull);
+      expect(result.userId, 'uid-1');
     });
 
     test('cancelled state', () {

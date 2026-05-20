@@ -1,0 +1,28 @@
+{
+    "effectsLibrary": [
+        {
+            "id": "silence",
+            "name": "Silence",
+            "type": "ability_lock"
+        },
+        {
+            "id": "stun",
+            "name": "Stun",
+            "type": "action_lock",
+            "blockedActions": [
+                "attack",
+                "move"
+            ]
+        },
+        {
+            "id": "battlefield_lock",
+            "name": "Battlefield Lock",
+            "type": "movement_lock"
+        },
+        {
+            "id": "spell_amplify",
+            "name": "Spell Amplify",
+            "type": "modifier"
+        }
+    ]
+}

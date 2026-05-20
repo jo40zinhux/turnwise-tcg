@@ -1,9 +1,11 @@
 import '../../timer/domain/timer_profile.dart';
+import 'match_effects_state.dart';
 
 class MatchSession {
   final String gameId;
   final int currentPhaseIndex;
   final Map<String, int> actionUsageCount;
+  final MatchEffectsState effectsState;
   final DateTime updatedAt;
   final DateTime? startedAt;
   final TimerProfile? timerProfile;
@@ -18,6 +20,7 @@ class MatchSession {
     required this.gameId,
     required this.currentPhaseIndex,
     required this.actionUsageCount,
+    this.effectsState = MatchEffectsState.empty,
     required this.updatedAt,
     this.startedAt,
     this.timerProfile,
@@ -36,6 +39,9 @@ class MatchSession {
       currentPhaseIndex: json['currentPhaseIndex'] as int? ?? 0,
       actionUsageCount: usageRaw.map(
         (key, value) => MapEntry(key, (value as num).toInt()),
+      ),
+      effectsState: MatchEffectsState.fromJson(
+        json['effectsState'] as Map<String, dynamic>?,
       ),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       startedAt: json['startedAt'] != null
@@ -57,6 +63,7 @@ class MatchSession {
       'gameId': gameId,
       'currentPhaseIndex': currentPhaseIndex,
       'actionUsageCount': actionUsageCount,
+      'effectsState': effectsState.toJson(),
       'updatedAt': updatedAt.toIso8601String(),
       if (startedAt != null) 'startedAt': startedAt!.toIso8601String(),
       if (timerProfile != null) 'timerProfile': timerProfile!.storageKey,
@@ -74,6 +81,7 @@ class MatchSession {
     String? gameId,
     int? currentPhaseIndex,
     Map<String, int>? actionUsageCount,
+    MatchEffectsState? effectsState,
     DateTime? updatedAt,
     DateTime? startedAt,
     TimerProfile? timerProfile,
@@ -88,6 +96,7 @@ class MatchSession {
       gameId: gameId ?? this.gameId,
       currentPhaseIndex: currentPhaseIndex ?? this.currentPhaseIndex,
       actionUsageCount: actionUsageCount ?? this.actionUsageCount,
+      effectsState: effectsState ?? this.effectsState,
       updatedAt: updatedAt ?? this.updatedAt,
       startedAt: startedAt ?? this.startedAt,
       timerProfile: timerProfile ?? this.timerProfile,
