@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../auth/providers/auth_providers.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -16,19 +21,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   final List<Map<String, String>> _onboardingData = [
     {
-      "headline": "Jogue com confiança.",
-      "text":
-          "TurnWise é seu assistente inteligente para partidas presenciais de TCG."
+      'headline': 'Jogue com confiança.',
+      'text':
+          'TurnWise é seu assistente inteligente para partidas presenciais de TCG.',
     },
     {
-      "headline": "Nunca perca uma ação importante.",
-      "text":
-          "Checklist de turno, controle de prêmios e lembretes inteligentes durante a partida."
+      'headline': 'Nunca perca uma ação importante.',
+      'text':
+          'Checklist de turno, controle de prêmios e lembretes inteligentes durante a partida.',
     },
     {
-      "headline": "Evolua junto com o jogo.",
-      "text":
-          "Histórico de partidas, calendário competitivo e muito mais em breve."
+      'headline': 'Evolua a cada partida.',
+      'text':
+          'Histórico, estatísticas e conquistas para acompanhar a tua jornada.',
     },
   ];
 
@@ -38,14 +43,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-  void _onSkip() async {
-    await _completeOnboarding();
-  }
-
-  void _onStart() async {
-    await _completeOnboarding();
-  }
-
   Future<void> _completeOnboarding() async {
     await ref.read(onboardingStateProvider.notifier).completeOnboarding();
     if (mounted) {
@@ -53,63 +50,60 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
+  bool get _isLastPage => _currentPage == _onboardingData.length - 1;
+
+  void _handlePrimaryTap() {
+    if (_isLastPage) {
+      _completeOnboarding();
+      return;
+    }
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Primary color #7C5CFF
-    const Color primaryPurple = Color(0xFF7C5CFF);
-
     return Scaffold(
-      backgroundColor: Colors.black, // Dark minimalism
+      backgroundColor: AppTheme.scaffoldColor,
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar with Skip Button
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
-                onPressed: _onSkip,
-                child: const Text(
-                  'Pular',
-                  style: TextStyle(color: Colors.white54, fontSize: 16),
-                ),
+                onPressed: _completeOnboarding,
+                child: Text('Pular', style: AppTypography.bodyMuted(context)),
               ),
             ),
-
-            // Carousel
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: _onboardingData.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
+                onPageChanged: (index) => setState(() => _currentPage = index),
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xl,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Space for an illustration or icon if desired
-                        const SizedBox(height: 40),
+                        AppSpacing.gapXl,
                         Text(
                           _onboardingData[index]['headline']!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: AppTypography.headline(context).copyWith(
                             fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        AppSpacing.gapLg,
                         Text(
                           _onboardingData[index]['text']!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
+                          style: AppTypography.body(context).copyWith(
+                            color: AppTheme.onSurfaceMuted,
                             height: 1.5,
                           ),
                         ),
@@ -119,60 +113,48 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 },
               ),
             ),
-
-            // Bottom Section (Dots and Start Button)
             Padding(
-              padding:
-                  const EdgeInsets.only(bottom: 40.0, left: 40.0, right: 40.0),
+              padding: const EdgeInsets.only(
+                bottom: AppSpacing.xl,
+                left: AppSpacing.xl,
+                right: AppSpacing.xl,
+              ),
               child: Column(
                 children: [
-                  // Page Indicators
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       _onboardingData.length,
                       (index) => AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
-                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                        height: 8.0,
-                        width: _currentPage == index ? 24.0 : 8.0,
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xs,
+                        ),
+                        height: AppSpacing.sm,
+                        width:
+                            _currentPage == index ? AppSpacing.lg : AppSpacing.sm,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? primaryPurple
+                              ? AppTheme.primaryColor
                               : Colors.white24,
-                          borderRadius: BorderRadius.circular(4.0),
+                          borderRadius: AppRadius.smAll,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
-
-                  // Start Button Placeholder (To keep height consistent)
+                  AppSpacing.gapXl,
                   SizedBox(
                     height: 56,
                     width: double.infinity,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 250),
-                      opacity: _currentPage == _onboardingData.length - 1
-                          ? 1.0
-                          : 0.0,
-                      child: ElevatedButton(
-                        onPressed: _currentPage == _onboardingData.length - 1
-                            ? _onStart
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Começar',
-                          style: TextStyle(
+                    child: ElevatedButton(
+                      onPressed: _handlePrimaryTap,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: Text(
+                          _isLastPage ? 'Começar' : 'Seguinte',
+                          key: ValueKey(_isLastPage),
+                          style: AppTypography.button(context).copyWith(
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

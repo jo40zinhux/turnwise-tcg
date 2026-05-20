@@ -1,138 +1,196 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/observability/app_analytics_provider.dart';
+import '../../data/bundled_rules_datasource.dart';
+import '../../data/cached_rules_repository.dart';
+import '../../data/file_rules_cache_datasource.dart';
 import '../../domain/game_rules.dart';
+import '../../domain/match_engine.dart';
+import '../../domain/match_engine_state.dart';
+import '../../domain/match_feedback.dart';
+import '../../domain/match_session_restore.dart';
 import '../../domain/rules_repository.dart';
-import '../../data/local_rules_repository.dart';
+import '../services/match_session_persist_coordinator.dart';
+import '../../../timer/presentation/providers/match_timer_providers.dart';
+import 'match_session_providers.dart';
+
+final bundledRulesDataSourceProvider = Provider<BundledRulesDataSource>((ref) {
+  return BundledRulesDataSource();
+});
+
+final fileRulesCacheDataSourceProvider =
+    Provider<FileRulesCacheDataSource>((ref) {
+  return FileRulesCacheDataSource();
+});
 
 final rulesRepositoryProvider = Provider<RulesRepository>((ref) {
-  return LocalRulesRepository();
+  return CachedRulesRepository(
+    bundled: ref.watch(bundledRulesDataSourceProvider),
+    cache: ref.watch(fileRulesCacheDataSourceProvider),
+  );
 });
 
-final gameRulesProvider = FutureProvider.family<GameRules, String>((ref, gameId) async {
+final gameRulesProvider =
+    FutureProvider.family<GameRules, String>((ref, gameId) async {
   final repo = ref.watch(rulesRepositoryProvider);
-  return await repo.getGameRules(gameId);
+  return repo.getGameRules(gameId);
 });
+
+final matchEngineProvider = Provider<MatchEngine>((ref) => MatchEngine());
 
 class MatchState {
-  final int currentPhaseIndex;
-  final String? currentFeedback;
-  final Map<String, int> actionUsageCount;
+  final MatchEngineState engineState;
 
-  const MatchState({
-    required this.currentPhaseIndex,
-    this.currentFeedback,
-    this.actionUsageCount = const {},
-  });
+  const MatchState({required this.engineState});
 
-  MatchState copyWith({
-    int? currentPhaseIndex,
-    String? currentFeedback,
-    bool clearFeedback = false,
-    Map<String, int>? actionUsageCount,
-  }) {
-    return MatchState(
-      currentPhaseIndex: currentPhaseIndex ?? this.currentPhaseIndex,
-      currentFeedback: clearFeedback ? null : (currentFeedback ?? this.currentFeedback),
-      actionUsageCount: actionUsageCount ?? this.actionUsageCount,
-    );
+  int get currentPhaseIndex => engineState.currentPhaseIndex;
+  Map<String, int> get actionUsageCount => engineState.actionUsageCount;
+  MatchFeedback? get feedback => engineState.feedback;
+
+  MatchState copyWith({MatchEngineState? engineState}) {
+    return MatchState(engineState: engineState ?? this.engineState);
   }
 }
 
 class MatchStateNotifier extends StateNotifier<MatchState> {
-  final GameRules? rules;
+  final Ref _ref;
+  final String gameId;
+  final MatchEngine _engine;
+  final MatchSessionPersistCoordinator _sessionPersist;
 
-  MatchStateNotifier(this.rules) : super(const MatchState(currentPhaseIndex: 0));
+  MatchStateNotifier({
+    required Ref ref,
+    required this.gameId,
+    required MatchEngine engine,
+    required MatchEngineState initialEngineState,
+    required MatchSessionPersistCoordinator sessionPersist,
+  })  : _ref = ref,
+        _engine = engine,
+        _sessionPersist = sessionPersist,
+        super(MatchState(engineState: initialEngineState)) {
+    Future.microtask(_persistPhaseToSession);
+  }
+
+  GameRules? get _rules => _ref.read(gameRulesProvider(gameId)).valueOrNull;
 
   void nextPhase() {
-    if (rules == null || rules!.phases.isEmpty) return;
+    final rules = _rules;
+    if (rules == null) return;
 
-    if (state.currentPhaseIndex < rules!.phases.length - 1) {
-      state = state.copyWith(
-        currentPhaseIndex: state.currentPhaseIndex + 1,
-        clearFeedback: true,
-      );
-    } else {
-      // Loop back to start
-      state = state.copyWith(
-        currentPhaseIndex: 0,
-        currentFeedback: "Novo turno iniciado! Não esqueça de desvirar suas cartas.",
-        actionUsageCount: const {}, // Reset tracking on new turn
-      );
-    }
+    state = MatchState(
+      engineState: _engine.nextPhase(state.engineState, rules),
+    );
+    unawaited(
+      _ref.read(appAnalyticsProvider).logPhaseAdvanced(
+            gameId: gameId,
+            phaseIndex: state.currentPhaseIndex,
+          ),
+    );
+    _persistPhaseToSession();
   }
 
   void attemptAction(String actionId) {
+    final rules = _rules;
     if (rules == null) return;
 
-    final action = rules!.actions.firstWhere(
-      (a) => a.id == actionId,
-      orElse: () => throw Exception('Action not found'),
+    state = MatchState(
+      engineState: _engine.attemptAction(state.engineState, rules, actionId),
     );
 
-    final currentPhaseId = rules!.phases[state.currentPhaseIndex].id;
-
-    if (!action.allowedPhases.contains(currentPhaseId)) {
-      // Phase validation failed
-      _setPhaseErrorFeedback(action);
-      return;
-    }
-
-    // Check Limit validations
-    for (final validationId in action.validations) {
-      final validation = rules!.validations.firstWhere(
-        (v) => v.id == validationId,
-        orElse: () => throw Exception('Validation not found: $validationId'),
+    final feedback = state.feedback;
+    if (feedback?.type == MatchFeedbackType.error) {
+      unawaited(
+        _ref.read(appAnalyticsProvider).logActionBlocked(
+              gameId: gameId,
+              actionId: actionId,
+            ),
       );
-
-      if (validation.type == 'limit') {
-        final maxPerTurn = validation.params['max'] as int? ?? 1;
-        final currentUsage = state.actionUsageCount[action.id] ?? 0;
-        
-        if (currentUsage >= maxPerTurn) {
-          // Blocked by usage limit
-          state = state.copyWith(
-            currentFeedback: validation.errorMessage.replaceAll('{actionName}', action.name),
-          );
-          return; // Stop further processing
-        }
-      }
     }
 
-    // Validate if action explicitly has trackUsage flag, increment anyway if reached this point
-    // Though usually it's handled via the limit validation rules.
-    final updatedUsages = Map<String, int>.from(state.actionUsageCount);
-    updatedUsages[action.id] = (updatedUsages[action.id] ?? 0) + 1;
-
-    state = state.copyWith(
-      clearFeedback: true,
-      actionUsageCount: updatedUsages,
-    );
-  }
-
-  void _setPhaseErrorFeedback(action) {
-    // If it has validations configured but failed because of phase, we might find a specific error message.
-    // For simplicity, we just look for any phase/type message, or show default blocker.
-    if (action.validations.isNotEmpty) {
-        final validationId = action.validations.first;
-        final validation = rules!.validations.firstWhere(
-          (v) => v.id == validationId,
-          orElse: () => throw Exception('Validation not found'),
-        );
-        state = state.copyWith(
-          currentFeedback: validation.errorMessage.replaceAll('{actionName}', action.name),
-        );
-      } else {
-        state = state.copyWith(
-          currentFeedback: "Ação de ${action.name} bloqueada nesta fase do jogo.",
-        );
-      }
+    _persistPhaseToSession();
   }
 
   void clearFeedback() {
-    state = state.copyWith(clearFeedback: true);
+    state = MatchState(
+      engineState: state.engineState.copyWith(clearFeedback: true),
+    );
+  }
+
+  void reconcilePhaseIndex(int phaseCount) {
+    final clamped = MatchSessionRestore.clampPhaseIndex(
+      state.currentPhaseIndex,
+      phaseCount,
+    );
+    if (clamped == state.currentPhaseIndex) return;
+
+    state = MatchState(
+      engineState: state.engineState.copyWith(currentPhaseIndex: clamped),
+    );
+    _persistPhaseToSession();
+  }
+
+  void _persistPhaseToSession() {
+    _sessionPersist.update(
+      (session) => session.copyWith(
+        startedAt: session.startedAt ?? DateTime.now(),
+        currentPhaseIndex: state.currentPhaseIndex,
+        actionUsageCount: state.actionUsageCount,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _sessionPersist.flushNow();
+    super.dispose();
   }
 }
 
-final matchStateProvider = StateNotifierProvider.family<MatchStateNotifier, MatchState, String>((ref, gameId) {
-  final rulesAsyncValue = ref.watch(gameRulesProvider(gameId));
-  return MatchStateNotifier(rulesAsyncValue.valueOrNull);
-});
+MatchEngineState _initialEngineState(Ref ref, String gameId) {
+  final coordinator = ref.read(matchSessionPersistCoordinatorProvider(gameId));
+  final session = coordinator.snapshot ??
+      ref.read(matchSessionRepositoryProvider).getActiveSession();
+  final rulesAsync = ref.read(gameRulesProvider(gameId));
+
+  final phaseCount = rulesAsync.when(
+    data: (rules) => rules.phases.length,
+    loading: () => (session?.currentPhaseIndex ?? 0) + 1,
+    error: (_, __) => (session?.currentPhaseIndex ?? 0) + 1,
+  );
+
+  return MatchSessionRestore.engineState(
+    session: session,
+    gameId: gameId,
+    phaseCount: phaseCount,
+  );
+}
+
+final matchStateProvider =
+    StateNotifierProvider.family<MatchStateNotifier, MatchState, String>(
+  (ref, gameId) {
+    return MatchStateNotifier(
+      ref: ref,
+      gameId: gameId,
+      engine: ref.watch(matchEngineProvider),
+      initialEngineState: _initialEngineState(ref, gameId),
+      sessionPersist: ref.watch(matchSessionPersistCoordinatorProvider(gameId)),
+    );
+  },
+);
+
+/// Clears active match from memory and storage without recording history.
+Future<void> dismissActiveMatch(WidgetRef ref, String gameId) async {
+  ref.read(matchSessionPersistCoordinatorProvider(gameId)).abandon();
+  await ref.read(matchSessionRepositoryProvider).clearActiveSession();
+  ref.invalidate(activeMatchSessionProvider);
+  ref.invalidate(matchSessionPersistCoordinatorProvider(gameId));
+  ref.invalidate(matchStateProvider(gameId));
+  ref.invalidate(matchTimerProvider(gameId));
+}
+
+Future<void> endActiveMatch(WidgetRef ref, String gameId) async {
+  await ref.read(appAnalyticsProvider).logMatchEnded(gameId: gameId);
+  await dismissActiveMatch(ref, gameId);
+}

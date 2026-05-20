@@ -1,0 +1,28 @@
+{
+  "achievements": [
+    {
+      "id": "first_match",
+      "title": "Primeira partida",
+      "description": "Completa a tua primeira partida.",
+      "metric": "matchCount",
+      "target": 1,
+      "iconCode": "emoji_events_outlined"
+    },
+    {
+      "id": "ten_matches",
+      "title": "Veterano",
+      "description": "Completa 10 partidas.",
+      "metric": "matchCount",
+      "target": 10,
+      "iconCode": "military_tech_outlined"
+    },
+    {
+      "id": "five_wins",
+      "title": "Competidor",
+      "description": "Regista 5 vitórias.",
+      "metric": "winCount",
+      "target": 5,
+      "iconCode": "workspace_premium_outlined"
+    }
+  ]
+}

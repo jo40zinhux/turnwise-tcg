@@ -32,6 +32,28 @@ IconData getIconFromString(String iconCode) {
       return Icons.fireplace;
     case 'dark_mode':
       return Icons.dark_mode;
+    case 'bloodtype':
+      return Icons.bloodtype;
+    case 'auto_awesome':
+      return Icons.auto_awesome;
+    case 'catching_pokemon':
+      return Icons.catching_pokemon;
+    case 'sailing':
+      return Icons.sailing;
+    case 'style':
+      return Icons.style;
+    case 'emoji_events_outlined':
+      return Icons.emoji_events_outlined;
+    case 'military_tech_outlined':
+      return Icons.military_tech_outlined;
+    case 'workspace_premium_outlined':
+      return Icons.workspace_premium_outlined;
+    case 'flag_outlined':
+      return Icons.flag_outlined;
+    case 'handshake_outlined':
+      return Icons.handshake_outlined;
+    case 'exit_to_app_rounded':
+      return Icons.exit_to_app_rounded;
     default:
       return Icons.help_outline; // Fallback
   }

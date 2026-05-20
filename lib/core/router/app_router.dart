@@ -8,7 +8,13 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/auth/providers/auth_providers.dart';
 import '../../features/match/presentation/match_screen.dart';
+import '../../features/match_history/presentation/match_history_screen.dart';
+import '../../features/achievements/presentation/achievements_screen.dart';
+import '../../features/stats/presentation/match_stats_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/match_history/presentation/match_summary_screen.dart';
+import '../../features/match_history/domain/match_summary_args.dart';
 
 final analytics = FirebaseAnalytics.instance;
 
@@ -90,15 +96,66 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
           routes: [
             GoRoute(
+              path: 'history',
+              name: 'history',
+              pageBuilder: (context, state) => _buildFadeTransitionPage(
+                context: context,
+                state: state,
+                child: const MatchHistoryScreen(),
+              ),
+            ),
+            GoRoute(
+              path: 'achievements',
+              name: 'achievements',
+              pageBuilder: (context, state) => _buildFadeTransitionPage(
+                context: context,
+                state: state,
+                child: const AchievementsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: 'stats',
+              name: 'stats',
+              pageBuilder: (context, state) => _buildFadeTransitionPage(
+                context: context,
+                state: state,
+                child: const MatchStatsScreen(),
+              ),
+            ),
+            GoRoute(
               path: 'match/:gameId',
               name: 'match',
               pageBuilder: (context, state) => _buildFadeTransitionPage(
                 context: context,
                 state: state,
                 child: MatchScreen(
-                  gameId: state.pathParameters['gameId'] ?? 'practice_tcg',
+                  gameId: state.pathParameters['gameId']!,
                 ),
               ),
+            ),
+            GoRoute(
+              path: 'settings',
+              name: 'settings',
+              pageBuilder: (context, state) => _buildFadeTransitionPage(
+                context: context,
+                state: state,
+                child: const SettingsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: 'match-summary',
+              name: 'matchSummary',
+              pageBuilder: (context, state) {
+                final extra = state.extra;
+                final child = extra is MatchSummaryArgs
+                    ? MatchSummaryScreen(args: extra)
+                    : const MatchSummaryFallback();
+                return _buildFadeTransitionPage(
+                  context: context,
+                  state: state,
+                  child: child,
+                );
+              },
             ),
           ]),
     ],

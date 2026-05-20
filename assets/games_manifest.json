@@ -1,0 +1,46 @@
+{
+  "games": [
+    {
+      "id": "flesh_and_blood",
+      "name": "Flesh and Blood",
+      "iconCode": "bloodtype",
+      "accent": "#EF5350"
+    },
+    {
+      "id": "lorcana",
+      "name": "Disney Lorcana",
+      "iconCode": "auto_awesome",
+      "accent": "#AB47BC"
+    },
+    {
+      "id": "pokemon",
+      "name": "Pokémon TCG",
+      "iconCode": "catching_pokemon",
+      "accent": "#FBC02D"
+    },
+    {
+      "id": "magic",
+      "name": "Magic: The Gathering",
+      "iconCode": "fireplace",
+      "accent": "#66BB6A"
+    },
+    {
+      "id": "one_piece",
+      "name": "One Piece TCG",
+      "iconCode": "sailing",
+      "accent": "#42A5F5"
+    },
+    {
+      "id": "riftbound",
+      "name": "Riftbound",
+      "iconCode": "bolt",
+      "accent": "#FFA726"
+    },
+    {
+      "id": "yugioh",
+      "name": "Yu-Gi-Oh!",
+      "iconCode": "style",
+      "accent": "#FFD54F"
+    }
+  ]
+}

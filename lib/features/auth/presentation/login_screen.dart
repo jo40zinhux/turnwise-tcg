@@ -1,82 +1,134 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/auth_providers.dart';
-import '../../../core/router/app_router.dart';
 
-class LoginScreen extends ConsumerWidget {
+import '../../../core/observability/app_analytics_provider.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../domain/auth_result.dart';
+import '../providers/auth_providers.dart';
+
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authService = ref.watch(authServiceProvider);
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  bool _isLoading = false;
+
+  Future<void> _handleSignIn(
+    Future<AuthResult> Function() signIn, {
+    bool trackGuest = false,
+  }) async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+    final result = await signIn();
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (result.isSuccess) {
+      if (trackGuest) {
+        ref.read(appAnalyticsProvider).logGuestSignIn();
+      }
+      return;
+    }
+
+    if (result.isCancelled) return;
+
+    final message = result.message ??
+        'Não foi possível iniciar sessão. Tenta novamente.';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = ref.read(authRepositoryProvider);
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(flex: 2),
-              const Center(
-                child: Icon(
-                  Icons.change_history_rounded,
-                  size: 64,
-                  color: Colors.white,
-                ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: AppSpacing.screenHorizontal,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Spacer(flex: 2),
+                  Icon(
+                    Icons.change_history_rounded,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  AppSpacing.gapLg,
+                  Text(
+                    'Bem-vindo ao\nTurnWise',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.display(context),
+                  ),
+                  AppSpacing.gapSm,
+                  Text(
+                    'Assistente de turno para mesas presenciais.',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyMuted(context),
+                  ),
+                  const Spacer(flex: 2),
+                  ElevatedButton.icon(
+                    onPressed: _isLoading
+                        ? null
+                        : () => _handleSignIn(
+                              auth.signInAnonymously,
+                              trackGuest: true,
+                            ),
+                    icon: const Icon(Icons.sports_esports_outlined),
+                    label: const Text('Jogar sem conta'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                      ),
+                    ),
+                  ),
+                  AppSpacing.gapSm,
+                  Text(
+                    'Funciona offline após a primeira entrada.',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.caption(context),
+                  ),
+                  AppSpacing.gapXl,
+                  _LoginButton(
+                    icon: Icons.g_mobiledata_rounded,
+                    label: 'Continuar com Google',
+                    enabled: !_isLoading,
+                    onPressed: () => _handleSignIn(auth.signInWithGoogle),
+                  ),
+                  AppSpacing.gapMd,
+                  _LoginButton(
+                    icon: Icons.apple_rounded,
+                    label: 'Continuar com Apple',
+                    enabled: !_isLoading,
+                    onPressed: () => _handleSignIn(auth.signInWithApple),
+                  ),
+                  const Spacer(),
+                ],
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Welcome to\nTurnWise',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w300,
-                  height: 1.2,
-                ),
+            ),
+            if (_isLoading)
+              const ColoredBox(
+                color: Color(0x66000000),
+                child: Center(child: CircularProgressIndicator()),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Sign in to continue',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white54,
-                ),
-              ),
-              const Spacer(flex: 2),
-
-              _LoginButton(
-                icon: Icons.g_mobiledata_rounded,
-                label: 'Continue with Google',
-                onPressed: () async {
-                  await authService.signInWithGoogle();
-                },
-              ),
-              const SizedBox(height: 16),
-              _LoginButton(
-                icon: Icons.apple_rounded,
-                label: 'Continue with Apple',
-                onPressed: () async {
-                  await authService.signInWithApple();
-                },
-              ),
-              const SizedBox(height: 32),
-              
-              TextButton(
-                onPressed: () async {
-                  await authService.signInAnonymously();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white54,
-                ),
-                child: const Text('Continue as Guest'),
-              ),
-              const Spacer(),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -86,24 +138,26 @@ class LoginScreen extends ConsumerWidget {
 class _LoginButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final bool enabled;
   final VoidCallback onPressed;
 
   const _LoginButton({
     required this.icon,
     required this.label,
+    required this.enabled,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: enabled ? onPressed : null,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF1E1E1E),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        backgroundColor: AppTheme.surfaceColor,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.mdAll,
           side: const BorderSide(color: Colors.white12),
         ),
       ),
@@ -111,17 +165,11 @@ class _LoginButton extends StatelessWidget {
         alignment: Alignment.centerLeft,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+            padding: const EdgeInsets.only(left: AppSpacing.md),
             child: Icon(icon, size: 28),
           ),
           Center(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            child: Text(label, style: AppTypography.button(context)),
           ),
         ],
       ),

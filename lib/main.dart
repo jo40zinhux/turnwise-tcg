@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// Note: Added firebase analytics observer to Router below
-import 'package:firebase_analytics/firebase_analytics.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'firebase_options.dart';
 import 'features/auth/providers/auth_providers.dart';
+import 'features/match_history/data/hive_initializer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await HiveInitializer.init();
 
   final prefs = await SharedPreferences.getInstance();
 
