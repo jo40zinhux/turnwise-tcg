@@ -69,6 +69,27 @@ void main() {
       );
     });
 
+    test('update after abandon does not resurrect session', () async {
+      final coordinator =
+          container.read(matchSessionPersistCoordinatorProvider('pokemon'));
+
+      coordinator.update((session) => session.copyWith(currentPhaseIndex: 3));
+      coordinator.abandon();
+      coordinator.update(
+        (session) => session.copyWith(
+          timerProfile: TimerProfile.bo1,
+          timerElapsedSeconds: 999,
+        ),
+      );
+      await coordinator.flushNow();
+
+      expect(
+        container.read(matchSessionRepositoryProvider).getActiveSession(),
+        isNull,
+      );
+      expect(coordinator.snapshot, isNull);
+    });
+
     test('abandon cancels debounced flush after dismiss', () async {
       final coordinator =
           container.read(matchSessionPersistCoordinatorProvider('pokemon'));

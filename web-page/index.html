@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="TurnWise — assistente de turno para mesas presenciais de TCG. Timer, fases, efeitos e estatísticas para Pokémon, Magic, FAB e mais."
+    />
+    <meta name="theme-color" content="#121212" />
+    <meta property="og:title" content="TurnWise — Assistente de TCG" />
+    <meta
+      property="og:description"
+      content="Timer, fases e estatísticas para as tuas partidas presenciais de TCG."
+    />
+    <meta property="og:type" content="website" />
+    <title>TurnWise — Assistente de TCG para mesa presencial</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="#">
+          <img src="assets/logo.svg" width="40" height="40" alt="" />
+          TurnWise
+        </a>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-label="Abrir menu"
+          aria-expanded="false"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="site-nav" aria-label="Principal">
+          <a href="#funcionalidades">Funcionalidades</a>
+          <a href="#jogos">Jogos</a>
+          <a href="#download">Download</a>
+          <a class="btn btn-primary" href="#download">Obter app</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="container hero-grid">
+          <div class="hero-content">
+            <span class="hero-badge">Beta disponível</span>
+            <h1>O teu assistente de <span>turno</span> na mesa</h1>
+            <p class="hero-lead">
+              TurnWise guia fases, efeitos e tempo de jogo em partidas presenciais
+              de TCG — com histórico, estatísticas e suporte offline.
+            </p>
+            <div class="hero-cta">
+              <a
+                id="btn-testflight"
+                class="btn btn-primary btn-lg btn-icon"
+                href="#download"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+                  />
+                </svg>
+                TestFlight (iOS)
+              </a>
+              <a
+                id="btn-android"
+                class="btn btn-secondary btn-lg btn-icon"
+                href="#download"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M17.6 9.48l1.84-3.18c.16-.27.07-.62-.2-.78-.27-.16-.62-.07-.78.2l-1.87 3.24a11.43 11.43 0 0 0-8.58 0L5.5 5.72a.506.506 0 0 0-.78-.2c-.27.16-.35.51-.2.78L6.4 9.48A10.81 10.81 0 0 0 1 14.5C1 14.78 1.22 15 1.5 15h21c.28 0 .5-.22.5-.5 0-1.88-.72-3.6-1.92-5.02zM7 13.25c-.69 0-1.25-.56-1.25-1.25S6.31 10.75 7 10.75 8.25 11.31 8.25 12 7.69 13.25 7 13.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"
+                  />
+                </svg>
+                Android (APK)
+              </a>
+            </div>
+            <p class="hero-note">
+              iOS via TestFlight · Android com download direto do APK
+            </p>
+          </div>
+
+          <aside class="phone-mockup" aria-hidden="true">
+            <div class="phone-screen">
+              <div class="mock-timer">
+                <div class="mock-timer-value">04:32</div>
+                <div class="mock-timer-label">Tempo de turno</div>
+              </div>
+              <div class="mock-phase">
+                <strong>Fase: Combate</strong>
+                Efeitos ativos e ações sugeridas para o teu TCG.
+              </div>
+              <div class="mock-games">
+                <span class="mock-chip">Pokémon</span>
+                <span class="mock-chip">Magic</span>
+                <span class="mock-chip">FAB</span>
+                <span class="mock-chip">Lorcana</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="funcionalidades">
+        <div class="container">
+          <header class="section-header">
+            <h2>Tudo o que precisas na mesa</h2>
+            <p>
+              Feito para jogadores que querem focar na partida, não em folhas de
+              regras ou cronómetros soltos.
+            </p>
+          </header>
+          <div class="features-grid">
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+              </div>
+              <h3>Timer de turno</h3>
+              <p>
+                Perfis de tempo por jogo, pausa e retoma automática ligados à tua
+                sessão ativa.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 6h16M4 12h10M4 18h16" />
+                </svg>
+              </div>
+              <h3>Fases e efeitos</h3>
+              <p>
+                Progresso de fases e biblioteca de efeitos por TCG, alinhada às
+                regras do jogo.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 3v18h18" />
+                  <path d="M7 16l4-8 4 5 5-9" />
+                </svg>
+              </div>
+              <h3>Estatísticas</h3>
+              <p>
+                Histórico de partidas, resultados e métricas para acompanhar a tua
+                evolução.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2l3 7h7l-5.5 4 2 7-6.5-4.5L6.5 20l2-7L3 9h7z" />
+                </svg>
+              </div>
+              <h3>Conquistas</h3>
+              <p>
+                Metas e desafios para manter as sessões de jogo mais envolventes.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <h3>Offline-first</h3>
+              <p>
+                Funciona sem rede na loja ou torneio; sincroniza quando estiveres
+                online.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <h3>Conta opcional</h3>
+              <p>
+                Joga como convidado ou liga Google / Apple para backup na nuvem.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="jogos" class="games-section">
+        <div class="container">
+          <header class="section-header">
+            <h2>TCGs suportados</h2>
+            <p>
+              Catálogo em expansão com regras e efeitos específicos por jogo.
+            </p>
+          </header>
+          <div class="games-grid">
+            <div class="game-pill">Pokémon TCG<span>Disponível</span></div>
+            <div class="game-pill">Magic: The Gathering<span>Disponível</span></div>
+            <div class="game-pill">Flesh and Blood<span>Disponível</span></div>
+            <div class="game-pill">Disney Lorcana<span>Disponível</span></div>
+            <div class="game-pill">One Piece TCG<span>Disponível</span></div>
+            <div class="game-pill">Yu-Gi-Oh!<span>Disponível</span></div>
+            <div class="game-pill">Riftbound<span>Disponível</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="download" class="download-section">
+        <div class="container">
+          <div class="download-card">
+            <div>
+              <h2>Instala o TurnWise</h2>
+              <p>
+                Escolhe a plataforma. No iPhone, entra no beta via TestFlight; no
+                Android, descarrega o APK pelo link público (ativa fontes
+                desconhecidas se o sistema pedir).
+              </p>
+            </div>
+            <div class="download-actions">
+              <a
+                class="btn btn-primary btn-lg btn-icon"
+                href="#"
+                data-download-ios
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+                  />
+                </svg>
+                TestFlight
+              </a>
+              <a
+                class="btn btn-secondary btn-lg btn-icon"
+                href="#"
+                data-download-android
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M17.6 9.48l1.84-3.18c.16-.27.07-.62-.2-.78-.27-.16-.62-.07-.78.2l-1.87 3.24a11.43 11.43 0 0 0-8.58 0L5.5 5.72a.506.506 0 0 0-.78-.2c-.27.16-.35.51-.2.78L6.4 9.48A10.81 10.81 0 0 0 1 14.5C1 14.78 1.22 15 1.5 15h21c.28 0 .5-.22.5-.5 0-1.88-.72-3.6-1.92-5.02zM7 13.25c-.69 0-1.25-.56-1.25-1.25S6.31 10.75 7 10.75 8.25 11.31 8.25 12 7.69 13.25 7 13.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"
+                  />
+                </svg>
+                APK Android
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© <span id="year"></span> TurnWise · Cubit Dev</p>
+        <p>
+          <a href="mailto:" data-support-email="text">suporte@turnwise.app</a>
+        </p>
+      </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

@@ -154,7 +154,6 @@ class MatchTimerNotifier extends StateNotifier<MatchTimerState?> {
   @override
   void dispose() {
     _stopTicking();
-    _persistTimerToSession(flushImmediately: true);
     super.dispose();
   }
 }

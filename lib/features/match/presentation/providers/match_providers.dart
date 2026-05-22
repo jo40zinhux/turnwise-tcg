@@ -225,11 +225,11 @@ final matchStateProvider =
 /// Clears active match from memory and storage without recording history.
 Future<void> dismissActiveMatch(WidgetRef ref, String gameId) async {
   ref.read(matchSessionPersistCoordinatorProvider(gameId)).abandon();
+  ref.invalidate(matchTimerProvider(gameId));
+  ref.invalidate(matchStateProvider(gameId));
   await ref.read(matchSessionRepositoryProvider).clearActiveSession();
   ref.invalidate(activeMatchSessionProvider);
   ref.invalidate(matchSessionPersistCoordinatorProvider(gameId));
-  ref.invalidate(matchStateProvider(gameId));
-  ref.invalidate(matchTimerProvider(gameId));
 }
 
 Future<void> endActiveMatch(WidgetRef ref, String gameId) async {

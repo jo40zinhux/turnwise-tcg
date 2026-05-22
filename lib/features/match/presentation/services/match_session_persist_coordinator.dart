@@ -42,7 +42,7 @@ class MatchSessionPersistCoordinator {
   }
 
   void update(MatchSession Function(MatchSession current) apply) {
-    _abandoned = false;
+    if (_abandoned) return;
     final base = _pending ?? _emptySession();
     _pending = apply(base);
     _scheduleFlush();
