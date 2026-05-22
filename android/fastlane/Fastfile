@@ -1,0 +1,112 @@
+# Fastlane — TurnWise Android (Flutter)
+#
+# Objetivo: enviar AAB para Google Play Console (faixa internal = testes internos).
+# Publicação em produção / promoção de faixas → manual no Play Console.
+#
+# Requisitos: android/key.properties + upload-keystore.jks
+#             Service Account com acesso à app no Play Console (JSON).
+
+default_platform(:android)
+
+def project_root
+  File.expand_path("../..", __dir__)
+end
+
+def play_json_key_file
+  path = ENV["PLAY_STORE_JSON_KEY_PATH"]
+  UI.user_error!("Define PLAY_STORE_JSON_KEY_PATH no android/fastlane/.env") if path.to_s.empty?
+  UI.user_error!("JSON key não encontrado: #{path}") unless File.exist?(path)
+  path
+end
+
+def play_supply_options
+  {
+    package_name: "com.cubitdev.turnwise",
+    json_key: play_json_key_file,
+    skip_upload_metadata: true,
+    skip_upload_images: true,
+    skip_upload_screenshots: true,
+    skip_upload_changelogs: true
+  }
+end
+
+def flutter_build_appbundle!(build_name: nil, build_number: nil)
+  unless File.exist?(File.join(project_root, "android", "key.properties"))
+    UI.user_error!("Falta android/key.properties (copia de key.properties.example).")
+  end
+
+  Dir.chdir(project_root) do
+    sh("flutter", "pub", "get")
+
+    build_args = ["flutter", "build", "appbundle", "--release"]
+    build_args << "--build-name=#{build_name}" if build_name && !build_name.to_s.empty?
+    build_args << "--build-number=#{build_number}" if build_number && !build_number.to_s.empty?
+
+    sh(*build_args)
+  end
+end
+
+def latest_aab_path
+  path = File.join(project_root, "build", "app", "outputs", "bundle", "release", "app-release.aab")
+  UI.user_error!("AAB não encontrado em #{path}. Corre a lane :build primeiro.") unless File.exist?(path)
+  path
+end
+
+def upload_aab_to_play!(aab, track: "internal")
+  upload_to_play_store(
+    play_supply_options.merge(
+      aab: aab,
+      track: track,
+      release_status: "completed"
+    )
+  )
+  UI.success(
+    "Upload concluído na faixa '#{track}'. " \
+    "Promove para beta/produção manualmente no Google Play Console."
+  )
+end
+
+platform :android do
+  desc "Valida Service Account e ligação ao Google Play"
+  lane :validate_play do
+    codes = google_play_track_version_codes(
+      play_supply_options.merge(track: "internal")
+    )
+    msg = codes.nil? || codes.empty? ? "ainda sem releases na faixa internal" : "internal: #{codes.join(', ')}"
+    UI.success("Play API OK — com.cubitdev.turnwise (#{msg})")
+  rescue StandardError => e
+    if e.message.include?("no releases") || e.message.include?("not found")
+      UI.success("Play API OK — com.cubitdev.turnwise (ainda sem releases na faixa internal)")
+    else
+      raise e
+    end
+  end
+
+  desc "Gera AAB release (Flutter) sem enviar"
+  lane :build do |options|
+    flutter_build_appbundle!(
+      build_name: options[:build_name],
+      build_number: options[:build_number]
+    )
+    UI.success("AAB: #{latest_aab_path}")
+  end
+
+  desc "Envia AAB existente para testes internos (faixa internal)"
+  lane :upload_internal do |options|
+    upload_aab_to_play!(options[:aab] || latest_aab_path, track: "internal")
+  end
+
+  desc "Build AAB + upload para testes internos (faixa internal)"
+  lane :internal do |options|
+    flutter_build_appbundle!(
+      build_name: options[:build_name],
+      build_number: options[:build_number]
+    )
+    upload_aab_to_play!(latest_aab_path, track: "internal")
+  end
+
+  desc "Envia AAB para faixa beta (testes fechados/abertos — ainda sem produção)"
+  lane :upload_beta do |options|
+    upload_aab_to_play!(options[:aab] || latest_aab_path, track: "beta")
+  end
+end

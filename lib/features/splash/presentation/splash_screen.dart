@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/turnwise_logo.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../../auth/providers/auth_providers.dart';
@@ -82,11 +83,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.change_history_rounded,
-                size: 80,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+              const TurnWiseLogo(size: 80),
               AppSpacing.gapLg,
               Text(
                 'TurnWise',
@@ -105,7 +102,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.5),
                   ),
                 ),
               ),

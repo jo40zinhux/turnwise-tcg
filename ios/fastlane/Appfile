@@ -1,0 +1,5 @@
+app_identifier("com.cubitdev.turnwise")
+apple_id(ENV["FASTLANE_APPLE_ID"]) # opcional se usares API Key
+team_id("VCE77X465D")
+
+# itc_team_id("") # descomenta se a equipa ASC for diferente da Developer Portal

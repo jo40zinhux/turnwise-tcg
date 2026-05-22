@@ -1,6 +1,9 @@
 # Gera APK release assinado (requer android/key.properties + upload-keystore.jks).
 # Saida: build/app/outputs/flutter-apk/app-release.apk
-# Uso: .\scripts\build-release-apk.ps1
+#
+# Uso:
+#   Windows:  .\scripts\build-release-apk.ps1
+#   macOS:    ./scripts/build-release-apk.sh
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot\..

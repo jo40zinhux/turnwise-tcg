@@ -1,0 +1,263 @@
+# Fastlane — TurnWise iOS (Flutter)
+#
+# Objetivo: enviar IPA para App Store Connect → TestFlight.
+# Publicação na App Store (produção / review) é feita manualmente no App Store Connect.
+#
+# Requisitos locais: certificado Distribution + profile "Turnwise - profile" no Keychain.
+
+default_platform(:ios)
+
+def ios_dir
+  @ios_dir ||= begin
+    if ENV["FLUTTER_IOS_DIR"] && File.exist?(File.join(ENV["FLUTTER_IOS_DIR"], "ExportOptions.plist"))
+      File.expand_path(ENV["FLUTTER_IOS_DIR"])
+    else
+      find_ios_dir!
+    end
+  end
+end
+
+def project_root
+  if ENV["FLUTTER_PROJECT_ROOT"] && File.exist?(File.join(ENV["FLUTTER_PROJECT_ROOT"], "pubspec.yaml"))
+    File.expand_path(ENV["FLUTTER_PROJECT_ROOT"])
+  else
+    File.expand_path("..", ios_dir)
+  end
+end
+
+def find_ios_dir!
+  roots = [
+    File.expand_path(File.dirname(__FILE__)),
+    Dir.pwd,
+    File.expand_path("..", Dir.pwd)
+  ].uniq
+
+  roots.each do |root|
+    candidates = [
+      root,
+      File.expand_path("..", root),
+      File.expand_path("ios", root)
+    ]
+    found = candidates.find do |dir|
+      File.exist?(File.join(dir, "ExportOptions.plist")) &&
+        File.exist?(File.join(dir, "Runner.xcodeproj", "project.pbxproj"))
+    end
+    return found if found
+  end
+
+  UI.user_error!(
+    "Não encontrei ios/ExportOptions.plist. Corre o script a partir da raiz do repo " \
+    "ou define FLUTTER_IOS_DIR=/caminho/para/turnwise-tcg/ios"
+  )
+end
+
+def export_options_plist
+  File.join(ios_dir, "ExportOptions.plist")
+end
+
+def asc_api_key
+  key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
+  issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
+  key_path = ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+  key_content = ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+
+  return nil if key_id.to_s.empty? || issuer_id.to_s.empty?
+
+  if !key_path.to_s.empty? && File.exist?(key_path)
+    app_store_connect_api_key(
+      key_id: key_id,
+      issuer_id: issuer_id,
+      key_filepath: key_path,
+      duration: 1200,
+      in_house: false
+    )
+  elsif !key_content.to_s.empty?
+    app_store_connect_api_key(
+      key_id: key_id,
+      issuer_id: issuer_id,
+      key_content: key_content,
+      duration: 1200,
+      in_house: false
+    )
+  else
+    UI.user_error!(
+      "Define APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_ISSUER_ID e " \
+      "APP_STORE_CONNECT_API_KEY_PATH (ou APP_STORE_CONNECT_API_KEY_CONTENT)."
+    )
+  end
+end
+
+def pod_executable
+  return ENV["POD_BINARY"] if ENV["POD_BINARY"] && File.executable?(ENV["POD_BINARY"])
+
+  candidates = [
+    "/opt/homebrew/bin/pod",
+    "/usr/local/bin/pod",
+    `which pod 2>/dev/null`.strip
+  ].reject(&:empty?)
+
+  candidates.find { |path| File.executable?(path) }
+end
+
+def bundler_env_keys
+  %w[BUNDLE_GEMFILE BUNDLE_BIN_PATH BUNDLE_PATH GEM_PATH RUBYOPT]
+end
+
+def pod_shim_dir
+  File.join(ios_dir, ".pod-shim")
+end
+
+def ensure_pod_shim!(pod)
+  dir = pod_shim_dir
+  FileUtils.mkdir_p(dir)
+  shim = File.join(dir, "pod")
+  File.write(
+    shim,
+    <<~SCRIPT
+      #!/bin/sh
+      exec "#{pod}" "$@"
+    SCRIPT
+  )
+  File.chmod(0o755, shim)
+  shim
+end
+
+def env_prefix_base(pod)
+  ensure_pod_shim!(pod)
+  bundler_env_keys.flat_map { |key| ["-u", key] } + ["LANG=en_US.UTF-8"]
+end
+
+def env_prefix_for_pod_install(pod)
+  pod_home = File.expand_path(File.dirname(pod))
+  # PATH mínimo para `pod install` (evita pod quebrado do Ruby do sistema)
+  path = [
+    pod_shim_dir,
+    pod_home,
+    "/opt/homebrew/bin",
+    "/usr/bin",
+    "/bin",
+    "/usr/sbin",
+    "/sbin"
+  ].uniq.join(":")
+
+  env_prefix_base(pod) + ["PATH=#{path}"]
+end
+
+def env_prefix_for_flutter_build(pod)
+  pod_home = File.expand_path(File.dirname(pod))
+  # Shim do pod à frente + PATH original (flutter, dart, Xcode, etc.)
+  existing_path = ENV.fetch("PATH", "").split(":").reject(&:empty?)
+  path = ([pod_shim_dir, pod_home, "/opt/homebrew/bin"] + existing_path).uniq.join(":")
+
+  env_prefix_base(pod) + ["PATH=#{path}"]
+end
+
+def run_pod_install_with_shim!(pod, *command)
+  sh("env", *env_prefix_for_pod_install(pod), *command)
+end
+
+def run_flutter_with_working_pod!(*command)
+  pod = pod_executable
+  UI.user_error!("CocoaPods não encontrado (brew install cocoapods).") unless pod
+
+  sh("env", *env_prefix_for_flutter_build(pod), *command)
+end
+
+def run_pod_install!(pod)
+  Dir.chdir(ios_dir) do
+    run_pod_install_with_shim!(pod, "pod", "install")
+  end
+end
+
+def ensure_cocoapods!
+  podfile = File.join(ios_dir, "Podfile")
+  return unless File.exist?(podfile)
+
+  pod = pod_executable
+  unless pod
+    UI.user_error!(
+      "CocoaPods não encontrado. Instala com: brew install cocoapods\n" \
+      "Depois corre: ./scripts/setup-ios-pods.sh"
+    )
+  end
+
+  UI.message("pod install (#{pod})...")
+  run_pod_install!(pod)
+end
+
+def flutter_build_ipa!(build_name: nil, build_number: nil)
+  Dir.chdir(project_root) do
+    sh("flutter", "pub", "get")
+    ensure_cocoapods!
+
+    build_args = ["flutter", "build", "ipa", "--release", "--no-pub"]
+    build_args << "--build-name=#{build_name}" if build_name && !build_name.to_s.empty?
+    build_args << "--build-number=#{build_number}" if build_number && !build_number.to_s.empty?
+    build_args << "--export-options-plist=#{export_options_plist}"
+
+    UI.message("flutter build ipa (pod shim + PATH do sistema)...")
+    run_flutter_with_working_pod!(*build_args)
+  end
+end
+
+def latest_ipa_path
+  pattern = File.join(project_root, "build", "ios", "ipa", "*.ipa")
+  ipa = Dir.glob(pattern).max_by { |path| File.mtime(path) }
+  UI.user_error!("IPA não encontrado em #{pattern}. Corre a lane :build primeiro.") if ipa.nil?
+  ipa
+end
+
+def upload_ipa_to_testflight!(ipa)
+  upload_to_testflight(
+    api_key: asc_api_key,
+    ipa: ipa,
+    skip_waiting_for_build_processing: true,
+    distribute_external: false,
+    notify_external_testers: false
+  )
+  UI.success("Upload concluído. Disponibiliza testadores e envia para a loja manualmente no App Store Connect.")
+end
+
+platform :ios do
+  desc "Valida API Key e ligação à App Store Connect"
+  lane :validate_asc do
+    api_key = asc_api_key
+    build_nr = app_store_build_number(
+      api_key: api_key,
+      app_identifier: "com.cubitdev.turnwise",
+      live: false,
+      initial_build_number: 0
+    )
+    msg = build_nr.to_i.positive? ? "último build TestFlight: #{build_nr}" : "ainda sem builds no TestFlight"
+    UI.success("API Key OK — com.cubitdev.turnwise (#{msg})")
+  end
+
+  desc "Gera IPA release (Flutter) sem enviar"
+  lane :build do |options|
+    flutter_build_ipa!(
+      build_name: options[:build_name],
+      build_number: options[:build_number]
+    )
+    UI.success("IPA: #{latest_ipa_path}")
+  end
+
+  desc "Envia IPA existente para TestFlight (App Store Connect)"
+  lane :upload_testflight do |options|
+    upload_ipa_to_testflight!(options[:ipa] || latest_ipa_path)
+  end
+
+  desc "Build IPA + upload para TestFlight"
+  lane :deploy_testflight do |options|
+    flutter_build_ipa!(
+      build_name: options[:build_name],
+      build_number: options[:build_number]
+    )
+    upload_ipa_to_testflight!(latest_ipa_path)
+  end
+
+  # Aliases (compatibilidade)
+  desc "Alias de deploy_testflight"
+  lane :beta do |options|
+    deploy_testflight(options)
+  end
+end

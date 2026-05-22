@@ -5,6 +5,7 @@ import '../../../core/observability/app_analytics_provider.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/turnwise_logo.dart';
 import '../../../core/theme/app_typography.dart';
 import '../domain/auth_result.dart';
 import '../providers/auth_providers.dart';
@@ -39,14 +40,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (result.isCancelled) return;
 
-    final message = result.message ??
-        'Não foi possível iniciar sessão. Tenta novamente.';
+    final message =
+        result.message ?? 'Não foi possível iniciar sessão. Tenta novamente.';
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+        shape: const RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
       ),
     );
   }
@@ -66,11 +67,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Spacer(flex: 2),
-                  Icon(
-                    Icons.change_history_rounded,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                  const TurnWiseLogo(size: 64),
                   AppSpacing.gapLg,
                   Text(
                     'Bem-vindo ao\nTurnWise',

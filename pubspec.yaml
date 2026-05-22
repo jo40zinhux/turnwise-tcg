@@ -74,6 +74,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/icons/ic_wise.png
     - assets/rules/
     - assets/rules/effects/
     - assets/games_manifest.json

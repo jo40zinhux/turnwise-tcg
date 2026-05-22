@@ -44,3 +44,24 @@ app.*.map.json
 
 # Test coverage output
 /coverage/
+
+# Bundler (gems locais por plataforma)
+ios/vendor/bundle
+android/vendor/bundle
+ios/.pod-shim
+
+# Fastlane (secrets e artefactos locais)
+ios/fastlane/.env
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+ios/fastlane/test_output
+android/fastlane/.env
+android/fastlane/report.xml
+android/fastlane/Preview.html
+android/fastlane/test_output
+**/AuthKey_*.p8
+*.p8
+**/play-store-key.json
+**/play-store*.json
+!android/fastlane/.env.example
+!ios/fastlane/.env.example
