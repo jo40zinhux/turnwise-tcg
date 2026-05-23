@@ -88,5 +88,23 @@ void main() {
       expect(next.feedback?.type, MatchFeedbackType.error);
       expect(next.actionUsageCount['play'], 1);
     });
+
+    test('reverts a registered action', () {
+      const state = MatchEngineState(
+        currentPhaseIndex: 1,
+        actionUsageCount: {'play': 1},
+      );
+      final next = engine.revertAction(state, rules, 'play');
+      expect(next.actionUsageCount, isEmpty);
+      expect(next.feedback?.type, MatchFeedbackType.success);
+      expect(next.feedback?.message, contains('desfeita'));
+    });
+
+    test('revert fails when action was not used', () {
+      const state = MatchEngineState(currentPhaseIndex: 1);
+      final next = engine.revertAction(state, rules, 'play');
+      expect(next.feedback?.type, MatchFeedbackType.error);
+      expect(next.actionUsageCount, isEmpty);
+    });
   });
 }

@@ -101,6 +101,45 @@ class MatchEngine {
     return next;
   }
 
+  MatchEngineState revertAction(
+    MatchEngineState state,
+    GameRules rules,
+    String actionId,
+  ) {
+    final currentUsage = state.actionUsageCount[actionId] ?? 0;
+    if (currentUsage <= 0) {
+      return state.copyWith(
+        feedback: const MatchFeedback(
+          message: 'Nenhuma utilização para desfazer.',
+          type: MatchFeedbackType.error,
+        ),
+      );
+    }
+
+    final action = rules.actions.firstWhere(
+      (a) => a.id == actionId,
+      orElse: () => throw Exception('Action not found: $actionId'),
+    );
+
+    final updatedUsages = Map<String, int>.from(state.actionUsageCount);
+    if (currentUsage == 1) {
+      updatedUsages.remove(actionId);
+    } else {
+      updatedUsages[actionId] = currentUsage - 1;
+    }
+
+    var next = state.copyWith(
+      actionUsageCount: updatedUsages,
+      feedback: MatchFeedback(
+        message: '${action.name} desfeita.',
+        type: MatchFeedbackType.success,
+      ),
+    );
+
+    next = _effects.removeLastEffectsFromAction(next, rules, actionId);
+    return next;
+  }
+
   MatchEngineState applyEffect(
     MatchEngineState state,
     GameRules rules,

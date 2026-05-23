@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_semantic_colors.dart';
@@ -9,13 +10,14 @@ import '../../core/theme/app_typography.dart';
 /// Visual states:
 /// - **idle**: outlined surface, ready to be tapped.
 /// - **used**: primary tint, check icon, still tappable (action allows reuse).
-/// - **exhausted**: dimmed, ripple disabled. Tapping triggers [onExhaustedTap]
-///   for soft feedback (haptic) without firing an engine error snackbar.
+/// - **exhausted**: dimmed; tap may undo (max=1) or trigger [onExhaustedTap].
 class MatchActionChip extends StatelessWidget {
   final String label;
   final bool isUsed;
   final bool isExhausted;
+  final bool canUndoOnTap;
   final VoidCallback onPressed;
+  final VoidCallback? onLongPress;
   final VoidCallback? onExhaustedTap;
   final bool expand;
 
@@ -24,7 +26,9 @@ class MatchActionChip extends StatelessWidget {
     required this.label,
     required this.isUsed,
     required this.isExhausted,
+    this.canUndoOnTap = false,
     required this.onPressed,
+    this.onLongPress,
     this.onExhaustedTap,
     this.expand = false,
   });
@@ -41,7 +45,7 @@ class MatchActionChip extends StatelessWidget {
       color: theme.colorScheme.outlineVariant.withOpacity(0.3),
     );
 
-    if (isExhausted) {
+    if (isExhausted && !canUndoOnTap) {
       backgroundColor = theme.colorScheme.surface.withOpacity(0.6);
       foregroundColor = theme.colorScheme.onSurface.withOpacity(0.45);
       borderSide = BorderSide(
@@ -53,8 +57,28 @@ class MatchActionChip extends StatelessWidget {
       borderSide = BorderSide(color: primary.withOpacity(0.6), width: 1.5);
     }
 
-    final tooltip = isExhausted ? 'Limite atingido neste turno' : null;
-    final iconColor = isUsed && !isExhausted ? primary : semantic.success;
+    final tooltip = _tooltipMessage();
+    final iconColor = isUsed && (!isExhausted || canUndoOnTap)
+        ? primary
+        : semantic.success;
+
+    void handleTap() {
+      if (canUndoOnTap) {
+        HapticFeedback.lightImpact();
+        onPressed();
+        return;
+      }
+      if (isExhausted) {
+        onExhaustedTap?.call();
+        return;
+      }
+      onPressed();
+    }
+
+    void handleLongPress() {
+      HapticFeedback.mediumImpact();
+      onLongPress?.call();
+    }
 
     final chip = AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -68,7 +92,8 @@ class MatchActionChip extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: AppRadius.smAll,
         child: InkWell(
-          onTap: isExhausted ? onExhaustedTap : onPressed,
+          onTap: handleTap,
+          onLongPress: onLongPress != null ? handleLongPress : null,
           borderRadius: AppRadius.smAll,
           excludeFromSemantics: false,
           child: Padding(
@@ -102,7 +127,7 @@ class MatchActionChip extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (isExhausted)
+                if (isExhausted && !canUndoOnTap)
                   Padding(
                     padding: const EdgeInsets.only(left: 6, top: 2),
                     child: Icon(
@@ -120,7 +145,7 @@ class MatchActionChip extends StatelessWidget {
 
     final accessible = Semantics(
       label: label,
-      enabled: !isExhausted,
+      enabled: !isExhausted || canUndoOnTap,
       button: true,
       child: SizedBox(
         width: expand ? double.infinity : null,
@@ -134,5 +159,14 @@ class MatchActionChip extends StatelessWidget {
       preferBelow: false,
       child: accessible,
     );
+  }
+
+  String? _tooltipMessage() {
+    if (canUndoOnTap) return 'Toca para desfazer';
+    if (onLongPress != null && isUsed) {
+      return 'Mantém premido para desfazer';
+    }
+    if (isExhausted) return 'Limite atingido neste turno';
+    return null;
   }
 }

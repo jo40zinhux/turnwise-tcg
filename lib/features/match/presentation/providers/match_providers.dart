@@ -121,6 +121,27 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
     _persistPhaseToSession();
   }
 
+  void revertAction(String actionId) {
+    final rules = _rules;
+    if (rules == null) return;
+
+    state = MatchState(
+      engineState: _engine.revertAction(state.engineState, rules, actionId),
+    );
+
+    final feedback = state.feedback;
+    if (feedback?.type == MatchFeedbackType.success) {
+      unawaited(
+        _ref.read(appAnalyticsProvider).logActionReverted(
+              gameId: gameId,
+              actionId: actionId,
+            ),
+      );
+    }
+
+    _persistPhaseToSession();
+  }
+
   void clearFeedback() {
     state = MatchState(
       engineState: state.engineState.copyWith(clearFeedback: true),

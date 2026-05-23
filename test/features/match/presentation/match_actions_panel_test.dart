@@ -16,6 +16,7 @@ Widget _wrap({
   required Map<String, int> usage,
   required int? Function(ActionRule) maxUsage,
   required ValueChanged<String> onAction,
+  ValueChanged<String>? onRevert,
   VoidCallback? onUnavailable,
 }) {
   return MaterialApp(
@@ -28,6 +29,7 @@ Widget _wrap({
           actionUsageCount: usage,
           maxUsageForAction: maxUsage,
           onActionPressed: onAction,
+          onActionRevert: onRevert ?? (_) {},
           onActionUnavailable: onUnavailable,
         ),
       ),
@@ -102,11 +104,44 @@ void main() {
             actionUsageCount: const {},
             maxUsageForAction: (_) => null,
             onActionPressed: (_) {},
+            onActionRevert: (_) {},
           ),
         ),
       ));
 
       expect(find.byType(MatchActionChip), findsNothing);
+    });
+
+    testWidgets('tap on max=1 used action triggers revert', (tester) async {
+      String? reverted;
+      await tester.pumpWidget(_wrap(
+        usage: const {'attack': 1},
+        maxUsage: (a) => a.id == 'attack' ? 1 : null,
+        onAction: (_) {},
+        onRevert: (id) => reverted = id,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Atacar'));
+      await tester.pumpAndSettle();
+
+      expect(reverted, 'attack');
+    });
+
+    testWidgets('long press on multi-use used action triggers revert', (tester) async {
+      String? reverted;
+      await tester.pumpWidget(_wrap(
+        usage: const {'attack': 1},
+        maxUsage: (a) => a.id == 'attack' ? 2 : null,
+        onAction: (_) {},
+        onRevert: (id) => reverted = id,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.longPress(find.text('Atacar'));
+      await tester.pumpAndSettle();
+
+      expect(reverted, 'attack');
     });
   });
 }

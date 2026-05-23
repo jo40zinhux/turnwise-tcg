@@ -59,6 +59,23 @@ class AppAnalytics {
     );
   }
 
+  Future<void> logActionReverted({
+    required String gameId,
+    required String actionId,
+  }) async {
+    await _log(
+      AnalyticsEvents.actionReverted,
+      {'game_id': gameId, 'action_id': actionId},
+    );
+  }
+
+  Future<void> logCoachTipDismissed({required String tipId}) async {
+    await _log(
+      AnalyticsEvents.coachTipDismissed,
+      {'tip_id': tipId},
+    );
+  }
+
   Future<void> logGuestSignIn() async {
     await _log(AnalyticsEvents.guestSignIn, const {});
   }

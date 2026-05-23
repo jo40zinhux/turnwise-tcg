@@ -14,6 +14,7 @@ import '../domain/game_rules.dart';
 import '../domain/match_feedback.dart';
 import '../../match_history/domain/complete_match_params.dart';
 import '../../match_history/presentation/providers/match_history_providers.dart';
+import '../../coach/presentation/widgets/coach_tip_banner.dart';
 import 'providers/match_providers.dart';
 import 'providers/match_session_providers.dart';
 import 'utils/match_feedback_snackbar.dart';
@@ -203,6 +204,11 @@ class _MatchBodyState extends ConsumerState<_MatchBody> {
   final _scrollController = ScrollController();
   bool _showAllPhases = false;
   int? _lastScrolledPhaseIndex;
+  bool _undoCoachDismissed = false;
+
+  int _totalActionUsage(Map<String, int> usage) {
+    return usage.values.fold(0, (sum, count) => sum + count);
+  }
 
   @override
   void initState() {
@@ -247,6 +253,10 @@ class _MatchBodyState extends ConsumerState<_MatchBody> {
     final engine = ref.read(matchEngineProvider);
     final feedbackService = ref.read(matchFeedbackServiceProvider);
 
+    final actionUsageTotal = _totalActionUsage(matchState.actionUsageCount);
+    final showActionUndoCoach =
+        actionUsageTotal > 0 && !_undoCoachDismissed;
+
     ref.listen(matchStateProvider(widget.gameId), (previous, next) {
       final feedback = next.feedback;
       if (feedback != null && feedback != previous?.feedback) {
@@ -260,6 +270,15 @@ class _MatchBodyState extends ConsumerState<_MatchBody> {
         }
         showMatchFeedbackSnackBar(context, feedback);
         notifier.clearFeedback();
+      }
+
+      final prevTotal = _totalActionUsage(previous?.actionUsageCount ?? const {});
+      final nextTotal = _totalActionUsage(next.actionUsageCount);
+      if (nextTotal > prevTotal && _undoCoachDismissed) {
+        setState(() => _undoCoachDismissed = false);
+      }
+      if (nextTotal == 0 && _undoCoachDismissed) {
+        setState(() => _undoCoachDismissed = false);
       }
 
       if (previous?.currentPhaseIndex != next.currentPhaseIndex) {
@@ -405,6 +424,19 @@ class _MatchBodyState extends ConsumerState<_MatchBody> {
                         'Ações disponíveis',
                         style: AppTypography.label(context),
                       ),
+                      if (showActionUndoCoach) ...[
+                        AppSpacing.gapSm,
+                        CoachTipBanner(
+                          message:
+                              'Tocaste sem querer? Toca outra vez (ou mantém premido) para desfazer.',
+                          onDismiss: () {
+                            setState(() => _undoCoachDismissed = true);
+                            ref.read(appAnalyticsProvider).logCoachTipDismissed(
+                                  tipId: 'match_action_undo',
+                                );
+                          },
+                        ),
+                      ],
                       AppSpacing.gapMd,
                       MatchActionsPanel(
                         actions: widget.rules.actions,
@@ -413,6 +445,7 @@ class _MatchBodyState extends ConsumerState<_MatchBody> {
                             engine.maxUsagePerTurn(widget.rules, action),
                         isActionLocked: notifier.isActionLocked,
                         onActionPressed: notifier.attemptAction,
+                        onActionRevert: notifier.revertAction,
                         onActionUnavailable: feedbackService.actionUnavailable,
                       ),
                       AppSpacing.gapMd,

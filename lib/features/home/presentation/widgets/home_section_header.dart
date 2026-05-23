@@ -18,8 +18,9 @@ class HomeSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(title, style: AppTypography.label(context)),
-        const Spacer(),
+        Expanded(
+          child: Text(title, style: AppTypography.label(context)),
+        ),
         if (actionLabel != null && onAction != null)
           TextButton(
             onPressed: onAction,

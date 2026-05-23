@@ -149,6 +149,45 @@ class EffectEngine {
     return next;
   }
 
+  /// Removes effects from the most recent use of [actionId] (LIFO batch).
+  MatchEngineState removeLastEffectsFromAction(
+    MatchEngineState state,
+    GameRules rules,
+    String actionId, {
+    int? effectsPerUse,
+  }) {
+    final batchSize = effectsPerUse ??
+        _effectsAppliedPerActionUse(rules, actionId);
+    if (batchSize <= 0) return state;
+
+    final effects = List<ActiveEffect>.from(state.effectsState.activeEffects);
+    var removed = 0;
+
+    while (removed < batchSize && effects.isNotEmpty) {
+      final last = effects.last;
+      if (last.source.kind != EffectSourceKind.action ||
+          last.source.referenceId != actionId) {
+        break;
+      }
+      effects.removeLast();
+      removed++;
+    }
+
+    if (removed == 0) return state;
+
+    return state.copyWith(
+      effectsState: state.effectsState.copyWith(activeEffects: effects),
+    );
+  }
+
+  int _effectsAppliedPerActionUse(GameRules rules, String actionId) {
+    final action = rules.actions.where((a) => a.id == actionId).firstOrNull;
+    if (action == null) return 0;
+    final applyIds = action.metadata['applyEffects'];
+    if (applyIds is! List) return 0;
+    return applyIds.length;
+  }
+
   List<String> lockedActionIds(MatchEngineState state) {
     return state.effectsState.lockedActionIds.toList();
   }

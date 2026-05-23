@@ -15,6 +15,7 @@ class MatchActionsPanel extends StatelessWidget {
   final int? Function(ActionRule action) maxUsageForAction;
   final bool Function(String actionId)? isActionLocked;
   final ValueChanged<String> onActionPressed;
+  final ValueChanged<String> onActionRevert;
   final VoidCallback? onActionUnavailable;
 
   const MatchActionsPanel({
@@ -24,6 +25,7 @@ class MatchActionsPanel extends StatelessWidget {
     required this.maxUsageForAction,
     this.isActionLocked,
     required this.onActionPressed,
+    required this.onActionRevert,
     this.onActionUnavailable,
   });
 
@@ -56,14 +58,27 @@ class MatchActionsPanel extends StatelessWidget {
   Widget _buildChip(ActionRule action) {
     final maxAllowed = maxUsageForAction(action);
     final currentUsage = actionUsageCount[action.id] ?? 0;
+    final isUsed = currentUsage > 0;
     final isExhausted = maxAllowed != null && currentUsage >= maxAllowed;
     final locked = isActionLocked?.call(action.id) ?? false;
+    final canUndoOnTap = isUsed && maxAllowed == 1 && !locked;
+    final canUndoOnLongPress =
+        isUsed && !locked && (maxAllowed == null || maxAllowed > 1);
 
     return MatchActionChip(
       label: action.name,
-      isUsed: currentUsage > 0,
+      isUsed: isUsed,
       isExhausted: isExhausted || locked,
-      onPressed: () => onActionPressed(action.id),
+      canUndoOnTap: canUndoOnTap,
+      onPressed: () {
+        if (canUndoOnTap) {
+          onActionRevert(action.id);
+        } else {
+          onActionPressed(action.id);
+        }
+      },
+      onLongPress:
+          canUndoOnLongPress ? () => onActionRevert(action.id) : null,
       onExhaustedTap: onActionUnavailable,
       expand: true,
     );
