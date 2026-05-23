@@ -1,5 +1,9 @@
 # Publica a landing page (web-page/) no Firebase Hosting.
-# Uso: .\scripts\deploy-landing.ps1
+#
+# Uso:
+#   Windows:  .\scripts\deploy-landing.ps1
+#   macOS:    ./scripts/deploy-landing.sh
+#
 # Antes do primeiro deploy: firebase login (se ainda não estiver autenticado).
 
 $ErrorActionPreference = "Stop"

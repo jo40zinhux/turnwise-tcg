@@ -36,5 +36,5 @@ if [[ -f "$APK" ]]; then
   echo "  ${size_mb} MB"
   echo ""
   echo "Próximo passo: envia o APK para o Drive (ou outro host) e coloca o link em web-page/js/config.js"
-  echo "Depois: scripts/deploy-landing.ps1"
+  echo "Depois: ./scripts/deploy-landing.sh"
 fi
