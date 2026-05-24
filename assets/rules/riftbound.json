@@ -37,99 +37,66 @@
         {
             "id": "channel_runes",
             "name": "Canalizar Runes",
-            "allowedPhases": [
-                "beginning"
-            ],
-            "validations": [
-                "rune_limit"
-            ],
+            "allowedPhases": ["beginning"],
+            "validations": ["rune_limit"],
             "trackUsage": true
         },
         {
             "id": "draw_card",
             "name": "Comprar Carta",
-            "allowedPhases": [
-                "beginning"
-            ],
-            "validations": [
-                "draw_limit"
-            ],
+            "allowedPhases": ["beginning"],
+            "validations": ["draw_limit"],
             "trackUsage": true
         },
         {
             "id": "play_unit",
             "name": "Jogar Unit",
-            "allowedPhases": [
-                "action"
-            ],
-            "validations": [
-                "energy_cost_check"
-            ],
+            "allowedPhases": ["action"],
+            "validations": ["energy_cost_check"],
             "trackUsage": true
         },
         {
             "id": "play_spell",
             "name": "Jogar Spell",
-            "allowedPhases": [
-                "action",
-                "showdown"
-            ],
-            "validations": [
-                "energy_cost_check"
-            ],
+            "allowedPhases": ["action", "showdown"],
+            "validations": ["energy_cost_check"],
             "trackUsage": true
         },
         {
             "id": "play_gear",
             "name": "Jogar Gear",
-            "allowedPhases": [
-                "action"
-            ],
-            "validations": [
-                "energy_cost_check"
-            ],
+            "allowedPhases": ["action"],
+            "validations": ["energy_cost_check"],
             "trackUsage": true,
             "requiresTarget": true
         },
         {
             "id": "move_unit",
             "name": "Mover Unit",
-            "allowedPhases": [
-                "action"
-            ],
-            "validations": [
-                "unit_ready_check"
-            ],
+            "allowedPhases": ["action"],
+            "validations": ["unit_ready_check"],
             "trackUsage": true,
             "requiresTarget": true
         },
         {
             "id": "start_showdown",
             "name": "Iniciar Showdown",
-            "allowedPhases": [
-                "showdown"
-            ],
+            "allowedPhases": ["showdown"],
             "validations": [],
             "trackUsage": true
         },
         {
             "id": "attack",
             "name": "Declarar Ataque",
-            "allowedPhases": [
-                "showdown"
-            ],
-            "validations": [
-                "unit_ready_check"
-            ],
+            "allowedPhases": ["showdown"],
+            "validations": ["unit_ready_check"],
             "trackUsage": true,
             "requiresTarget": true
         },
         {
             "id": "activate_ability",
             "name": "Ativar Habilidade",
-            "allowedPhases": [
-                "action"
-            ],
+            "allowedPhases": ["action"],
             "validations": [],
             "trackUsage": true
         }
@@ -138,17 +105,13 @@
         {
             "id": "rune_limit",
             "type": "limit",
-            "params": {
-                "max": 1
-            },
+            "params": {"max": 1},
             "errorMessage": "Você já canalizou runes neste turno."
         },
         {
             "id": "draw_limit",
             "type": "limit",
-            "params": {
-                "max": 1
-            },
+            "params": {"max": 1},
             "errorMessage": "Você já comprou carta nesta fase."
         },
         {
@@ -160,7 +123,7 @@
         {
             "id": "unit_ready_check",
             "type": "condition",
-            "params": {},
+            "params": {"requires": "unit_ready"},
             "errorMessage": "A unidade precisa estar pronta para executar esta ação."
         }
     ],
@@ -174,6 +137,22 @@
         "supportsTeams": true,
         "genre": "Battlefield Control TCG",
         "themeColor": "deepPurpleAccent",
-        "iconCode": "grass"
+        "iconCode": "grass",
+        "firstTurnHint": "Segue a ordem de turnos do rulebook. Unidades exauridas não movem nem atacam até serem preparadas.",
+        "board": {
+            "slotLabels": ["Unidade 1", "Unidade 2", "Unidade 3"],
+            "flags": [
+                {
+                    "flag": "exerted",
+                    "label": "Exaurida"
+                }
+            ]
+        },
+        "coachTips": [
+            {
+                "id": "riftbound_ready_units",
+                "message": "Só unidades prontas podem mover ou atacar; exauridas aguardam o Awaken."
+            }
+        ]
     }
 }

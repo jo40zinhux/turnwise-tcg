@@ -5,25 +5,25 @@
         {
             "id": "ready",
             "title": "Ready Phase",
-            "description": "Ready all your cards in play.",
+            "description": "Pronto todas as suas cartas em jogo.",
             "iconCode": "refresh"
         },
         {
             "id": "set",
             "title": "Set Phase",
-            "description": "Check for effects that happen at the start of turn.",
+            "description": "Resolva efeitos que ocorrem no início do turno.",
             "iconCode": "bolt"
         },
         {
             "id": "draw",
             "title": "Draw Phase",
-            "description": "Draw a card from the top of your deck.",
+            "description": "Compre uma carta do topo do baralho.",
             "iconCode": "copy_outlined"
         },
         {
             "id": "main",
             "title": "Main Phase",
-            "description": "Add Ink, play cards, quest or challenge.",
+            "description": "Adicionar ink, jogar cartas, fazer quest ou desafiar.",
             "iconCode": "stars"
         }
     ],
@@ -60,14 +60,14 @@
             "id": "quest",
             "name": "Fazer Quest",
             "allowedPhases": ["main"],
-            "validations": [],
+            "validations": ["exerted_check"],
             "trackUsage": true
         },
         {
             "id": "challenge",
             "name": "Desafiar",
             "allowedPhases": ["main"],
-            "validations": [],
+            "validations": ["first_turn_challenge_ban", "exerted_check"],
             "requiresTarget": true,
             "trackUsage": true
         }
@@ -76,15 +76,41 @@
         {
             "id": "ink_limit",
             "type": "limit",
-            "params": {
-                "max": 1
-            },
+            "params": {"max": 1},
             "errorMessage": "Você só pode adicionar uma carta como ink por turno."
+        },
+        {
+            "id": "first_turn_challenge_ban",
+            "type": "player_first_turn",
+            "params": {},
+            "errorMessage": "Você não pode desafiar no seu primeiro turno."
+        },
+        {
+            "id": "exerted_check",
+            "type": "condition",
+            "params": {"requires": "character_ready"},
+            "errorMessage": "Personagens exauridos não podem fazer quest nem desafiar."
         }
     ],
     "statusEffects": [],
     "metadata": {
         "themeColor": "purpleAccent",
-        "iconCode": "auto_awesome"
+        "iconCode": "auto_awesome",
+        "firstTurnHint": "No teu primeiro turno não podes desafiar. Podes fazer quest e jogar cartas normalmente.",
+        "board": {
+            "slotLabels": ["Personagem 1", "Personagem 2", "Personagem 3"],
+            "flags": [
+                {
+                    "flag": "exerted",
+                    "label": "Exertado"
+                }
+            ]
+        },
+        "coachTips": [
+            {
+                "id": "lorcana_no_challenge_turn1",
+                "message": "No teu primeiro turno não podes desafiar personagens oponentes."
+            }
+        ]
     }
 }

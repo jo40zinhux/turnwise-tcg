@@ -4,29 +4,43 @@
             "id": "exerted",
             "name": "Exerted",
             "type": "status",
-            "blockedActions": [
-                "challenge"
-            ]
+            "blockedActions": ["quest", "challenge"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Personagem exaurido não pode fazer quest nem desafiar."
         },
         {
             "id": "cannot_challenge",
             "name": "Cannot Challenge",
-            "type": "attack_restriction"
+            "type": "attack_restriction",
+            "blockedActions": ["challenge"],
+            "duration": {"type": "continuous"},
+            "description": "O personagem afetado não pode desafiar."
         },
         {
             "id": "cannot_quest",
             "name": "Cannot Quest",
-            "type": "action_lock"
+            "type": "action_lock",
+            "blockedActions": ["quest"],
+            "duration": {"type": "continuous"},
+            "description": "O personagem afetado não pode fazer quest."
         },
         {
             "id": "evasive",
             "name": "Evasive",
-            "type": "modifier"
+            "type": "modifier",
+            "description": "Só pode ser desafiado por personagens com Evasive."
         },
         {
             "id": "bodyguard",
             "name": "Bodyguard",
-            "type": "targeting_modifier"
+            "type": "targeting_modifier",
+            "description": "Oponentes devem desafiar este personagem se possível."
+        },
+        {
+            "id": "rush",
+            "name": "Rush",
+            "type": "modifier",
+            "description": "Pode desafiar no turno em que entrou em jogo."
         }
     ]
 }

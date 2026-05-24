@@ -8,8 +8,10 @@ import '../../data/bundled_rules_datasource.dart';
 import '../../data/cached_rules_repository.dart';
 import '../../data/file_rules_cache_datasource.dart';
 import '../../domain/game_rules.dart';
+import '../../domain/match_board_state.dart';
 import '../../domain/match_effects_state.dart';
 import '../../domain/match_engine.dart';
+import '../../domain/match_resources_state.dart';
 import '../../domain/match_engine_state.dart';
 import '../../domain/match_feedback.dart';
 import '../../domain/match_session_restore.dart';
@@ -91,6 +93,12 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
     state = MatchState(
       engineState: _engine.nextPhase(state.engineState, rules),
     );
+
+    if (state.feedback?.type == MatchFeedbackType.error) {
+      _persistPhaseToSession();
+      return;
+    }
+
     unawaited(
       _ref.read(appAnalyticsProvider).logPhaseAdvanced(
             gameId: gameId,
@@ -100,25 +108,59 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
     _persistPhaseToSession();
   }
 
-  void attemptAction(String actionId) {
+  void attemptAction(
+    String actionId, {
+    String? targetId,
+    MatchBoardState? board,
+  }) {
     final rules = _rules;
     if (rules == null) return;
 
+    var engineState = state.engineState;
+    if (board != null) {
+      engineState = engineState.copyWith(
+        effectsState: engineState.effectsState.copyWith(board: board),
+      );
+    }
+
     state = MatchState(
-      engineState: _engine.attemptAction(state.engineState, rules, actionId),
+      engineState: _engine.attemptAction(
+        engineState,
+        rules,
+        actionId,
+        targetId: targetId,
+      ),
     );
 
     final feedback = state.feedback;
     if (feedback?.type == MatchFeedbackType.error) {
-      unawaited(
-        _ref.read(appAnalyticsProvider).logActionBlocked(
-              gameId: gameId,
-              actionId: actionId,
-            ),
-      );
+      _logActionBlockedAnalytics(rules, actionId, feedback!.reason);
     }
 
     _persistPhaseToSession();
+  }
+
+  void _logActionBlockedAnalytics(
+    GameRules rules,
+    String actionId,
+    String? reason,
+  ) {
+    final analytics = _ref.read(appAnalyticsProvider);
+    if (reason != null &&
+        reason != 'opponent_turn' &&
+        rules.validations.any((v) => v.id == reason)) {
+      unawaited(
+        analytics.logMatchValidationBlocked(
+          gameId: gameId,
+          actionId: actionId,
+          validationId: reason,
+        ),
+      );
+      return;
+    }
+    unawaited(
+      analytics.logActionBlocked(gameId: gameId, actionId: actionId),
+    );
   }
 
   void revertAction(String actionId) {
@@ -172,6 +214,42 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
   void dismissCheckup(String checkupId) {
     state = MatchState(
       engineState: _engine.dismissCheckup(state.engineState, checkupId),
+    );
+    _persistPhaseToSession();
+  }
+
+  void setPlayerWentFirst(bool wentFirst) {
+    state = MatchState(
+      engineState: _engine.setPlayerWentFirst(state.engineState, wentFirst),
+    );
+    unawaited(
+      _ref.read(appAnalyticsProvider).logMatchSetupCompleted(
+            gameId: gameId,
+            wentFirst: wentFirst,
+          ),
+    );
+    _persistPhaseToSession();
+  }
+
+  void updateResources(MatchResourcesState resources) {
+    state = MatchState(
+      engineState: _engine.adjustResources(state.engineState, resources),
+    );
+    _persistPhaseToSession();
+  }
+
+  void updateBoard(MatchBoardState board) {
+    state = MatchState(
+      engineState: state.engineState.copyWith(
+        effectsState: state.engineState.effectsState.copyWith(board: board),
+      ),
+    );
+    _persistPhaseToSession();
+  }
+
+  void completeOpponentTurn() {
+    state = MatchState(
+      engineState: _engine.completeOpponentTurn(state.engineState),
     );
     _persistPhaseToSession();
   }

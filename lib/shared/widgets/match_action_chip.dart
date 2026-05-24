@@ -20,6 +20,7 @@ class MatchActionChip extends StatelessWidget {
   final VoidCallback? onLongPress;
   final VoidCallback? onExhaustedTap;
   final bool expand;
+  final bool showReminderBadge;
 
   const MatchActionChip({
     super.key,
@@ -31,6 +32,7 @@ class MatchActionChip extends StatelessWidget {
     this.onLongPress,
     this.onExhaustedTap,
     this.expand = false,
+    this.showReminderBadge = false,
   });
 
   @override
@@ -135,6 +137,15 @@ class MatchActionChip extends StatelessWidget {
                       size: 14,
                       color: foregroundColor,
                     ),
+                  )
+                else if (showReminderBadge)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6, top: 2),
+                    child: Icon(
+                      Icons.info_outline_rounded,
+                      size: 14,
+                      color: theme.colorScheme.primary.withOpacity(0.85),
+                    ),
                   ),
               ],
             ),
@@ -166,7 +177,13 @@ class MatchActionChip extends StatelessWidget {
     if (onLongPress != null && isUsed) {
       return 'Mantém premido para desfazer';
     }
+    if (onLongPress != null && showReminderBadge) {
+      return 'Mantém premido para ver a regra';
+    }
     if (isExhausted) return 'Limite atingido neste turno';
+    if (showReminderBadge) {
+      return 'Regista a ação e confirma a regra no tabuleiro';
+    }
     return null;
   }
 }

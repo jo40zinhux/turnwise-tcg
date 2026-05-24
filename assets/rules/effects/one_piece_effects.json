@@ -3,33 +3,41 @@
         {
             "id": "cannot_attack_leader",
             "name": "Cannot Attack Leader",
-            "type": "attack_restriction"
+            "type": "attack_restriction",
+            "blockedActions": ["attack"],
+            "duration": {"type": "continuous"},
+            "description": "Não pode atacar o Leader oponente."
         },
         {
             "id": "cannot_attack_character",
             "name": "Cannot Attack Character",
-            "type": "attack_restriction"
+            "type": "attack_restriction",
+            "blockedActions": ["attack"],
+            "duration": {"type": "continuous"},
+            "description": "Não pode atacar Characters oponentes."
         },
         {
             "id": "rested",
             "name": "Rested",
             "type": "status",
-            "blockedActions": [
-                "attack"
-            ]
+            "blockedActions": ["attack"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Carta descansada não pode atacar neste turno."
         },
         {
             "id": "cannot_activate_blocker",
             "name": "Cannot Activate Blocker",
-            "type": "ability_lock"
+            "type": "ability_lock",
+            "blockedActions": ["counter"],
+            "duration": {"type": "continuous"},
+            "description": "Efeitos Blocker do alvo não podem ser ativados."
         },
         {
             "id": "cost_increase",
             "name": "Cost Increase",
             "type": "modifier",
-            "effect": {
-                "costIncrease": 1
-            }
+            "effect": {"costIncrease": 1},
+            "description": "Custo em DON!! aumentado em {n}."
         }
     ]
 }

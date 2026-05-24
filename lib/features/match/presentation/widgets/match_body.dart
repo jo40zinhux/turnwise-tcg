@@ -1,0 +1,338 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/feedback/match_feedback_service_provider.dart';
+import '../../../../core/observability/app_analytics_provider.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/list_screen_skeleton.dart';
+import '../../../../shared/widgets/phase_tile.dart';
+import '../../../../shared/widgets/skeleton_box.dart';
+import '../../../timer/presentation/providers/match_timer_providers.dart';
+import '../../domain/action_enforcement.dart';
+import '../../domain/game_rules.dart';
+import '../../domain/match_action_filter.dart';
+import '../../domain/match_coach_tips.dart';
+import '../../domain/match_feedback.dart';
+import '../providers/match_providers.dart';
+import '../utils/match_feedback_snackbar.dart';
+import 'match_body_header.dart';
+import 'match_body_phase_button.dart';
+import 'match_body_play_area.dart';
+import 'match_target_picker_sheet.dart';
+
+/// Scrollable match play area: phases, effects, actions, phase advance CTA.
+class MatchBody extends ConsumerStatefulWidget {
+  final String gameId;
+  final GameRules rules;
+  final VoidCallback onRequestSetup;
+
+  const MatchBody({
+    super.key,
+    required this.gameId,
+    required this.rules,
+    required this.onRequestSetup,
+  });
+
+  @override
+  ConsumerState<MatchBody> createState() => _MatchBodyState();
+}
+
+class _MatchBodyState extends ConsumerState<MatchBody> {
+  final _scrollController = ScrollController();
+  bool _showAllPhases = false;
+  int? _lastScrolledPhaseIndex;
+  bool _undoCoachDismissed = false;
+  bool _trackerNoticeDismissed = false;
+  final Set<String> _dismissedCoachTipIds = {};
+
+  int _totalActionUsage(Map<String, int> usage) {
+    return usage.values.fold(0, (sum, count) => sum + count);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(matchStateProvider(widget.gameId).notifier)
+          .reconcilePhaseIndex(widget.rules.phases.length);
+      widget.onRequestSetup();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToCurrentPhase(int phaseIndex) {
+    if (_lastScrolledPhaseIndex == phaseIndex) return;
+    _lastScrolledPhaseIndex = phaseIndex;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+
+      final targetOffset = _showAllPhases
+          ? (phaseIndex * 88.0)
+              .clamp(0.0, _scrollController.position.maxScrollExtent)
+          : 0.0;
+
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  Future<void> _handleActionPressed(String actionId) async {
+    final action =
+        widget.rules.actions.firstWhere((a) => a.id == actionId);
+
+    if (!ActionEnforcement.needsTargetSelection(widget.rules, action)) {
+      ref.read(matchStateProvider(widget.gameId).notifier).attemptAction(
+            actionId,
+          );
+      return;
+    }
+
+    final matchState = ref.read(matchStateProvider(widget.gameId));
+    final selection = await showMatchTargetPickerSheet(
+      context,
+      gameId: widget.gameId,
+      boardMetadata: widget.rules.metadata.board,
+      action: action,
+      board: matchState.effectsState.board,
+    );
+    if (selection == null || !mounted) return;
+
+    ref.read(matchStateProvider(widget.gameId).notifier).attemptAction(
+          actionId,
+          targetId: selection.targetId,
+          board: selection.board,
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final matchState = ref.watch(matchStateProvider(widget.gameId));
+    final isOpponentTurn = ref.watch(
+      matchStateProvider(widget.gameId)
+          .select((s) => s.effectsState.isOpponentTurn),
+    );
+    final notifier = ref.read(matchStateProvider(widget.gameId).notifier);
+    final engine = ref.read(matchEngineProvider);
+    final feedbackService = ref.read(matchFeedbackServiceProvider);
+
+    final actionUsageTotal = _totalActionUsage(matchState.actionUsageCount);
+    final showActionUndoCoach =
+        actionUsageTotal > 0 && !_undoCoachDismissed;
+
+    ref.listen(matchStateProvider(widget.gameId), (previous, next) {
+      final feedback = next.feedback;
+      if (feedback != null && feedback != previous?.feedback) {
+        switch (feedback.type) {
+          case MatchFeedbackType.success:
+            feedbackService.actionUsed();
+          case MatchFeedbackType.error:
+            feedbackService.actionInvalid();
+          case MatchFeedbackType.info:
+            feedbackService.actionUsed();
+        }
+        showMatchFeedbackSnackBar(context, feedback);
+        notifier.clearFeedback();
+      }
+
+      final prevTotal =
+          _totalActionUsage(previous?.actionUsageCount ?? const {});
+      final nextTotal = _totalActionUsage(next.actionUsageCount);
+      if (nextTotal > prevTotal && _undoCoachDismissed) {
+        setState(() => _undoCoachDismissed = false);
+      }
+      if (nextTotal == 0 && _undoCoachDismissed) {
+        setState(() => _undoCoachDismissed = false);
+      }
+
+      if (previous?.currentPhaseIndex != next.currentPhaseIndex) {
+        _scrollToCurrentPhase(next.currentPhaseIndex);
+      }
+    });
+
+    final timerState = ref.watch(matchTimerProvider(widget.gameId));
+
+    if (timerState == null) {
+      return const Padding(
+        padding: AppSpacing.screen,
+        child: Column(
+          children: [
+            SkeletonBox(height: 56),
+            AppSpacing.gapMd,
+            Expanded(child: ListScreenSkeleton(itemCount: 4)),
+          ],
+        ),
+      );
+    }
+
+    final phases = widget.rules.phases;
+    final currentPhaseIndex =
+        matchState.currentPhaseIndex.clamp(0, phases.length - 1);
+    final currentPhaseId = phases[currentPhaseIndex].id;
+    final isLastPhase = matchState.currentPhaseIndex == phases.length - 1;
+    final phaseActions = MatchActionFilter.forPhase(
+      widget.rules.actions,
+      currentPhaseId,
+    );
+    final contextualCoachTip = MatchCoachTips.activeTip(
+      rules: widget.rules,
+      state: matchState.engineState,
+      dismissedTipIds: _dismissedCoachTipIds,
+    );
+
+    final visiblePhaseIndices = _showAllPhases
+        ? List.generate(phases.length, (i) => i)
+        : [currentPhaseIndex];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MatchBodyHeader(
+          gameId: widget.gameId,
+          boardMetadata: widget.rules.metadata.board,
+          currentPhaseIndex: currentPhaseIndex,
+          totalPhases: phases.length,
+          currentPhaseTitle: phases[currentPhaseIndex].title,
+          effectsState: matchState.effectsState,
+          board: matchState.effectsState.board,
+          onResourcesChanged: notifier.updateResources,
+          onBoardChanged: notifier.updateBoard,
+          onPlayerWentFirst: notifier.setPlayerWentFirst,
+          onCompleteOpponentTurn: isOpponentTurn
+              ? notifier.completeOpponentTurn
+              : null,
+        ),
+        Expanded(
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverPadding(
+                padding: AppSpacing.screenHorizontal,
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    if (!_showAllPhases && phases.length > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () =>
+                                setState(() => _showAllPhases = true),
+                            icon: const Icon(Icons.unfold_more_rounded, size: 18),
+                            label: Text(
+                              'Ver todas as fases (${phases.length})',
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (_showAllPhases && phases.length > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () =>
+                                setState(() => _showAllPhases = false),
+                            icon: const Icon(Icons.unfold_less_rounded, size: 18),
+                            label: const Text('Mostrar só fase atual'),
+                          ),
+                        ),
+                      ),
+                  ]),
+                ),
+              ),
+              SliverPadding(
+                padding: AppSpacing.screenHorizontal,
+                sliver: SliverList.separated(
+                  itemCount: visiblePhaseIndices.length,
+                  separatorBuilder: (context, index) => AppSpacing.gapMd,
+                  itemBuilder: (context, listIndex) {
+                    final index = visiblePhaseIndices[listIndex];
+                    final phase = phases[index];
+                    return PhaseTile(
+                      key: ValueKey('phase_$index'),
+                      phase: phase,
+                      isCurrent: matchState.currentPhaseIndex == index,
+                      isPast: matchState.currentPhaseIndex > index,
+                    );
+                  },
+                ),
+              ),
+              SliverPadding(
+                padding: AppSpacing.screenHorizontal,
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppSpacing.gapLg,
+                      const Divider(),
+                      AppSpacing.gapMd,
+                      MatchBodyPlayArea(
+                        rules: widget.rules,
+                        engineState: matchState.engineState,
+                        currentPhaseTitle: phases[currentPhaseIndex].title,
+                        phaseActions: phaseActions,
+                        actionUsageCount: matchState.actionUsageCount,
+                        maxUsageForAction: (action) =>
+                            engine.maxUsagePerTurn(widget.rules, action),
+                        isActionLocked: notifier.isActionLocked,
+                        onActionPressed: _handleActionPressed,
+                        onActionRevert: notifier.revertAction,
+                        onActionUnavailable: feedbackService.actionUnavailable,
+                        onApplyEffect: notifier.applyEffect,
+                        onRemoveEffect: notifier.removeActiveEffect,
+                        onDismissCheckup: notifier.dismissCheckup,
+                        showTrackerNotice: !_trackerNoticeDismissed,
+                        onDismissTrackerNotice: () =>
+                            setState(() => _trackerNoticeDismissed = true),
+                        contextualCoachTip: contextualCoachTip,
+                        onDismissContextualCoachTip: () {
+                          if (contextualCoachTip == null) return;
+                          setState(() {
+                            _dismissedCoachTipIds.add(contextualCoachTip.id);
+                          });
+                          ref.read(appAnalyticsProvider).logCoachTipDismissed(
+                                tipId: contextualCoachTip.id,
+                              );
+                        },
+                        showActionUndoCoach: showActionUndoCoach,
+                        onDismissActionUndoCoach: () {
+                          setState(() => _undoCoachDismissed = true);
+                          ref.read(appAnalyticsProvider).logCoachTipDismissed(
+                                tipId: 'match_action_undo',
+                              );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        MatchBodyPhaseButton(
+          isLastPhase: isLastPhase,
+          isOpponentTurn: isOpponentTurn,
+          onPressed: () {
+            if (isLastPhase) {
+              feedbackService.turnEnd();
+            } else {
+              feedbackService.phaseAdvance();
+            }
+            notifier.nextPhase();
+          },
+        ),
+      ],
+    );
+  }
+}

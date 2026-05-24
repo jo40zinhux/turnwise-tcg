@@ -3,26 +3,41 @@
         {
             "id": "silence",
             "name": "Silence",
-            "type": "ability_lock"
+            "type": "ability_lock",
+            "blockedActions": ["activate_ability"],
+            "duration": {"type": "continuous"},
+            "description": "Habilidades da unidade afetada não podem ser ativadas."
         },
         {
             "id": "stun",
             "name": "Stun",
             "type": "action_lock",
-            "blockedActions": [
-                "attack",
-                "move"
-            ]
+            "blockedActions": ["attack", "move_unit"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Unidade atordoada não pode atacar nem se mover neste turno."
         },
         {
             "id": "battlefield_lock",
             "name": "Battlefield Lock",
-            "type": "movement_lock"
+            "type": "movement_lock",
+            "blockedActions": ["move_unit"],
+            "duration": {"type": "continuous"},
+            "description": "Unidades não podem entrar ou sair deste battlefield."
         },
         {
             "id": "spell_amplify",
             "name": "Spell Amplify",
-            "type": "modifier"
+            "type": "modifier",
+            "effect": {"spellDamageIncrease": 1},
+            "description": "Dano de Spells aumentado em {n}."
+        },
+        {
+            "id": "exhausted",
+            "name": "Exhausted",
+            "type": "status",
+            "blockedActions": ["attack", "move_unit"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Unidade exaurida não pode atacar nem se mover neste turno."
         }
     ]
 }

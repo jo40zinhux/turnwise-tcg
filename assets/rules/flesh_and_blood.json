@@ -5,19 +5,19 @@
         {
             "id": "start",
             "title": "Start Phase",
-            "description": "Trigger start of turn effects and check state.",
+            "description": "Ative efeitos de início de turno e verifique o estado.",
             "iconCode": "play_arrow"
         },
         {
             "id": "action",
             "title": "Action Phase",
-            "description": "Play action cards, attack, play non-actions.",
+            "description": "Jogue cartas de ação, ataque e jogue cartas não-ação.",
             "iconCode": "flash_on"
         },
         {
             "id": "end",
             "title": "End Phase",
-            "description": "Clear pitch zone, put equipment in graveyard, draw to intellect.",
+            "description": "Esvazie a pitch zone, envie equipamentos ao cemitério e compre até o intellect.",
             "iconCode": "pan_tool"
         }
     ],
@@ -50,19 +50,38 @@
             "allowedPhases": ["action"],
             "validations": [],
             "trackUsage": true
+        },
+        {
+            "id": "play_non_action",
+            "name": "Jogar Carta Não-Ação",
+            "allowedPhases": ["action"],
+            "validations": [],
+            "trackUsage": true
         }
     ],
     "validations": [
         {
             "id": "action_point",
             "type": "resource",
-            "params": {},
+            "params": {"resource": "action_point", "cost": 1},
             "errorMessage": "Você precisa de um Action Point para realizar {actionName}."
         }
     ],
     "statusEffects": [],
     "metadata": {
         "themeColor": "redAccent",
-        "iconCode": "bloodtype"
+        "iconCode": "bloodtype",
+        "firstTurnHint": "Quem joga primeiro actua primeiro na Action Phase. Recebes 1 Action Point por turno (Go Again concede mais).",
+        "board": {
+            "slotLabels": ["Herói", "Equipamento"],
+            "emptyHint": "Slots para referência. FAB usa Action Points, não estados no tabuleiro.",
+            "flags": []
+        },
+        "coachTips": [
+            {
+                "id": "fab_action_points",
+                "message": "Tens 1 Action Point por turno para jogar ações ou atacar (Go Again dá mais)."
+            }
+        ]
     }
 }

@@ -1,3 +1,4 @@
+import 'match_effects_state.dart';
 import 'match_engine_state.dart';
 import 'match_session.dart';
 
@@ -9,7 +10,10 @@ class MatchSessionRestore {
     required int phaseCount,
   }) {
     if (session == null || session.gameId != gameId || phaseCount <= 0) {
-      return const MatchEngineState(currentPhaseIndex: 0);
+      return MatchEngineState(
+        currentPhaseIndex: 0,
+        effectsState: MatchEffectsState.initialForGame(gameId),
+      );
     }
 
     final maxIndex = phaseCount - 1;

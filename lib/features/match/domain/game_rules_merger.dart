@@ -1,5 +1,4 @@
 import 'checkup_definition.dart';
-import 'effect_definition.dart';
 import 'game_effects_bundle.dart';
 import 'game_rules.dart';
 import 'trigger_definition.dart';
@@ -31,6 +30,7 @@ abstract final class GameRulesMerger {
         bundle.triggers,
         (item) => item.id,
       ),
+      metadata: base.metadata,
     );
   }
 

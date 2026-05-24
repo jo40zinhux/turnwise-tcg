@@ -9,6 +9,7 @@ import '../../domain/active_effect.dart';
 import '../../domain/effect_definition.dart';
 import '../../domain/effect_type.dart';
 import '../../domain/game_rules.dart';
+import '../../domain/match_action_filter.dart';
 
 /// Shows active effects, locks, and quick apply controls.
 class MatchEffectsPanel extends StatelessWidget {
@@ -52,7 +53,7 @@ class MatchEffectsPanel extends StatelessWidget {
         ),
         if (lockedActionIds.isNotEmpty) ...[
           AppSpacing.gapSm,
-          _LocksRow(lockedActionIds: lockedActionIds),
+          _LocksRow(rules: rules, lockedActionIds: lockedActionIds),
         ],
         if (visible.isEmpty) ...[
           AppSpacing.gapSm,
@@ -125,9 +126,10 @@ class MatchEffectsPanel extends StatelessWidget {
 }
 
 class _LocksRow extends StatelessWidget {
+  final GameRules rules;
   final Set<String> lockedActionIds;
 
-  const _LocksRow({required this.lockedActionIds});
+  const _LocksRow({required this.rules, required this.lockedActionIds});
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +151,7 @@ class _LocksRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              'Ações bloqueadas: ${lockedActionIds.join(', ')}',
+              'Ações bloqueadas: ${MatchActionFilter.resolveActionLabels(rules.actions, lockedActionIds).join(', ')}',
               style: AppTypography.caption(context).copyWith(
                 color: semantic.warning,
               ),

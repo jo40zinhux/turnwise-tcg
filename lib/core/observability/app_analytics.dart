@@ -59,6 +59,21 @@ class AppAnalytics {
     );
   }
 
+  Future<void> logMatchValidationBlocked({
+    required String gameId,
+    required String actionId,
+    required String validationId,
+  }) async {
+    await _log(
+      AnalyticsEvents.matchValidationBlocked,
+      {
+        'game_id': gameId,
+        'action_id': actionId,
+        'validation_id': validationId,
+      },
+    );
+  }
+
   Future<void> logActionReverted({
     required String gameId,
     required String actionId,
@@ -73,6 +88,19 @@ class AppAnalytics {
     await _log(
       AnalyticsEvents.coachTipDismissed,
       {'tip_id': tipId},
+    );
+  }
+
+  Future<void> logMatchSetupCompleted({
+    required String gameId,
+    required bool wentFirst,
+  }) async {
+    await _log(
+      AnalyticsEvents.matchSetupCompleted,
+      {
+        'game_id': gameId,
+        'went_first': wentFirst ? 1 : 0,
+      },
     );
   }
 

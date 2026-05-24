@@ -43,23 +43,15 @@
         {
             "id": "normal_summon",
             "name": "Normal Summon",
-            "allowedPhases": [
-                "main1",
-                "main2"
-            ],
-            "validations": [
-                "normal_summon_limit"
-            ],
+            "allowedPhases": ["main1", "main2"],
+            "validations": ["normal_summon_limit"],
             "trackUsage": true,
             "requiresTarget": true
         },
         {
             "id": "special_summon",
             "name": "Special Summon",
-            "allowedPhases": [
-                "main1",
-                "main2"
-            ],
+            "allowedPhases": ["main1", "main2"],
             "validations": [],
             "trackUsage": true,
             "requiresTarget": true
@@ -67,72 +59,59 @@
         {
             "id": "set_monster",
             "name": "Setar Monstro",
-            "allowedPhases": [
-                "main1",
-                "main2"
-            ],
-            "validations": [
-                "normal_summon_limit"
-            ],
+            "allowedPhases": ["main1", "main2"],
+            "validations": ["normal_summon_limit"],
             "trackUsage": true
         },
         {
             "id": "activate_spell",
             "name": "Ativar Spell",
-            "allowedPhases": [
-                "main1",
-                "main2",
-                "battle"
-            ],
+            "allowedPhases": ["main1", "main2", "battle"],
             "validations": [],
             "trackUsage": true
         },
         {
             "id": "set_spell_trap",
             "name": "Setar Spell/Trap",
-            "allowedPhases": [
-                "main1",
-                "main2"
-            ],
+            "allowedPhases": ["main1", "main2"],
             "validations": [],
             "trackUsage": true
         },
         {
+            "id": "activate_trap",
+            "name": "Ativar Trap",
+            "allowedPhases": ["main1", "main2", "battle"],
+            "validations": [],
+            "trackUsage": true
+        },
+        {
+            "id": "activate_monster_effect",
+            "name": "Ativar Efeito de Monstro",
+            "allowedPhases": ["main1", "main2", "battle"],
+            "validations": [],
+            "trackUsage": true,
+            "requiresTarget": true
+        },
+        {
             "id": "change_battle_position",
             "name": "Mudar Posição de Batalha",
-            "allowedPhases": [
-                "main1",
-                "main2"
-            ],
-            "validations": [
-                "battle_position_limit"
-            ],
+            "allowedPhases": ["main1", "main2"],
+            "validations": ["battle_position_limit"],
             "trackUsage": true,
             "requiresTarget": true
         },
         {
             "id": "declare_attack",
             "name": "Declarar Ataque",
-            "allowedPhases": [
-                "battle"
-            ],
-            "validations": [
-                "attack_position_check"
-            ],
+            "allowedPhases": ["battle"],
+            "validations": ["first_turn_attack_ban", "attack_position_check"],
             "trackUsage": true,
             "requiresTarget": true
         },
         {
             "id": "activate_quick_effect",
             "name": "Ativar Quick Effect",
-            "allowedPhases": [
-                "draw",
-                "standby",
-                "main1",
-                "battle",
-                "main2",
-                "end"
-            ],
+            "allowedPhases": ["draw", "standby", "main1", "battle", "main2", "end"],
             "validations": [],
             "trackUsage": true
         }
@@ -141,23 +120,25 @@
         {
             "id": "normal_summon_limit",
             "type": "limit",
-            "params": {
-                "max": 1
-            },
+            "params": {"max": 1},
             "errorMessage": "Você só pode realizar um Normal Summon ou Set por turno."
         },
         {
             "id": "battle_position_limit",
             "type": "limit",
-            "params": {
-                "max": 1
-            },
+            "params": {"max": 1},
             "errorMessage": "Um monstro só pode mudar sua posição de batalha uma vez por turno."
+        },
+        {
+            "id": "first_turn_attack_ban",
+            "type": "player_first_turn",
+            "params": {},
+            "errorMessage": "Nenhum jogador pode declarar ataque no primeiro turno do duelo."
         },
         {
             "id": "attack_position_check",
             "type": "condition",
-            "params": {},
+            "params": {"requires": "attacker_in_attack_position"},
             "errorMessage": "Somente monstros em posição de ataque podem declarar ataque."
         }
     ],
@@ -172,6 +153,22 @@
         "supportsTeams": true,
         "genre": "Combo / Battle TCG",
         "themeColor": "purple",
-        "iconCode": "diamond"
+        "iconCode": "diamond",
+        "firstTurnHint": "No primeiro turno do duelo, nenhum jogador pode declarar ataque. Normal Summon / Set continuam permitidos.",
+        "board": {
+            "slotLabels": ["Monstro 1", "Monstro 2", "Monstro 3"],
+            "flags": [
+                {
+                    "flag": "attackPosition",
+                    "label": "Em posição de ataque"
+                }
+            ]
+        },
+        "coachTips": [
+            {
+                "id": "yugioh_no_attack_turn1",
+                "message": "Nenhum jogador pode declarar ataque no primeiro turno do duelo."
+            }
+        ]
     }
 }

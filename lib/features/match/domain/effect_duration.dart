@@ -20,7 +20,16 @@ class EffectDuration {
   final EffectDurationKind kind;
   final int? value;
 
-  const EffectDuration({required this.kind, this.value});
+  /// Original library type from JSON (e.g. until_end_opponent_turn).
+  final String? libraryKind;
+
+  const EffectDuration({
+    required this.kind,
+    this.value,
+    this.libraryKind,
+  });
+
+  bool get expiresOnOpponentTurnEnd => libraryKind == 'until_end_opponent_turn';
 
   bool get isPermanent => kind == EffectDurationKind.permanent;
 
@@ -34,6 +43,7 @@ class EffectDuration {
     return EffectDuration(
       kind: parsed.$1,
       value: parsed.$2 ?? json['value'] as int?,
+      libraryKind: rawKind,
     );
   }
 
@@ -55,6 +65,7 @@ class EffectDuration {
     return {
       'kind': kind.storageKey,
       if (value != null) 'value': value,
+      if (libraryKind != null) 'type': libraryKind,
     };
   }
 }

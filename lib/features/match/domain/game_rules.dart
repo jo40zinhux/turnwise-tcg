@@ -3,6 +3,7 @@ import 'checkup_definition.dart';
 import 'effect_definition.dart';
 import 'effect_duration.dart';
 import 'effect_type.dart';
+import 'game_rules_metadata.dart';
 import 'trigger_definition.dart';
 import 'turn_phase.dart';
 import 'validation_rule.dart';
@@ -16,6 +17,7 @@ class GameRules {
   final List<EffectDefinition> effects;
   final List<CheckupDefinition> checkups;
   final List<TriggerDefinition> triggers;
+  final GameRulesMetadata metadata;
 
   const GameRules({
     required this.gameId,
@@ -26,6 +28,7 @@ class GameRules {
     required this.effects,
     this.checkups = const [],
     this.triggers = const [],
+    this.metadata = const GameRulesMetadata(),
   });
 
   EffectDefinition? effectById(String id) {
@@ -66,6 +69,9 @@ class GameRules {
               ?.map((e) => TriggerDefinition.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      metadata: GameRulesMetadata.fromJson(
+        json['metadata'] as Map<String, dynamic>?,
+      ),
     );
   }
 

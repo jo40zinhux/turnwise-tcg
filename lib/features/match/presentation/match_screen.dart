@@ -2,32 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/feedback/match_feedback_service_provider.dart';
 import '../../../core/observability/app_analytics_provider.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/error_state_view.dart';
 import '../../../shared/widgets/list_screen_skeleton.dart';
-import '../../../shared/widgets/phase_tile.dart';
 import '../../../shared/widgets/skeleton_box.dart';
-import '../domain/game_rules.dart';
-import '../domain/match_feedback.dart';
 import '../../match_history/domain/complete_match_params.dart';
+import '../../match_history/domain/match_summary_args.dart';
 import '../../match_history/presentation/providers/match_history_providers.dart';
-import '../../coach/presentation/widgets/coach_tip_banner.dart';
-import 'providers/match_providers.dart';
-import 'providers/match_session_providers.dart';
-import 'utils/match_feedback_snackbar.dart';
-import 'widgets/complete_match_dialog.dart';
 import '../../timer/domain/timer_profile.dart';
 import '../../timer/presentation/providers/match_timer_providers.dart';
-import '../../timer/presentation/widgets/match_timer_bar.dart';
-import '../../match_history/domain/match_summary_args.dart';
 import '../../timer/presentation/widgets/timer_profile_picker_sheet.dart';
-import 'widgets/match_actions_panel.dart';
-import 'widgets/match_checkup_banner.dart';
-import 'widgets/match_effects_panel.dart';
-import 'widgets/match_phase_progress.dart';
+import '../domain/game_rules.dart';
+import 'providers/match_providers.dart';
+import 'providers/match_session_providers.dart';
+import 'widgets/complete_match_dialog.dart';
+import 'widgets/match_body.dart';
+import 'widgets/match_setup_sheet.dart';
 
 class MatchScreen extends ConsumerStatefulWidget {
   final String gameId;
@@ -41,6 +32,7 @@ class MatchScreen extends ConsumerStatefulWidget {
 class _MatchScreenState extends ConsumerState<MatchScreen> {
   bool _loggedMatchStart = false;
   bool _pickerShown = false;
+  bool _setupShown = false;
 
   @override
   void initState() {
@@ -49,6 +41,29 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
       _logMatchStarted();
       _ensureTimerProfile();
     });
+  }
+
+  Future<void> _ensureMatchSetup(GameRules rules) async {
+    if (_setupShown || !mounted) return;
+    final wentFirst =
+        ref.read(matchStateProvider(widget.gameId)).effectsState.playerWentFirst;
+    if (wentFirst != null) return;
+
+    _setupShown = true;
+    final selected = await showMatchSetupSheet(
+      context,
+      gameId: widget.gameId,
+    );
+    if (!mounted) return;
+
+    if (selected == null) {
+      context.goNamed('home');
+      return;
+    }
+
+    ref.read(matchStateProvider(widget.gameId).notifier).setPlayerWentFirst(
+          selected,
+        );
   }
 
   Future<void> _ensureTimerProfile() async {
@@ -103,13 +118,35 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
         actions: [
           PopupMenuButton<_MatchMenuAction>(
             tooltip: 'Opções da partida',
-            onSelected: (action) {
+            onSelected: (action) async {
               switch (action) {
                 case _MatchMenuAction.endMatch:
                   _confirmEndMatch(context);
+                case _MatchMenuAction.editSetup:
+                  final rules =
+                      ref.read(gameRulesProvider(widget.gameId)).valueOrNull;
+                  if (rules == null || !context.mounted) return;
+                  final selected = await showMatchSetupSheet(
+                    context,
+                    gameId: widget.gameId,
+                  );
+                  if (selected == null || !context.mounted) return;
+                  ref
+                      .read(matchStateProvider(widget.gameId).notifier)
+                      .setPlayerWentFirst(selected);
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: _MatchMenuAction.editSetup,
+                child: Row(
+                  children: [
+                    Icon(Icons.swap_horiz_rounded, size: 20),
+                    SizedBox(width: AppSpacing.md),
+                    Text('Quem joga primeiro'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: _MatchMenuAction.endMatch,
                 child: Row(
@@ -127,7 +164,11 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
       ),
       body: SafeArea(
         child: rulesAsync.when(
-          data: (rules) => _MatchBody(gameId: widget.gameId, rules: rules),
+          data: (rules) => MatchBody(
+            gameId: widget.gameId,
+            rules: rules,
+            onRequestSetup: () => _ensureMatchSetup(rules),
+          ),
           loading: () => const Padding(
             padding: AppSpacing.screen,
             child: Column(
@@ -188,303 +229,4 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
   }
 }
 
-enum _MatchMenuAction { endMatch }
-
-class _MatchBody extends ConsumerStatefulWidget {
-  final String gameId;
-  final GameRules rules;
-
-  const _MatchBody({required this.gameId, required this.rules});
-
-  @override
-  ConsumerState<_MatchBody> createState() => _MatchBodyState();
-}
-
-class _MatchBodyState extends ConsumerState<_MatchBody> {
-  final _scrollController = ScrollController();
-  bool _showAllPhases = false;
-  int? _lastScrolledPhaseIndex;
-  bool _undoCoachDismissed = false;
-
-  int _totalActionUsage(Map<String, int> usage) {
-    return usage.values.fold(0, (sum, count) => sum + count);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref
-          .read(matchStateProvider(widget.gameId).notifier)
-          .reconcilePhaseIndex(widget.rules.phases.length);
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollToCurrentPhase(int phaseIndex) {
-    if (_lastScrolledPhaseIndex == phaseIndex) return;
-    _lastScrolledPhaseIndex = phaseIndex;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scrollController.hasClients) return;
-
-      final targetOffset = _showAllPhases
-          ? (phaseIndex * 88.0).clamp(0.0, _scrollController.position.maxScrollExtent)
-          : 0.0;
-
-      _scrollController.animateTo(
-        targetOffset,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final matchState = ref.watch(matchStateProvider(widget.gameId));
-    final notifier = ref.read(matchStateProvider(widget.gameId).notifier);
-    final engine = ref.read(matchEngineProvider);
-    final feedbackService = ref.read(matchFeedbackServiceProvider);
-
-    final actionUsageTotal = _totalActionUsage(matchState.actionUsageCount);
-    final showActionUndoCoach =
-        actionUsageTotal > 0 && !_undoCoachDismissed;
-
-    ref.listen(matchStateProvider(widget.gameId), (previous, next) {
-      final feedback = next.feedback;
-      if (feedback != null && feedback != previous?.feedback) {
-        switch (feedback.type) {
-          case MatchFeedbackType.success:
-            feedbackService.actionUsed();
-          case MatchFeedbackType.error:
-            feedbackService.actionInvalid();
-          case MatchFeedbackType.info:
-            break;
-        }
-        showMatchFeedbackSnackBar(context, feedback);
-        notifier.clearFeedback();
-      }
-
-      final prevTotal = _totalActionUsage(previous?.actionUsageCount ?? const {});
-      final nextTotal = _totalActionUsage(next.actionUsageCount);
-      if (nextTotal > prevTotal && _undoCoachDismissed) {
-        setState(() => _undoCoachDismissed = false);
-      }
-      if (nextTotal == 0 && _undoCoachDismissed) {
-        setState(() => _undoCoachDismissed = false);
-      }
-
-      if (previous?.currentPhaseIndex != next.currentPhaseIndex) {
-        _scrollToCurrentPhase(next.currentPhaseIndex);
-      }
-    });
-
-    final timerState = ref.watch(matchTimerProvider(widget.gameId));
-
-    if (timerState == null) {
-      return const Padding(
-        padding: AppSpacing.screen,
-        child: Column(
-          children: [
-            SkeletonBox(height: 56),
-            AppSpacing.gapMd,
-            Expanded(child: ListScreenSkeleton(itemCount: 4)),
-          ],
-        ),
-      );
-    }
-
-    final phases = widget.rules.phases;
-    final currentPhaseIndex =
-        matchState.currentPhaseIndex.clamp(0, phases.length - 1);
-    final isLastPhase = matchState.currentPhaseIndex == phases.length - 1;
-
-    final visiblePhaseIndices = _showAllPhases
-        ? List.generate(phases.length, (i) => i)
-        : [currentPhaseIndex];
-
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: AppSpacing.screen,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              MatchTimerBar(gameId: widget.gameId),
-              AppSpacing.gapMd,
-              MatchPhaseProgress(
-                currentPhase: currentPhaseIndex,
-                totalPhases: phases.length,
-                currentPhaseTitle: phases[currentPhaseIndex].title,
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverPadding(
-                padding: AppSpacing.screenHorizontal,
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    if (!_showAllPhases && phases.length > 1)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
-                            onPressed: () =>
-                                setState(() => _showAllPhases = true),
-                            icon: const Icon(Icons.unfold_more_rounded, size: 18),
-                            label: Text(
-                              'Ver todas as fases (${phases.length})',
-                              style: AppTypography.caption(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_showAllPhases && phases.length > 1)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
-                            onPressed: () =>
-                                setState(() => _showAllPhases = false),
-                            icon: const Icon(Icons.unfold_less_rounded, size: 18),
-                            label: Text(
-                              'Mostrar só fase atual',
-                              style: AppTypography.caption(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ]),
-                ),
-              ),
-              SliverPadding(
-                padding: AppSpacing.screenHorizontal,
-                sliver: SliverList.separated(
-                  itemCount: visiblePhaseIndices.length,
-                  separatorBuilder: (context, index) => AppSpacing.gapMd,
-                  itemBuilder: (context, listIndex) {
-                    final index = visiblePhaseIndices[listIndex];
-                    final phase = phases[index];
-                    return PhaseTile(
-                      key: ValueKey('phase_$index'),
-                      phase: phase,
-                      isCurrent: matchState.currentPhaseIndex == index,
-                      isPast: matchState.currentPhaseIndex > index,
-                    );
-                  },
-                ),
-              ),
-              SliverPadding(
-                padding: AppSpacing.screenHorizontal,
-                sliver: SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      AppSpacing.gapLg,
-                      const Divider(),
-                      AppSpacing.gapMd,
-                      if (matchState.effectsState.pendingCheckups.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: MatchCheckupBanner(
-                            reminder:
-                                matchState.effectsState.pendingCheckups.first,
-                            onDismiss: () => notifier.dismissCheckup(
-                              matchState
-                                  .effectsState.pendingCheckups.first.id,
-                            ),
-                          ),
-                        ),
-                      MatchEffectsPanel(
-                        rules: widget.rules,
-                        activeEffects: matchState.effectsState.activeEffects,
-                        lockedActionIds:
-                            matchState.effectsState.lockedActionIds,
-                        onApplyEffect: notifier.applyEffect,
-                        onRemoveEffect: notifier.removeActiveEffect,
-                      ),
-                      AppSpacing.gapLg,
-                      Text(
-                        'Ações disponíveis',
-                        style: AppTypography.label(context),
-                      ),
-                      if (showActionUndoCoach) ...[
-                        AppSpacing.gapSm,
-                        CoachTipBanner(
-                          message:
-                              'Tocaste sem querer? Toca outra vez (ou mantém premido) para desfazer.',
-                          onDismiss: () {
-                            setState(() => _undoCoachDismissed = true);
-                            ref.read(appAnalyticsProvider).logCoachTipDismissed(
-                                  tipId: 'match_action_undo',
-                                );
-                          },
-                        ),
-                      ],
-                      AppSpacing.gapMd,
-                      MatchActionsPanel(
-                        actions: widget.rules.actions,
-                        actionUsageCount: matchState.actionUsageCount,
-                        maxUsageForAction: (action) =>
-                            engine.maxUsagePerTurn(widget.rules, action),
-                        isActionLocked: notifier.isActionLocked,
-                        onActionPressed: notifier.attemptAction,
-                        onActionRevert: notifier.revertAction,
-                        onActionUnavailable: feedbackService.actionUnavailable,
-                      ),
-                      AppSpacing.gapMd,
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Material(
-          elevation: 8,
-          color: theme.scaffoldBackgroundColor,
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: AppSpacing.screen,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (isLastPhase) {
-                    feedbackService.turnEnd();
-                  } else {
-                    feedbackService.phaseAdvance();
-                  }
-                  notifier.nextPhase();
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  minimumSize: const Size.fromHeight(52),
-                ),
-                child: Text(
-                  isLastPhase ? 'Terminar turno' : 'Próxima fase',
-                  style: AppTypography.button(context).copyWith(fontSize: 18),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
+enum _MatchMenuAction { editSetup, endMatch }

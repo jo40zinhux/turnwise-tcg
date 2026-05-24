@@ -14,6 +14,9 @@ class ActiveEffect {
   final List<String> lockedActionIds;
   final String? reminderMessage;
 
+  /// Persists until [MatchEngine.completeOpponentTurn] clears it.
+  final bool expiresOnOpponentTurnEnd;
+
   const ActiveEffect({
     required this.instanceId,
     required this.definitionId,
@@ -25,15 +28,18 @@ class ActiveEffect {
     this.remainingPhases,
     this.lockedActionIds = const [],
     this.reminderMessage,
+    this.expiresOnOpponentTurnEnd = false,
   });
 
   bool get isExpired {
+    if (expiresOnOpponentTurnEnd) return false;
     if (remainingTurns != null && remainingTurns! <= 0) return true;
     if (remainingPhases != null && remainingPhases! <= 0) return true;
     return false;
   }
 
   String? get durationLabel {
+    if (expiresOnOpponentTurnEnd) return 'Opp';
     if (remainingTurns != null) return '${remainingTurns}T';
     if (remainingPhases != null) return '${remainingPhases}F';
     return null;
@@ -50,6 +56,7 @@ class ActiveEffect {
     int? remainingPhases,
     List<String>? lockedActionIds,
     String? reminderMessage,
+    bool? expiresOnOpponentTurnEnd,
     bool clearRemainingTurns = false,
     bool clearRemainingPhases = false,
   }) {
@@ -67,6 +74,8 @@ class ActiveEffect {
           : (remainingPhases ?? this.remainingPhases),
       lockedActionIds: lockedActionIds ?? this.lockedActionIds,
       reminderMessage: reminderMessage ?? this.reminderMessage,
+      expiresOnOpponentTurnEnd:
+          expiresOnOpponentTurnEnd ?? this.expiresOnOpponentTurnEnd,
     );
   }
 
@@ -84,6 +93,8 @@ class ActiveEffect {
       remainingPhases: json['remainingPhases'] as int?,
       lockedActionIds: List<String>.from(json['lockedActionIds'] ?? const []),
       reminderMessage: json['reminderMessage'] as String?,
+      expiresOnOpponentTurnEnd:
+          json['expiresOnOpponentTurnEnd'] as bool? ?? false,
     );
   }
 
@@ -99,6 +110,7 @@ class ActiveEffect {
       if (remainingPhases != null) 'remainingPhases': remainingPhases,
       if (lockedActionIds.isNotEmpty) 'lockedActionIds': lockedActionIds,
       if (reminderMessage != null) 'reminderMessage': reminderMessage,
+      if (expiresOnOpponentTurnEnd) 'expiresOnOpponentTurnEnd': true,
     };
   }
 }

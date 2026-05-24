@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/match_action_chip.dart';
+import '../../domain/action_enforcement.dart';
 import '../../domain/action_rule.dart';
+import '../../domain/game_rules.dart';
+import 'match_action_reminder_sheet.dart';
 
 /// Vertical fluid grid of action chips.
 ///
@@ -10,6 +13,7 @@ import '../../domain/action_rule.dart';
 /// every available action without horizontal scrolling — a deliberate UX
 /// choice for competitive play (no clutter, no hidden options).
 class MatchActionsPanel extends StatelessWidget {
+  final GameRules? rules;
   final List<ActionRule> actions;
   final Map<String, int> actionUsageCount;
   final int? Function(ActionRule action) maxUsageForAction;
@@ -20,6 +24,7 @@ class MatchActionsPanel extends StatelessWidget {
 
   const MatchActionsPanel({
     super.key,
+    this.rules,
     required this.actions,
     required this.actionUsageCount,
     required this.maxUsageForAction,
@@ -47,7 +52,7 @@ class MatchActionsPanel extends StatelessWidget {
             for (final action in actions)
               SizedBox(
                 width: chipWidth,
-                child: _buildChip(action),
+                child: _buildChip(context, action),
               ),
           ],
         );
@@ -55,7 +60,7 @@ class MatchActionsPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildChip(ActionRule action) {
+  Widget _buildChip(BuildContext context, ActionRule action) {
     final maxAllowed = maxUsageForAction(action);
     final currentUsage = actionUsageCount[action.id] ?? 0;
     final isUsed = currentUsage > 0;
@@ -64,12 +69,30 @@ class MatchActionsPanel extends StatelessWidget {
     final canUndoOnTap = isUsed && maxAllowed == 1 && !locked;
     final canUndoOnLongPress =
         isUsed && !locked && (maxAllowed == null || maxAllowed > 1);
+    final enforcement =
+        rules != null ? ActionEnforcement.analyze(rules!, action) : null;
+    final showReminder = enforcement?.showsReminderBadge ?? false;
+    final reminderMessage = enforcement?.primaryReminderMessage;
+
+    VoidCallback? longPressHandler;
+    if (canUndoOnLongPress) {
+      longPressHandler = () => onActionRevert(action.id);
+    } else if (showReminder && reminderMessage != null) {
+      longPressHandler = () {
+        showMatchActionReminderSheet(
+          context,
+          actionName: action.name,
+          ruleMessage: reminderMessage,
+        );
+      };
+    }
 
     return MatchActionChip(
       label: action.name,
       isUsed: isUsed,
       isExhausted: isExhausted || locked,
       canUndoOnTap: canUndoOnTap,
+      showReminderBadge: showReminder,
       onPressed: () {
         if (canUndoOnTap) {
           onActionRevert(action.id);
@@ -77,8 +100,7 @@ class MatchActionsPanel extends StatelessWidget {
           onActionPressed(action.id);
         }
       },
-      onLongPress:
-          canUndoOnLongPress ? () => onActionRevert(action.id) : null,
+      onLongPress: longPressHandler,
       onExhaustedTap: onActionUnavailable,
       expand: true,
     );

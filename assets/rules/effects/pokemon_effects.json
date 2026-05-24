@@ -4,107 +4,82 @@
             "id": "item_lock",
             "name": "Item Lock",
             "type": "action_lock",
-            "blockedActions": [
-                "item"
-            ],
-            "duration": {
-                "type": "until_end_opponent_turn"
-            },
+            "blockedActions": ["item"],
+            "duration": {"type": "until_end_opponent_turn"},
             "description": "O jogador não pode usar cartas Item."
         },
         {
             "id": "supporter_lock",
             "name": "Supporter Lock",
             "type": "action_lock",
-            "blockedActions": [
-                "supporter"
-            ],
-            "duration": {
-                "type": "until_end_turn"
-            }
+            "blockedActions": ["supporter"],
+            "duration": {"type": "until_end_turn"},
+            "description": "O jogador não pode usar cartas Apoiador neste turno."
         },
         {
             "id": "ability_lock",
             "name": "Ability Lock",
             "type": "ability_lock",
-            "blockedActions": [
-                "ability"
-            ],
-            "duration": {
-                "type": "continuous"
-            }
+            "blockedActions": ["ability"],
+            "duration": {"type": "continuous"},
+            "description": "Habilidades do Pokémon afetado não podem ser usadas."
         },
         {
             "id": "attack_lock",
             "name": "Attack Lock",
             "type": "attack_restriction",
-            "blockedActions": [
-                "attack"
-            ],
-            "duration": {
-                "type": "until_end_turn"
-            }
+            "blockedActions": ["attack"],
+            "duration": {"type": "until_end_turn"},
+            "description": "O Pokémon afetado não pode atacar neste turno."
         },
         {
             "id": "retreat_lock",
             "name": "Retreat Lock",
             "type": "action_lock",
-            "blockedActions": [
-                "retreat"
-            ],
-            "duration": {
-                "type": "until_end_turn"
-            }
+            "blockedActions": ["retreat"],
+            "duration": {"type": "until_end_turn"},
+            "description": "O Pokémon afetado não pode recuar neste turno."
         },
         {
             "id": "poison",
             "name": "Poison",
             "type": "status",
             "trigger": "pokemon_checkup",
-            "effect": {
-                "damage": 10
-            },
-            "description": "Recebe dano entre turnos."
+            "effect": {"damage": 10},
+            "description": "Coloque 1 contador de dano no Pokémon envenenado entre turnos."
         },
         {
             "id": "burn",
             "name": "Burn",
             "type": "status",
             "trigger": "pokemon_checkup",
-            "effect": {
-                "damage": 20,
-                "coinFlipRemove": true
-            }
+            "effect": {"damage": 20, "coinFlipRemove": true},
+            "description": "Coloque 2 contadores de dano. Jogue moeda para se recuperar."
         },
         {
             "id": "sleep",
             "name": "Sleep",
             "type": "status",
             "trigger": "pokemon_checkup",
-            "effect": {
-                "coinFlipWakeUp": true
-            }
+            "blockedActions": ["attack"],
+            "effect": {"coinFlipWakeUp": true},
+            "description": "Não pode atacar. Jogue moeda para acordar entre turnos."
         },
         {
             "id": "paralysis",
             "name": "Paralysis",
             "type": "status",
-            "blockedActions": [
-                "attack",
-                "retreat"
-            ],
-            "duration": {
-                "type": "until_end_turn"
-            }
+            "blockedActions": ["attack", "retreat"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Não pode atacar nem recuar. Recupera-se no fim do turno do Pokémon afetado."
         },
         {
             "id": "confusion",
             "name": "Confusion",
             "type": "status",
             "trigger": "before_attack",
-            "effect": {
-                "coinFlipAttackCheck": true
-            }
+            "effect": {"coinFlipAttackCheck": true},
+            "description": "Antes de atacar, jogue moeda. Se falhar, coloque 3 contadores de dano no Pokémon."
         }
     ]
 }

@@ -11,7 +11,7 @@
         {
             "id": "upkeep",
             "title": "Upkeep Phase",
-            "description": "Resolva habilidades que desencadeiam no início da manutenção. Compre sua carta.",
+            "description": "Resolva habilidades de início da manutenção e compre uma carta.",
             "iconCode": "copy_outlined"
         },
         {
@@ -35,7 +35,7 @@
         {
             "id": "end",
             "title": "End Step",
-            "description": "Fim do turno e descarte até tamanho da mão.",
+            "description": "Fim do turno e descarte até o tamanho da mão.",
             "iconCode": "dark_mode"
         }
     ],
@@ -73,6 +73,14 @@
             "id": "declare_attacker",
             "name": "Declarar Atacante",
             "allowedPhases": ["combat"],
+            "validations": ["summoning_sickness_check"],
+            "requiresTarget": true,
+            "trackUsage": true
+        },
+        {
+            "id": "declare_blocker",
+            "name": "Declarar Bloqueador",
+            "allowedPhases": ["combat"],
             "validations": [],
             "requiresTarget": true,
             "trackUsage": true
@@ -84,11 +92,33 @@
             "type": "limit",
             "params": {"max": 1},
             "errorMessage": "Você só pode baixar um terreno por turno."
+        },
+        {
+            "id": "summoning_sickness_check",
+            "type": "condition",
+            "params": {"requires": "creature_control_since_turn_start"},
+            "errorMessage": "Criaturas com enjoo de invocação não podem atacar neste turno."
         }
     ],
     "statusEffects": [],
     "metadata": {
         "themeColor": "greenAccent",
-        "iconCode": "fireplace"
+        "iconCode": "fireplace",
+        "firstTurnHint": "Criaturas com enjoo de invocação não atacam no turno em que entram. A ordem da moeda ajuda a seguir o turno activo.",
+        "board": {
+            "slotLabels": ["Criatura 1", "Criatura 2", "Criatura 3"],
+            "flags": [
+                {
+                    "flag": "enteredThisTurn",
+                    "label": "Enjoo de invocação"
+                }
+            ]
+        },
+        "coachTips": [
+            {
+                "id": "magic_summoning_sickness",
+                "message": "Criaturas que entraram em jogo neste turno não podem atacar (enjoo de invocação)."
+            }
+        ]
     }
 }

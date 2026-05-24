@@ -4,52 +4,56 @@
             "id": "special_summon_lock",
             "name": "Special Summon Lock",
             "type": "summon_lock",
-            "blockedActions": [
-                "special_summon"
-            ]
+            "blockedActions": ["special_summon"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Não é possível realizar Special Summons neste turno."
         },
         {
             "id": "monster_effect_negate",
             "name": "Monster Effect Negation",
             "type": "ability_lock",
-            "blockedActions": [
-                "activate_monster_effect"
-            ]
+            "blockedActions": ["activate_monster_effect"],
+            "duration": {"type": "continuous"},
+            "description": "Efeitos de monstro do alvo estão negados."
         },
         {
             "id": "spell_lock",
             "name": "Spell Lock",
             "type": "action_lock",
-            "blockedActions": [
-                "activate_spell"
-            ]
+            "blockedActions": ["activate_spell"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Não é possível ativar Spells neste turno."
         },
         {
             "id": "trap_lock",
             "name": "Trap Lock",
             "type": "action_lock",
-            "blockedActions": [
-                "activate_trap"
-            ]
+            "blockedActions": ["activate_trap"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Não é possível ativar Traps neste turno."
         },
         {
             "id": "cannot_attack",
             "name": "Cannot Attack",
-            "type": "attack_restriction"
+            "type": "attack_restriction",
+            "blockedActions": ["declare_attack"],
+            "duration": {"type": "continuous"},
+            "description": "O monstro afetado não pode declarar ataque."
         },
         {
             "id": "battle_position_lock",
             "name": "Battle Position Lock",
             "type": "action_lock",
-            "blockedActions": [
-                "change_battle_position"
-            ]
+            "blockedActions": ["change_battle_position"],
+            "duration": {"type": "continuous"},
+            "description": "O monstro afetado não pode mudar posição de batalha."
         },
         {
             "id": "banish_on_leave",
             "name": "Banish On Leave",
             "type": "trigger",
-            "trigger": "leave_field"
+            "trigger": "leave_field",
+            "description": "Quando o monstro deixar o campo, bana-o em vez de ir ao cemitério."
         }
     ]
 }

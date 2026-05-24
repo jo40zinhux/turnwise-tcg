@@ -198,7 +198,9 @@ class EffectEngine {
 
     switch (definition.duration.kind) {
       case EffectDurationKind.turns:
-        remainingTurns = definition.duration.value ?? 1;
+        if (!definition.duration.expiresOnOpponentTurnEnd) {
+          remainingTurns = definition.duration.value ?? 1;
+        }
       case EffectDurationKind.phases:
         remainingPhases = definition.duration.value ?? 1;
       case EffectDurationKind.permanent:
@@ -218,6 +220,7 @@ class EffectEngine {
       remainingPhases: remainingPhases,
       lockedActionIds: lockedIds,
       reminderMessage: definition.reminderMessage,
+      expiresOnOpponentTurnEnd: definition.duration.expiresOnOpponentTurnEnd,
     );
   }
 
@@ -254,6 +257,10 @@ class EffectEngine {
   MatchEffectsState _tickTurnDurations(MatchEffectsState effects) {
     final updated = <ActiveEffect>[];
     for (final effect in effects.activeEffects) {
+      if (effect.expiresOnOpponentTurnEnd) {
+        updated.add(effect);
+        continue;
+      }
       if (effect.remainingTurns == null) {
         updated.add(effect);
         continue;
@@ -262,6 +269,13 @@ class EffectEngine {
       if (nextTurns <= 0) continue;
       updated.add(effect.copyWith(remainingTurns: nextTurns));
     }
+    return effects.copyWith(activeEffects: updated);
+  }
+
+  MatchEffectsState expireOpponentTurnEffects(MatchEffectsState effects) {
+    final updated = effects.activeEffects
+        .where((effect) => !effect.expiresOnOpponentTurnEnd)
+        .toList();
     return effects.copyWith(activeEffects: updated);
   }
 

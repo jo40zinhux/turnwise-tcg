@@ -5,8 +5,10 @@ abstract final class AnalyticsEvents {
   static const matchCompleted = 'match_completed';
   static const phaseAdvanced = 'phase_advanced';
   static const actionBlocked = 'action_blocked';
+  static const matchValidationBlocked = 'match_validation_blocked';
   static const actionReverted = 'action_reverted';
   static const coachTipDismissed = 'coach_tip_dismissed';
+  static const matchSetupCompleted = 'match_setup_completed';
   static const guestSignIn = 'guest_sign_in';
   static const googleSignIn = 'google_sign_in';
   static const appleSignIn = 'apple_sign_in';

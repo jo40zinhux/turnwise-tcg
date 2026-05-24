@@ -41,11 +41,16 @@
     ],
     "actions": [
         {
+            "id": "add_don",
+            "name": "Adicionar DON!!",
+            "allowedPhases": ["don"],
+            "validations": ["don_add_limit"],
+            "trackUsage": true
+        },
+        {
             "id": "attach_don",
             "name": "Anexar DON!!",
-            "allowedPhases": [
-                "main"
-            ],
+            "allowedPhases": ["main"],
             "validations": [],
             "trackUsage": true,
             "requiresTarget": true
@@ -53,75 +58,58 @@
         {
             "id": "play_character",
             "name": "Jogar Character",
-            "allowedPhases": [
-                "main"
-            ],
-            "validations": [
-                "don_cost_check"
-            ],
+            "allowedPhases": ["main"],
+            "validations": ["don_cost_check"],
             "trackUsage": true
         },
         {
             "id": "play_event",
             "name": "Jogar Event",
-            "allowedPhases": [
-                "main",
-                "battle"
-            ],
-            "validations": [
-                "don_cost_check"
-            ],
+            "allowedPhases": ["main", "battle"],
+            "validations": ["don_cost_check"],
             "trackUsage": true
         },
         {
             "id": "play_stage",
             "name": "Jogar Stage",
-            "allowedPhases": [
-                "main"
-            ],
-            "validations": [
-                "stage_limit"
-            ],
+            "allowedPhases": ["main"],
+            "validations": ["stage_limit"],
             "trackUsage": true
         },
         {
             "id": "activate_main",
             "name": "Ativar Main Effect",
-            "allowedPhases": [
-                "main"
-            ],
+            "allowedPhases": ["main"],
             "validations": [],
             "trackUsage": true
         },
         {
             "id": "attack",
             "name": "Declarar Ataque",
-            "allowedPhases": [
-                "battle"
-            ],
-            "validations": [
-                "rested_rule"
-            ],
+            "allowedPhases": ["battle"],
+            "validations": ["rested_check"],
             "trackUsage": true,
             "requiresTarget": true
         },
         {
             "id": "counter",
             "name": "Usar Counter",
-            "allowedPhases": [
-                "battle"
-            ],
+            "allowedPhases": ["battle"],
             "validations": [],
             "trackUsage": true
         }
     ],
     "validations": [
         {
+            "id": "don_add_limit",
+            "type": "limit",
+            "params": {"max": 2},
+            "errorMessage": "Você só pode adicionar até 2 DON!! por turno."
+        },
+        {
             "id": "stage_limit",
             "type": "limit",
-            "params": {
-                "max": 1
-            },
+            "params": {"max": 1},
             "errorMessage": "Você só pode ter uma carta Stage ativa."
         },
         {
@@ -131,15 +119,43 @@
             "errorMessage": "Você não possui DON!! suficiente para esta ação."
         },
         {
-            "id": "rested_rule",
+            "id": "rested_check",
             "type": "condition",
-            "params": {},
+            "params": {"requires": "character_active"},
             "errorMessage": "Characters descansados não podem atacar."
+        },
+        {
+            "id": "first_player_skip_draw",
+            "type": "first_player_first_turn",
+            "params": {"phase": "draw"},
+            "errorMessage": "O primeiro jogador não compra carta no primeiro turno."
         }
     ],
     "statusEffects": [],
     "metadata": {
         "themeColor": "blueAccent",
-        "iconCode": "sailing"
+        "iconCode": "sailing",
+        "firstTurnHint": "Quem joga primeiro não compra na Draw Phase do turno 1. Ambos podem adicionar DON!! normalmente.",
+        "board": {
+            "slotLabels": ["Leader", "Personagem 1", "Personagem 2"],
+            "flags": [
+                {
+                    "flag": "exerted",
+                    "label": "Descansado (Rested)"
+                }
+            ]
+        },
+        "coachTips": [
+            {
+                "id": "one_piece_first_turn_draw",
+                "message": "Você joga primeiro: não compra na Draw Phase deste turno.",
+                "whenWentFirst": true
+            },
+            {
+                "id": "one_piece_second_player_draw",
+                "message": "Oponente jogou primeiro: você compra normalmente na Draw Phase.",
+                "whenWentFirst": false
+            }
+        ]
     }
 }

@@ -4,31 +4,36 @@
             "id": "frailty",
             "name": "Frailty",
             "type": "modifier",
-            "effect": {
-                "attackReduction": 1
-            }
+            "effect": {"attackReduction": 1},
+            "description": "Poder de ataque reduzido em {n}."
         },
         {
             "id": "inertia",
             "name": "Inertia",
             "type": "trigger",
-            "trigger": "end_turn"
+            "trigger": "end_turn",
+            "description": "Resolva o efeito de Inertia no fim do turno."
         },
         {
             "id": "bloodrot_pox",
             "name": "Bloodrot Pox",
             "type": "trigger",
-            "trigger": "end_turn"
+            "trigger": "end_turn",
+            "description": "Resolva Bloodrot Pox no fim do turno (1 dano se não pitch carta vermelha)."
         },
         {
             "id": "dominate",
             "name": "Dominate",
-            "type": "block_restriction"
+            "type": "block_restriction",
+            "blockedActions": ["defend"],
+            "duration": {"type": "until_end_turn"},
+            "description": "Ataque com Dominate não pode ser defendido por cartas de ação."
         },
         {
             "id": "go_again",
             "name": "Go Again",
-            "type": "modifier"
+            "type": "modifier",
+            "description": "Ganhe 1 Action Point após resolver esta carta."
         }
     ]
 }
