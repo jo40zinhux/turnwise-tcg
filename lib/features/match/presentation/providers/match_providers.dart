@@ -272,6 +272,7 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
   }
 
   void _persistPhaseToSession() {
+    if (_sessionPersist.isAbandoned) return;
     _sessionPersist.update(
       (session) => session.copyWith(
         startedAt: session.startedAt ?? DateTime.now(),
@@ -284,7 +285,9 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
 
   @override
   void dispose() {
-    _sessionPersist.flushNow();
+    if (!_sessionPersist.isAbandoned) {
+      unawaited(_sessionPersist.flushNow());
+    }
     super.dispose();
   }
 }
@@ -316,16 +319,14 @@ final matchStateProvider =
       gameId: gameId,
       engine: ref.watch(matchEngineProvider),
       initialEngineState: _initialEngineState(ref, gameId),
-      sessionPersist: ref.watch(matchSessionPersistCoordinatorProvider(gameId)),
+      sessionPersist: ref.read(matchSessionPersistCoordinatorProvider(gameId)),
     );
   },
 );
 
 /// Clears active match from memory and storage without recording history.
 Future<void> dismissActiveMatch(WidgetRef ref, String gameId) async {
-  ref.read(matchSessionPersistCoordinatorProvider(gameId)).abandon();
-  ref.invalidate(matchTimerProvider(gameId));
-  ref.invalidate(matchStateProvider(gameId));
+  await ref.read(matchSessionPersistCoordinatorProvider(gameId)).abandon();
   await ref.read(matchSessionRepositoryProvider).clearActiveSession();
   ref.invalidate(activeMatchSessionProvider);
   ref.invalidate(matchSessionPersistCoordinatorProvider(gameId));

@@ -131,7 +131,7 @@ class MatchTimerNotifier extends StateNotifier<MatchTimerState?> {
 
   void _persistTimerToSession({bool flushImmediately = false}) {
     final timerState = state;
-    if (timerState == null) return;
+    if (timerState == null || _sessionPersist.isAbandoned) return;
 
     _sessionPersist.update(
       (session) => session.copyWith(
@@ -164,7 +164,7 @@ final matchTimerProvider =
     return MatchTimerNotifier(
       gameId: gameId,
       engine: ref.watch(matchTimerEngineProvider),
-      sessionPersist: ref.watch(matchSessionPersistCoordinatorProvider(gameId)),
+      sessionPersist: ref.read(matchSessionPersistCoordinatorProvider(gameId)),
     );
   },
 );

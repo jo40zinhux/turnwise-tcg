@@ -70,7 +70,7 @@ class MatchBoardPanel extends StatefulWidget {
 }
 
 class _MatchBoardPanelState extends State<MatchBoardPanel> {
-  bool _expanded = true;
+  bool _expanded = false;
 
   void _updateTarget(BoardTarget updated) {
     widget.onChanged(widget.board.withTarget(updated));
@@ -211,16 +211,11 @@ class _TargetRow extends StatelessWidget {
           Row(
             children: [
               Icon(
-                hasActiveFlag
-                    ? Icons.layers_rounded
-                    : Icons.layers_outlined,
+                hasActiveFlag ? Icons.layers_rounded : Icons.layers_outlined,
                 size: 16,
                 color: hasActiveFlag
                     ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.45),
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -230,7 +225,8 @@ class _TargetRow extends StatelessWidget {
                 IconButton(
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                  constraints:
+                      const BoxConstraints(minWidth: 28, minHeight: 28),
                   onPressed: onRemove,
                   icon: Icon(
                     Icons.close_rounded,

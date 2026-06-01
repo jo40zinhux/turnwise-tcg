@@ -17,6 +17,9 @@ class MatchSessionPersistCoordinator {
   Timer? _debounce;
   bool _isFlushing = false;
   bool _abandoned = false;
+  Completer<void>? _flushCompleter;
+
+  bool get isAbandoned => _abandoned;
 
   MatchSessionPersistCoordinator({
     required Ref ref,
@@ -34,11 +37,16 @@ class MatchSessionPersistCoordinator {
   }
 
   /// Drops in-memory state and cancels pending writes (e.g. user dismissed resume
-  /// banner). Prevents a debounced flush from recreating storage after clear.
-  void abandon() {
+  /// banner). Waits for an in-flight flush so storage cannot be rewritten after
+  /// [MatchSessionRepository.clearActiveSession].
+  Future<void> abandon() async {
     _abandoned = true;
     _debounce?.cancel();
     _pending = null;
+    final inFlight = _flushCompleter;
+    if (inFlight != null) {
+      await inFlight.future;
+    }
   }
 
   void update(MatchSession Function(MatchSession current) apply) {
@@ -61,17 +69,36 @@ class MatchSessionPersistCoordinator {
   }
 
   Future<void> _flush() async {
-    if (_abandoned || _pending == null || _isFlushing) return;
+    if (_abandoned || _pending == null) return;
+    if (_isFlushing) {
+      final inFlight = _flushCompleter;
+      if (inFlight != null) await inFlight.future;
+      return;
+    }
 
+    final done = Completer<void>();
+    _flushCompleter = done;
     _isFlushing = true;
     try {
+      if (_abandoned || _pending == null) return;
+
       final session = _pending!.copyWith(updatedAt: DateTime.now());
-      await _repository.saveSession(session);
       if (_abandoned) return;
+
+      await _repository.saveSession(session);
+      if (_abandoned) {
+        await _repository.clearActiveSession();
+        return;
+      }
+
       _pending = session;
       _ref.invalidate(activeMatchSessionProvider);
     } finally {
       _isFlushing = false;
+      done.complete();
+      if (identical(_flushCompleter, done)) {
+        _flushCompleter = null;
+      }
     }
   }
 

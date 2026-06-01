@@ -34,7 +34,8 @@ class ResumeMatchBanner extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.play_circle_outline, color: theme.colorScheme.primary),
+                Icon(Icons.play_circle_outline,
+                    color: theme.colorScheme.primary),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(

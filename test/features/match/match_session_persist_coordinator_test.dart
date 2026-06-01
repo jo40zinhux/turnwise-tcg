@@ -1,12 +1,40 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turnwise_tcg/features/auth/providers/auth_providers.dart';
 import 'package:turnwise_tcg/features/match/data/shared_preferences_match_session_repository.dart';
 import 'package:turnwise_tcg/features/match/domain/match_session.dart';
+import 'package:turnwise_tcg/features/match/domain/match_session_repository.dart';
 import 'package:turnwise_tcg/features/match/presentation/providers/match_session_providers.dart';
 import 'package:turnwise_tcg/features/match/presentation/services/match_session_persist_coordinator.dart';
 import 'package:turnwise_tcg/features/timer/domain/timer_profile.dart';
+
+class _BlockingMatchSessionRepository implements MatchSessionRepository {
+  final Completer<void> _releaseSave = Completer<void>();
+  MatchSession? _stored;
+
+  void releaseSave() {
+    if (!_releaseSave.isCompleted) {
+      _releaseSave.complete();
+    }
+  }
+
+  @override
+  MatchSession? getActiveSession() => _stored;
+
+  @override
+  Future<void> saveSession(MatchSession session) async {
+    await _releaseSave.future;
+    _stored = session;
+  }
+
+  @override
+  Future<void> clearActiveSession() async {
+    _stored = null;
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +88,7 @@ void main() {
           container.read(matchSessionPersistCoordinatorProvider('pokemon'));
 
       coordinator.update((session) => session.copyWith(currentPhaseIndex: 1));
-      coordinator.abandon();
+      await coordinator.abandon();
       await coordinator.flushNow();
 
       expect(
@@ -74,7 +102,7 @@ void main() {
           container.read(matchSessionPersistCoordinatorProvider('pokemon'));
 
       coordinator.update((session) => session.copyWith(currentPhaseIndex: 3));
-      coordinator.abandon();
+      await coordinator.abandon();
       coordinator.update(
         (session) => session.copyWith(
           timerProfile: TimerProfile.bo1,
@@ -95,7 +123,7 @@ void main() {
           container.read(matchSessionPersistCoordinatorProvider('pokemon'));
 
       coordinator.update((session) => session.copyWith(currentPhaseIndex: 2));
-      coordinator.abandon();
+      await coordinator.abandon();
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
       expect(
@@ -120,5 +148,49 @@ void main() {
 
       expect(coordinator.snapshot?.currentPhaseIndex, 1);
     });
+
+    test('isAbandoned is true after abandon', () async {
+      final coordinator =
+          container.read(matchSessionPersistCoordinatorProvider('pokemon'));
+
+      coordinator.update((session) => session.copyWith(currentPhaseIndex: 1));
+      expect(coordinator.isAbandoned, isFalse);
+
+      await coordinator.abandon();
+      expect(coordinator.isAbandoned, isTrue);
+    });
+
+    test(
+      'in-flight flush does not resurrect session after abandon',
+      () async {
+        final blockingRepo = _BlockingMatchSessionRepository();
+        final blockingContainer = ProviderContainer(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            matchSessionRepositoryProvider.overrideWithValue(blockingRepo),
+          ],
+        );
+        addTearDown(blockingContainer.dispose);
+
+        final coordinator = blockingContainer.read(
+          matchSessionPersistCoordinatorProvider('pokemon'),
+        );
+        coordinator.update(
+          (session) => session.copyWith(currentPhaseIndex: 2),
+        );
+
+        final flushFuture = coordinator.flushNow();
+        await Future<void>.delayed(Duration.zero);
+
+        final abandonFuture = coordinator.abandon();
+        blockingRepo.releaseSave();
+
+        await flushFuture;
+        await abandonFuture;
+        await blockingRepo.clearActiveSession();
+
+        expect(blockingRepo.getActiveSession(), isNull);
+      },
+    );
   });
 }
