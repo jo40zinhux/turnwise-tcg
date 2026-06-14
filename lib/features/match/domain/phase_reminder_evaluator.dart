@@ -15,7 +15,7 @@ abstract final class PhaseReminderEvaluator {
         state.effectsState.playerWentFirst == true) {
       return const CheckupReminder(
         id: 'first_player_skip_draw',
-        title: 'Draw Phase',
+        title: 'Fase de compra',
         message:
             'Como primeiro jogador, você não compra carta no primeiro turno.',
       );
@@ -24,7 +24,7 @@ abstract final class PhaseReminderEvaluator {
     if (phaseId == 'don' && rules.gameId == 'one_piece') {
       return const CheckupReminder(
         id: 'don_phase_hint',
-        title: 'DON!! Phase',
+        title: 'Fase DON!!',
         message: 'Adicione até 2 cartas DON!! do seu DON!! Deck.',
       );
     }

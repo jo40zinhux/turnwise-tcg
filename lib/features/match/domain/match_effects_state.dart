@@ -20,6 +20,9 @@ class MatchEffectsState {
   /// LIFO snapshots for undoing board changes per action.
   final List<BoardUndoEntry> boardUndoStack;
 
+  /// LIFO snapshots for manual board panel edits (flags, slots).
+  final List<MatchBoardState> manualBoardUndoStack;
+
   /// True while the opponent is taking their turn (between your end step and next turn).
   final bool isOpponentTurn;
 
@@ -31,8 +34,13 @@ class MatchEffectsState {
     this.resources = const MatchResourcesState(),
     this.board = const MatchBoardState(),
     this.boardUndoStack = const [],
+    this.manualBoardUndoStack = const [],
     this.isOpponentTurn = false,
   });
+
+  static const maxManualBoardUndoDepth = 10;
+
+  bool get hasManualBoardUndo => manualBoardUndoStack.isNotEmpty;
 
   static MatchEffectsState initialForGame(String gameId) {
     return MatchEffectsState(
@@ -65,6 +73,7 @@ class MatchEffectsState {
     MatchResourcesState? resources,
     MatchBoardState? board,
     List<BoardUndoEntry>? boardUndoStack,
+    List<MatchBoardState>? manualBoardUndoStack,
     bool? isOpponentTurn,
     bool clearPlayerWentFirst = false,
     bool clearCheckups = false,
@@ -80,7 +89,29 @@ class MatchEffectsState {
       resources: resources ?? this.resources,
       board: board ?? this.board,
       boardUndoStack: boardUndoStack ?? this.boardUndoStack,
+      manualBoardUndoStack:
+          manualBoardUndoStack ?? this.manualBoardUndoStack,
       isOpponentTurn: isOpponentTurn ?? this.isOpponentTurn,
+    );
+  }
+
+  MatchEffectsState pushManualBoardUndo(MatchBoardState snapshot) {
+    final next = [...manualBoardUndoStack, snapshot];
+    if (next.length > maxManualBoardUndoDepth) {
+      next.removeAt(0);
+    }
+    return copyWith(manualBoardUndoStack: next);
+  }
+
+  MatchEffectsState popManualBoardUndo() {
+    if (manualBoardUndoStack.isEmpty) return this;
+    final previous = manualBoardUndoStack.last;
+    return copyWith(
+      board: previous,
+      manualBoardUndoStack: manualBoardUndoStack.sublist(
+        0,
+        manualBoardUndoStack.length - 1,
+      ),
     );
   }
 
@@ -121,6 +152,12 @@ class MatchEffectsState {
               ?.map((e) => BoardUndoEntry.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      manualBoardUndoStack: (json['manualBoardUndoStack'] as List<dynamic>?)
+              ?.map(
+                (e) => MatchBoardState.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
       isOpponentTurn: json['isOpponentTurn'] as bool? ?? false,
     );
   }
@@ -134,6 +171,8 @@ class MatchEffectsState {
       'resources': resources.toJson(),
       'board': board.toJson(),
       'boardUndoStack': boardUndoStack.map((e) => e.toJson()).toList(),
+      'manualBoardUndoStack':
+          manualBoardUndoStack.map((e) => e.toJson()).toList(),
       'isOpponentTurn': isOpponentTurn,
     };
   }

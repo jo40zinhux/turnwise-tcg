@@ -4,37 +4,37 @@
     "phases": [
         {
             "id": "untap",
-            "title": "Untap Phase",
+            "title": "Desvirar permanentes",
             "description": "Desvire suas permanentes.",
             "iconCode": "refresh"
         },
         {
             "id": "upkeep",
-            "title": "Upkeep Phase",
+            "title": "Manutenção",
             "description": "Resolva habilidades de início da manutenção e compre uma carta.",
             "iconCode": "copy_outlined"
         },
         {
             "id": "main1",
-            "title": "Main Phase 1",
+            "title": "Fase principal 1",
             "description": "Baixe terrenos, conjure mágicas, use habilidades.",
             "iconCode": "fireplace"
         },
         {
             "id": "combat",
-            "title": "Combat Phase",
+            "title": "Fase de combate",
             "description": "Declare atacantes, bloqueadores e resolva dano.",
             "iconCode": "sports_martial_arts_rounded"
         },
         {
             "id": "main2",
-            "title": "Main Phase 2",
+            "title": "Fase principal 2",
             "description": "Ações pós-combate.",
             "iconCode": "shield_rounded"
         },
         {
             "id": "end",
-            "title": "End Step",
+            "title": "Fase final",
             "description": "Fim do turno e descarte até o tamanho da mão.",
             "iconCode": "dark_mode"
         }

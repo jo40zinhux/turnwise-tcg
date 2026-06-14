@@ -16,7 +16,7 @@ void main() {
 
     test('one piece uses rested label', () {
       final specs = BoardGameConfig.flagSpecs('one_piece');
-      expect(specs.single.label, 'Descansado (Rested)');
+      expect(specs.single.label, 'Descansado');
     });
 
     test('lorcana uses exerted label', () {

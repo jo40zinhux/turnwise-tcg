@@ -13,11 +13,15 @@ import '../../domain/game_rules.dart';
 import '../../domain/match_action_filter.dart';
 import '../../domain/match_coach_tips.dart';
 import '../../domain/match_feedback.dart';
+import '../providers/match_board_panel_preferences_provider.dart';
 import '../providers/match_providers.dart';
 import '../utils/match_feedback_snackbar.dart';
+import '../../domain/game_rules_metadata.dart';
+import 'match_board_panel.dart';
 import 'match_body_header.dart';
 import 'match_body_phase_button.dart';
 import 'match_body_play_area.dart';
+import 'match_resource_bar.dart';
 import 'match_target_picker_sheet.dart';
 
 /// Scrollable match play area: phases, effects, actions, phase advance CTA.
@@ -39,6 +43,7 @@ class MatchBody extends ConsumerStatefulWidget {
 
 class _MatchBodyState extends ConsumerState<MatchBody> {
   final _scrollController = ScrollController();
+  final _phaseTileKeys = <int, GlobalKey>{};
   bool _showAllPhases = false;
   int? _lastScrolledPhaseIndex;
   bool _undoCoachDismissed = false;
@@ -62,28 +67,48 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
   }
 
   @override
+  void didUpdateWidget(MatchBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.gameId != widget.gameId) {
+      _phaseTileKeys.clear();
+      _lastScrolledPhaseIndex = null;
+    }
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
 
+  GlobalKey _phaseKey(int index) =>
+      _phaseTileKeys.putIfAbsent(index, GlobalKey.new);
+
   void _scrollToCurrentPhase(int phaseIndex) {
     if (_lastScrolledPhaseIndex == phaseIndex) return;
     _lastScrolledPhaseIndex = phaseIndex;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scrollController.hasClients) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
 
-      final targetOffset = _showAllPhases
-          ? (phaseIndex * 88.0)
-              .clamp(0.0, _scrollController.position.maxScrollExtent)
-          : 0.0;
+      final phaseContext = _phaseTileKeys[phaseIndex]?.currentContext;
+      if (phaseContext != null) {
+        await Scrollable.ensureVisible(
+          phaseContext,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeInOut,
+          alignment: 0.05,
+        );
+        return;
+      }
 
-      _scrollController.animateTo(
-        targetOffset,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeInOut,
-      );
+      if (_scrollController.hasClients) {
+        await _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeInOut,
+        );
+      }
     });
   }
 
@@ -193,20 +218,22 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
     final visiblePhaseIndices = _showAllPhases
         ? List.generate(phases.length, (i) => i)
         : [currentPhaseIndex];
+    final showResourceBar =
+        GameRulesMetadata.showResourceBarFor(widget.gameId);
+    final board = matchState.effectsState.board;
+    final showBoardPanel = board.targets.isNotEmpty;
+    final boardPrefs = ref.watch(matchBoardPanelPreferencesProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         MatchBodyHeader(
           gameId: widget.gameId,
-          boardMetadata: widget.rules.metadata.board,
           currentPhaseIndex: currentPhaseIndex,
           totalPhases: phases.length,
-          currentPhaseTitle: phases[currentPhaseIndex].title,
-          effectsState: matchState.effectsState,
-          board: matchState.effectsState.board,
-          onResourcesChanged: notifier.updateResources,
-          onBoardChanged: notifier.updateBoard,
+          turnNumber: matchState.effectsState.turnNumber,
+          playerWentFirst: matchState.effectsState.playerWentFirst,
+          isOpponentTurn: isOpponentTurn,
           onPlayerWentFirst: notifier.setPlayerWentFirst,
           onCompleteOpponentTurn: isOpponentTurn
               ? notifier.completeOpponentTurn
@@ -226,8 +253,10 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: TextButton.icon(
-                            onPressed: () =>
-                                setState(() => _showAllPhases = true),
+                            onPressed: () => setState(() {
+                              _showAllPhases = true;
+                              _lastScrolledPhaseIndex = null;
+                            }),
                             icon: const Icon(Icons.unfold_more_rounded, size: 18),
                             label: Text(
                               'Ver todas as fases (${phases.length})',
@@ -241,8 +270,10 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: TextButton.icon(
-                            onPressed: () =>
-                                setState(() => _showAllPhases = false),
+                            onPressed: () => setState(() {
+                              _showAllPhases = false;
+                              _lastScrolledPhaseIndex = null;
+                            }),
                             icon: const Icon(Icons.unfold_less_rounded, size: 18),
                             label: const Text('Mostrar só fase atual'),
                           ),
@@ -260,7 +291,7 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
                     final index = visiblePhaseIndices[listIndex];
                     final phase = phases[index];
                     return PhaseTile(
-                      key: ValueKey('phase_$index'),
+                      key: _phaseKey(index),
                       phase: phase,
                       isCurrent: matchState.currentPhaseIndex == index,
                       isPast: matchState.currentPhaseIndex > index,
@@ -268,6 +299,47 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
                   },
                 ),
               ),
+              if (showResourceBar || showBoardPanel)
+                SliverPadding(
+                  padding: AppSpacing.screenHorizontal,
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppSpacing.gapMd,
+                        if (showResourceBar)
+                          MatchResourceBar(
+                            gameId: widget.gameId,
+                            resources: matchState.effectsState.resources,
+                            onChanged: notifier.updateResources,
+                          ),
+                        if (showResourceBar && showBoardPanel) AppSpacing.gapSm,
+                        if (showBoardPanel)
+                          MatchBoardPanel(
+                            key: ValueKey('board_${widget.gameId}'),
+                            gameId: widget.gameId,
+                            boardMetadata: widget.rules.metadata.board,
+                            board: board,
+                            onChanged: notifier.updateBoard,
+                            canUndo: notifier.hasManualBoardUndo,
+                            onUndo: notifier.revertLastBoardEdit,
+                            initialExpanded:
+                                boardPrefs.isExpanded(widget.gameId),
+                            showIntroHint: !boardPrefs.introSeen,
+                            onExpandedChanged: (expanded) async {
+                              await boardPrefs.setExpanded(
+                                widget.gameId,
+                                expanded,
+                              );
+                              if (expanded) {
+                                await boardPrefs.markIntroSeen();
+                              }
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               SliverPadding(
                 padding: AppSpacing.screenHorizontal,
                 sliver: SliverToBoxAdapter(
@@ -280,7 +352,6 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
                       MatchBodyPlayArea(
                         rules: widget.rules,
                         engineState: matchState.engineState,
-                        currentPhaseTitle: phases[currentPhaseIndex].title,
                         phaseActions: phaseActions,
                         actionUsageCount: matchState.actionUsageCount,
                         maxUsageForAction: (action) =>

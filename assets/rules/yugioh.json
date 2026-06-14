@@ -4,37 +4,37 @@
     "phases": [
         {
             "id": "draw",
-            "title": "Draw Phase",
+            "title": "Fase de compra",
             "description": "Compre 1 carta do topo do baralho.",
             "iconCode": "copy_outlined"
         },
         {
             "id": "standby",
-            "title": "Standby Phase",
-            "description": "Resolva efeitos ativados durante a Standby Phase.",
+            "title": "Fase de preparação",
+            "description": "Resolva efeitos ativados durante a fase de preparação.",
             "iconCode": "hourglass_top"
         },
         {
             "id": "main1",
-            "title": "Main Phase 1",
+            "title": "Fase principal 1",
             "description": "Invoque monstros, ative mágicas e prepare o campo.",
             "iconCode": "back_hand_rounded"
         },
         {
             "id": "battle",
-            "title": "Battle Phase",
+            "title": "Fase de combate",
             "description": "Declare ataques e resolva batalhas.",
             "iconCode": "sports_mma"
         },
         {
             "id": "main2",
-            "title": "Main Phase 2",
+            "title": "Fase principal 2",
             "description": "Faça ações adicionais após o combate.",
             "iconCode": "dashboard_customize"
         },
         {
             "id": "end",
-            "title": "End Phase",
+            "title": "Fase final",
             "description": "Resolva efeitos de fim de turno.",
             "iconCode": "dark_mode"
         }

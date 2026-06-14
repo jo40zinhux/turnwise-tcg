@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 
 /// One-line product honesty: tracker vs automatic rule enforcement.
@@ -28,7 +29,7 @@ class MatchTrackerNotice extends StatelessWidget {
             Icon(
               Icons.track_changes_outlined,
               size: 16,
-              color: theme.colorScheme.onSurface.withOpacity(0.65),
+              color: AppTheme.onSurfaceMuted,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -38,15 +39,23 @@ class MatchTrackerNotice extends StatelessWidget {
                 style: AppTypography.caption(context).copyWith(height: 1.35),
               ),
             ),
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-              onPressed: onDismiss,
-              icon: Icon(
-                Icons.close_rounded,
-                size: 16,
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
+            Tooltip(
+              message: 'Fechar aviso',
+              child: Semantics(
+                button: true,
+                label: 'Fechar aviso do tracker',
+                child: IconButton(
+                  onPressed: onDismiss,
+                  iconSize: 18,
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: AppTheme.onSurfaceMuted,
+                  ),
+                ),
               ),
             ),
           ],

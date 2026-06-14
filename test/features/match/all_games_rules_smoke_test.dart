@@ -80,6 +80,22 @@ void main() {
           expect(GameRulesMetadata.showResourceBarFor(gameId), expectsBar);
         });
 
+        test('phase titles are localized in Portuguese', () {
+          final legacyEnglishTitle = RegExp(
+            r' (Phase|Step)$|^(Untap|Upkeep|Combat|Draw|Main|Ready|Set|Start|End|Action|Beginning|Awaken|Showdown) ',
+          );
+
+          for (final phase in rules.phases) {
+            expect(
+              legacyEnglishTitle.hasMatch(phase.title),
+              isFalse,
+              reason:
+                  'Phase ${phase.id} title should be Portuguese, got "${phase.title}"',
+            );
+            expect(phase.title, isNotEmpty);
+          }
+        });
+
         test('ActionEnforcement analyzes every action without error', () {
           for (final action in rules.actions) {
             expect(

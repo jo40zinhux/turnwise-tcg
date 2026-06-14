@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-14T00:00:00.000Z",
+  "title": "Design System: TurnWise TCG",
+  "extensions": {
+    "colorMeta": {
+      "wise-violet": {
+        "role": "primary",
+        "displayName": "Wise Violet",
+        "canonical": "oklch(58% 0.22 285)",
+        "tonalRamp": [
+          "oklch(18% 0.08 285)",
+          "oklch(25% 0.12 285)",
+          "oklch(32% 0.15 285)",
+          "oklch(40% 0.18 285)",
+          "oklch(48% 0.20 285)",
+          "oklch(58% 0.22 285)",
+          "oklch(68% 0.18 285)",
+          "oklch(78% 0.14 285)"
+        ]
+      },
+      "table-bg": {
+        "role": "neutral",
+        "displayName": "Table Background",
+        "canonical": "oklch(15% 0 0)",
+        "tonalRamp": [
+          "oklch(8% 0 0)",
+          "oklch(12% 0 0)",
+          "oklch(15% 0 0)",
+          "oklch(18% 0 0)",
+          "oklch(22% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(32% 0 0)",
+          "oklch(40% 0 0)"
+        ]
+      },
+      "table-surface": {
+        "role": "neutral",
+        "displayName": "Table Surface",
+        "canonical": "oklch(22% 0 0)",
+        "tonalRamp": [
+          "oklch(10% 0 0)",
+          "oklch(14% 0 0)",
+          "oklch(18% 0 0)",
+          "oklch(22% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(30% 0 0)",
+          "oklch(36% 0 0)",
+          "oklch(44% 0 0)"
+        ]
+      },
+      "semantic-success": {
+        "role": "semantic",
+        "displayName": "Success",
+        "canonical": "oklch(68% 0.15 155)",
+        "tonalRamp": [
+          "oklch(20% 0.06 155)",
+          "oklch(28% 0.08 155)",
+          "oklch(36% 0.10 155)",
+          "oklch(44% 0.12 155)",
+          "oklch(52% 0.13 155)",
+          "oklch(60% 0.14 155)",
+          "oklch(68% 0.15 155)",
+          "oklch(78% 0.12 155)"
+        ]
+      },
+      "semantic-danger": {
+        "role": "semantic",
+        "displayName": "Danger",
+        "canonical": "oklch(58% 0.20 25)",
+        "tonalRamp": [
+          "oklch(18% 0.08 25)",
+          "oklch(26% 0.12 25)",
+          "oklch(34% 0.15 25)",
+          "oklch(42% 0.17 25)",
+          "oklch(50% 0.19 25)",
+          "oklch(58% 0.20 25)",
+          "oklch(66% 0.17 25)",
+          "oklch(74% 0.14 25)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Login welcome and large outcome screens — max one per view."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "AppBar screen identity and card headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Instructions and snackbar copy readable between turns."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Action chips, timer labels, compact CTAs."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-feedback",
+        "value": "0 8px 24px rgba(0, 0, 0, 0.35)",
+        "purpose": "Snackbars and modal sheets only — never on resting cards."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-chip",
+        "value": "cubic-bezier(0.25, 1, 0.5, 1)",
+        "purpose": "200ms chip state transitions (easeOut)."
+      },
+      {
+        "name": "duration-chip",
+        "value": "200ms",
+        "purpose": "Match action chip background/border animation."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "0px"
+      },
+      {
+        "name": "tablet",
+        "value": "600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main forward action — guest play, resume match, phase advance.",
+      "html": "<button class=\"ds-btn-primary\">Jogar sem conta</button>",
+      "css": ".ds-btn-primary { background: #7C5CFF; color: #FFFFFF; padding: 16px 24px; font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 600; line-height: 1.2; border: none; border-radius: 16px; cursor: pointer; transition: background 0.2s cubic-bezier(0.25, 1, 0.5, 1); } .ds-btn-primary:hover { filter: brightness(1.08); } .ds-btn-primary:focus-visible { outline: 2px solid #7C5CFF; outline-offset: 2px; } .ds-btn-primary:active { background: #6B4EE6; }"
+    },
+    {
+      "name": "Surface Login Button",
+      "kind": "button",
+      "refersTo": "button-surface",
+      "description": "OAuth provider buttons on login — neutral surface with border.",
+      "html": "<button class=\"ds-btn-surface\"><span class=\"ds-btn-surface-icon\" aria-hidden=\"true\">G</span>Continuar com Google</button>",
+      "css": ".ds-btn-surface { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; background: #1E1E1E; color: #FFFFFF; padding: 16px 24px; font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 600; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; cursor: pointer; transition: background 0.2s ease; } .ds-btn-surface:hover { background: #262626; } .ds-btn-surface:focus-visible { outline: 2px solid #7C5CFF; outline-offset: 2px; } .ds-btn-surface-icon { position: absolute; left: 16px; font-size: 20px; font-weight: 700; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary dismiss or skip actions.",
+      "html": "<button class=\"ds-btn-ghost\">Pular</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: rgba(255,255,255,0.7); padding: 12px 16px; font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 400; border: none; border-radius: 16px; cursor: pointer; } .ds-btn-ghost:hover { color: #FFFFFF; } .ds-btn-ghost:focus-visible { outline: 2px solid #7C5CFF; outline-offset: 2px; }"
+    },
+    {
+      "name": "Match Action Chip — Idle",
+      "kind": "chip",
+      "refersTo": "chip-action-idle",
+      "description": "Ready-to-tap action in the 2-column match grid.",
+      "html": "<button class=\"ds-chip-idle\">Usar Item</button>",
+      "css": ".ds-chip-idle { display: block; width: 100%; text-align: left; background: #1E1E1E; color: #FFFFFF; padding: 10px 14px; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 500; line-height: 1.3; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; cursor: pointer; transition: background 0.2s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s; } .ds-chip-idle:hover { border-color: rgba(255,255,255,0.22); } .ds-chip-idle:focus-visible { outline: 2px solid #7C5CFF; outline-offset: 2px; }"
+    },
+    {
+      "name": "Match Action Chip — Used",
+      "kind": "chip",
+      "refersTo": "chip-action-used",
+      "description": "Registered action with check — may allow undo on tap.",
+      "html": "<button class=\"ds-chip-used\"><svg class=\"ds-chip-check\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\"><path d=\"M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z\" fill=\"#7C5CFF\"/></svg>Usar Item</button>",
+      "css": ".ds-chip-used { display: flex; align-items: flex-start; gap: 6px; width: 100%; text-align: left; background: rgba(124, 92, 255, 0.18); color: #7C5CFF; padding: 10px 14px; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; line-height: 1.3; border: 1.5px solid rgba(124, 92, 255, 0.6); border-radius: 12px; cursor: pointer; } .ds-chip-used:focus-visible { outline: 2px solid #7C5CFF; outline-offset: 2px; } .ds-chip-check { flex-shrink: 0; margin-top: 2px; }"
+    },
+    {
+      "name": "Game Carousel Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Home discovery tile with per-TCG accent tint and border.",
+      "html": "<a class=\"ds-game-card\" href=\"#\"><span class=\"ds-game-icon\" aria-hidden=\"true\">⚡</span><span class=\"ds-game-copy\"><strong>Pokémon TCG</strong><small>Toca para jogar</small></span></a>",
+      "css": ".ds-game-card { display: flex; align-items: center; gap: 12px; background: color-mix(in srgb, #F7D02C 14%, #1E1E1E); color: #FFFFFF; padding: 12px 16px; border: 1.2px solid rgba(247, 208, 44, 0.5); border-radius: 16px; text-decoration: none; min-width: 182px; transition: filter 0.2s ease; } .ds-game-card:hover { filter: brightness(1.06); } .ds-game-icon { display: grid; place-items: center; width: 44px; height: 44px; background: rgba(247, 208, 44, 0.22); border: 1px solid rgba(247, 208, 44, 0.55); border-radius: 12px; font-size: 20px; } .ds-game-copy { display: flex; flex-direction: column; gap: 2px; } .ds-game-copy strong { font-size: 16px; font-weight: 600; } .ds-game-copy small { font-size: 13px; color: rgba(255,255,255,0.7); }"
+    },
+    {
+      "name": "Filled Input",
+      "kind": "input",
+      "refersTo": "input-filled",
+      "description": "Notes field and text inputs — surface fill, violet focus ring.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Observações (opcional)\" />",
+      "css": ".ds-input { width: 100%; background: #1E1E1E; color: #FFFFFF; padding: 18px 20px; font-family: system-ui, -apple-system, sans-serif; font-size: 16px; border: none; border-radius: 16px; outline: none; } .ds-input::placeholder { color: rgba(255,255,255,0.7); } .ds-input:focus { box-shadow: 0 0 0 2px #7C5CFF; }"
+    },
+    {
+      "name": "Floating Snackbar",
+      "kind": "custom",
+      "refersTo": "card-surface",
+      "description": "Match feedback and auth errors — floating with soft shadow.",
+      "html": "<div class=\"ds-snackbar\" role=\"status\">Ação registada.</div>",
+      "css": ".ds-snackbar { display: inline-block; background: #1E1E1E; color: #FFFFFF; padding: 14px 18px; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Focused Table",
+    "overview": "TurnWise is a phone-side companion during physical TCG matches. The visual system is built for mid-match glances: one calm focal point, dark surfaces that recede in dim store lighting, and Wise Violet reserved for actions that move the game forward. It inherits Linear's tool clarity — focused hierarchy, minimal chrome, confident restraint — while allowing playful progress without tipping into toy-like or aggressive gaming aesthetics.",
+    "keyCharacteristics": [
+      "Dark-first (#121212 scaffold) with surface layering at #1E1E1E / #262626",
+      "Wise Violet (#7C5CFF) as the sole brand accent — CTAs, active chips, focus rings",
+      "Per-TCG accent colors on game cards only; never the global primary",
+      "Flat cards at rest (elevation: 0); borders and tint carry structure",
+      "System UI typography — weight and size do hierarchy",
+      "Match action chips as the signature interaction pattern (2-column wrap grid)",
+      "WCAG 2.1 AA contrast baseline"
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "colorScheme.primary (Wise Violet) is for brand and forward motion only. Win/loss/warning always use AppSemanticTheme tokens — never repurpose primary green/red.",
+        "section": "colors"
+      },
+      {
+        "name": "The Game Color Rule",
+        "body": "Each TCG has a catalog accent used only on HomeGameCarouselCard discovery tiles. Match UI stays neutral + violet so switching games does not reshuffle the whole chrome.",
+        "section": "colors"
+      },
+      {
+        "name": "The Glance Rule",
+        "body": "During an active match, the largest readable element should answer what phase am I in or what can I tap next — never marketing copy or decorative display type.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "If a surface is not modal, floating, or responding to direct touch feedback, it has no shadow. Nested cards are prohibited.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep match screens visually quiet — one highlighted phase, one primary CTA.",
+      "Do use AppSemanticTheme for win/loss/warning/timer urgency — never Wise Violet for outcomes.",
+      "Do maintain 16px screen horizontal padding for thumb reach consistency.",
+      "Do animate chip state changes over 200ms easeOut — respect prefers-reduced-motion.",
+      "Do let each TCG accent color live only on home discovery cards, not match chrome."
+    ],
+    "donts": [
+      "Don't use aggressive neon gaming UI — no cyberpunk gradients, glowing borders, or RGB spectacle.",
+      "Don't feel childish or toy-like — no cartoon mascots, bubbly excess, or infantilizing illustration style.",
+      "Don't build cluttered rulebook trackers — avoid dense text walls or judge-console density on phone.",
+      "Don't import generic SaaS dashboard patterns — no cream backgrounds, hero metrics, or identical card grids.",
+      "Don't nest cards inside cards — use spacing and typography to separate content instead.",
+      "Don't put gradient text or decorative glassmorphism on core app surfaces."
+    ]
+  }
+}

@@ -4,25 +4,25 @@
     "phases": [
         {
             "id": "ready",
-            "title": "Ready Phase",
+            "title": "Preparar cartas",
             "description": "Pronto todas as suas cartas em jogo.",
             "iconCode": "refresh"
         },
         {
             "id": "set",
-            "title": "Set Phase",
+            "title": "Início do turno",
             "description": "Resolva efeitos que ocorrem no início do turno.",
             "iconCode": "bolt"
         },
         {
             "id": "draw",
-            "title": "Draw Phase",
+            "title": "Fase de compra",
             "description": "Compre uma carta do topo do baralho.",
             "iconCode": "copy_outlined"
         },
         {
             "id": "main",
-            "title": "Main Phase",
+            "title": "Fase principal",
             "description": "Adicionar ink, jogar cartas, fazer quest ou desafiar.",
             "iconCode": "stars"
         }

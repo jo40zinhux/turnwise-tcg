@@ -239,9 +239,32 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
   }
 
   void updateBoard(MatchBoardState board) {
+    final effects = state.engineState.effectsState;
+    final previous = effects.board;
+    var nextEffects = effects;
+
+    if (!previous.contentEquals(board)) {
+      nextEffects = nextEffects.pushManualBoardUndo(previous);
+    }
+
     state = MatchState(
       engineState: state.engineState.copyWith(
-        effectsState: state.engineState.effectsState.copyWith(board: board),
+        effectsState: nextEffects.copyWith(board: board),
+      ),
+    );
+    _persistPhaseToSession();
+  }
+
+  bool get hasManualBoardUndo =>
+      state.engineState.effectsState.hasManualBoardUndo;
+
+  void revertLastBoardEdit() {
+    final effects = state.engineState.effectsState;
+    if (!effects.hasManualBoardUndo) return;
+
+    state = MatchState(
+      engineState: state.engineState.copyWith(
+        effectsState: effects.popManualBoardUndo(),
       ),
     );
     _persistPhaseToSession();

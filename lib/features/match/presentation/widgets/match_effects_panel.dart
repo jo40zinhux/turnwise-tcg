@@ -5,6 +5,7 @@ import '../../../../core/theme/app_semantic_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/icon_mapper.dart';
+import '../../../../shared/widgets/match_chip_surface.dart';
 import '../../domain/active_effect.dart';
 import '../../domain/effect_definition.dart';
 import '../../domain/effect_type.dart';
@@ -177,25 +178,63 @@ class _ActiveEffectChip extends StatelessWidget {
     final semantic = context.semantic;
     final isLock = effect.type == EffectType.actionLock ||
         effect.type == EffectType.attackRestriction;
+    final accent = isLock ? semantic.warning : semantic.info;
+    final accentMuted = isLock ? semantic.warningMuted : semantic.infoMuted;
 
     final label = effect.durationLabel != null
         ? '${effect.name} · ${effect.durationLabel}'
         : effect.name;
 
-    return InputChip(
-      avatar: Icon(
-        getIconFromString(effect.iconCode ?? 'info_outline'),
-        size: 18,
-        color: isLock ? semantic.warning : semantic.info,
-      ),
-      label: Text(label),
-      deleteIcon: const Icon(Icons.close, size: 16),
-      onDeleted: onRemove,
-      visualDensity: VisualDensity.compact,
-      labelStyle: AppTypography.caption(context),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-      side: BorderSide(
-        color: (isLock ? semantic.warning : semantic.info).withOpacity(0.45),
+    final style = MatchChipStyle.accent(accent: accent, accentMuted: accentMuted);
+
+    return Tooltip(
+      message: 'Toca no X para remover',
+      child: Semantics(
+        label: label,
+        button: true,
+        child: MatchChipSurface(
+          backgroundColor: style.backgroundColor,
+          borderSide: style.borderSide,
+          animate: false,
+          padding: const EdgeInsets.only(
+            left: AppSpacing.sm,
+            right: AppSpacing.xs,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                getIconFromString(effect.iconCode ?? 'info_outline'),
+                size: 18,
+                color: accent,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  label,
+                  style: AppTypography.caption(context).copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+              Semantics(
+                button: true,
+                label: 'Remover $label',
+                child: IconButton(
+                  onPressed: onRemove,
+                  iconSize: 18,
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  icon: Icon(Icons.close_rounded, color: accent),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

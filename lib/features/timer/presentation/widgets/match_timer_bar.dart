@@ -68,22 +68,19 @@ class _MatchTimerBarState extends ConsumerState<MatchTimerBar> {
 
     final progress = _progressValue(timerState);
 
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.35),
-      shape: RoundedRectangleBorder(
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.35),
         borderRadius: AppRadius.mdAll,
-        side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withOpacity(0.25),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withOpacity(0.3),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        child: Column(
+      child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -103,11 +100,9 @@ class _MatchTimerBarState extends ConsumerState<MatchTimerBar> {
                   ),
                 ),
                 IconButton(
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
+                    minWidth: 44,
+                    minHeight: 44,
                   ),
                   tooltip: timerState.isRunning ? 'Pausar' : 'Retomar',
                   onPressed: notifier.togglePause,
@@ -119,11 +114,9 @@ class _MatchTimerBarState extends ConsumerState<MatchTimerBar> {
                   ),
                 ),
                 IconButton(
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
+                    minWidth: 44,
+                    minHeight: 44,
                   ),
                   tooltip: 'Reiniciar ronda',
                   onPressed: notifier.resetRound,
@@ -192,7 +185,6 @@ class _MatchTimerBarState extends ConsumerState<MatchTimerBar> {
               ),
           ],
         ),
-      ),
     );
   }
 
@@ -259,10 +251,9 @@ class _CompactBo3Button extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          visualDensity: VisualDensity.compact,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: AppSpacing.sm),
+          minimumSize: const Size(44, 44),
+          tapTargetSize: MaterialTapTargetSize.padded,
         ),
         child: Text(label),
       ),

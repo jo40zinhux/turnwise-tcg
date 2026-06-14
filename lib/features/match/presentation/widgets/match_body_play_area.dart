@@ -17,7 +17,6 @@ import 'match_tracker_notice.dart';
 class MatchBodyPlayArea extends StatelessWidget {
   final GameRules rules;
   final MatchEngineState engineState;
-  final String currentPhaseTitle;
   final List<ActionRule> phaseActions;
   final Map<String, int> actionUsageCount;
   final int? Function(ActionRule action) maxUsageForAction;
@@ -39,7 +38,6 @@ class MatchBodyPlayArea extends StatelessWidget {
     super.key,
     required this.rules,
     required this.engineState,
-    required this.currentPhaseTitle,
     required this.phaseActions,
     required this.actionUsageCount,
     required this.maxUsageForAction,
@@ -82,7 +80,7 @@ class MatchBodyPlayArea extends StatelessWidget {
         ),
         AppSpacing.gapLg,
         Text(
-          'Ações — $currentPhaseTitle',
+          'Ações',
           style: AppTypography.label(context),
         ),
         if (showTrackerNotice) ...[

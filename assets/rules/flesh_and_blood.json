@@ -4,19 +4,19 @@
     "phases": [
         {
             "id": "start",
-            "title": "Start Phase",
+            "title": "Início do turno",
             "description": "Ative efeitos de início de turno e verifique o estado.",
             "iconCode": "play_arrow"
         },
         {
             "id": "action",
-            "title": "Action Phase",
+            "title": "Fase de ação",
             "description": "Jogue cartas de ação, ataque e jogue cartas não-ação.",
             "iconCode": "flash_on"
         },
         {
             "id": "end",
-            "title": "End Phase",
+            "title": "Fase final",
             "description": "Esvazie a pitch zone, envie equipamentos ao cemitério e compre até o intellect.",
             "iconCode": "pan_tool"
         }

@@ -78,4 +78,21 @@ class MatchBoardState {
   Map<String, dynamic> toJson() => {
         'targets': targets.map((t) => t.toJson()).toList(),
       };
+
+  bool contentEquals(MatchBoardState other) {
+    if (targets.length != other.targets.length) return false;
+    for (var i = 0; i < targets.length; i++) {
+      final a = targets[i];
+      final b = other.targets[i];
+      if (a.id != b.id ||
+          a.label != b.label ||
+          a.enteredThisTurn != b.enteredThisTurn ||
+          a.exerted != b.exerted ||
+          a.ready != b.ready ||
+          a.inAttackPosition != b.inAttackPosition) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

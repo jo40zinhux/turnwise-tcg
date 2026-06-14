@@ -26,8 +26,9 @@ class PhaseTile extends StatelessWidget {
     Color iconColor = theme.colorScheme.onSurface.withOpacity(0.54);
     TextStyle titleStyle = AppTypography.body(context).copyWith(
       fontWeight: FontWeight.w500,
-      color: iconColor,
-      decoration: isPast ? TextDecoration.lineThrough : null,
+      color: isPast
+          ? theme.colorScheme.onSurface.withOpacity(0.45)
+          : iconColor,
     );
 
     if (isCurrent) {
@@ -42,8 +43,10 @@ class PhaseTile extends StatelessWidget {
     }
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
+      duration: Duration(
+        milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 250,
+      ),
+      curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.md,
@@ -61,7 +64,9 @@ class PhaseTile extends StatelessWidget {
       child: Row(
         children: [
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
+            duration: Duration(
+              milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 250,
+            ),
             child: Icon(
               isPast ? Icons.check_circle_rounded : getIconFromString(phase.iconCode),
               key: ValueKey(isPast),

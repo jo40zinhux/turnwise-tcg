@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/action_rule.dart';
 import '../../domain/board_game_config.dart';
@@ -115,58 +116,36 @@ class _MatchTargetPickerSheetState extends State<_MatchTargetPickerSheet> {
                 style: AppTypography.bodyMuted(context),
               )
             else
-              ..._board.targets.map((target) {
-                final selected = _selectedId == target.id;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: Material(
-                    color: selected
-                        ? theme.colorScheme.primary.withOpacity(0.12)
-                        : theme.colorScheme.surfaceContainerHighest
-                            .withOpacity(0.45),
-                    borderRadius: AppRadius.mdAll,
-                    child: InkWell(
-                      borderRadius: AppRadius.mdAll,
-                      onTap: () => setState(() => _selectedId = target.id),
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  selected
-                                      ? Icons.radio_button_checked
-                                      : Icons.radio_button_off,
-                                  size: 18,
-                                  color: selected
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.onSurface
-                                          .withOpacity(0.5),
-                                ),
-                                const SizedBox(width: AppSpacing.sm),
-                                Text(
-                                  target.label,
-                                  style: AppTypography.label(context),
-                                ),
-                              ],
-                            ),
-                            if (selected) ...[
-                              AppSpacing.gapSm,
-                              BoardTargetFlagChips(
-                                specs: flagSpecs,
-                                target: target,
-                                onChanged: _updateTarget,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
+              Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: AppRadius.mdAll,
+                  border: Border.all(
+                    color: theme.colorScheme.outlineVariant.withOpacity(0.3),
                   ),
-                );
-              }),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < _board.targets.length; i++) ...[
+                      if (i > 0)
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: theme.dividerTheme.color,
+                        ),
+                      _TargetPickerRow(
+                        target: _board.targets[i],
+                        selected: _selectedId == _board.targets[i].id,
+                        flagSpecs: flagSpecs,
+                        onSelect: () =>
+                            setState(() => _selectedId = _board.targets[i].id),
+                        onTargetChanged: _updateTarget,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             AppSpacing.gapMd,
             FilledButton(
               onPressed: _selectedId == null
@@ -179,11 +158,98 @@ class _MatchTargetPickerSheetState extends State<_MatchTargetPickerSheet> {
                         ),
                       );
                     },
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+              ),
               child: const Text('Confirmar alvo'),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _TargetPickerRow extends StatelessWidget {
+  final BoardTarget target;
+  final bool selected;
+  final List<BoardFlagSpec> flagSpecs;
+  final VoidCallback onSelect;
+  final ValueChanged<BoardTarget> onTargetChanged;
+
+  const _TargetPickerRow({
+    required this.target,
+    required this.selected,
+    required this.flagSpecs,
+    required this.onSelect,
+    required this.onTargetChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          button: true,
+          selected: selected,
+          label: target.label,
+          child: InkWell(
+            onTap: onSelect,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 44),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      selected
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      size: 20,
+                      color: selected
+                          ? theme.colorScheme.primary
+                          : AppTheme.onSurfaceMuted,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        target.label,
+                        style: AppTypography.label(context).copyWith(
+                          color: selected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface,
+                          fontWeight:
+                              selected ? FontWeight.w600 : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (selected && flagSpecs.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: BoardTargetFlagChips(
+              specs: flagSpecs,
+              target: target,
+              onChanged: onTargetChanged,
+            ),
+          ),
+      ],
     );
   }
 }

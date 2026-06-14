@@ -70,6 +70,7 @@ class MatchEngine {
           resources: effects,
           board: next.effectsState.board.onNewTurn(),
           boardUndoStack: const [],
+          manualBoardUndoStack: const [],
           isOpponentTurn: true,
         ),
         feedback: _turnFeedback(next),

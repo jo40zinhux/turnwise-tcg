@@ -4,7 +4,7 @@
     "phases": [
         {
             "id": "draw",
-            "title": "Draw Phase",
+            "title": "Fase de compra",
             "description": "Comprar carta do topo do baralho.",
             "iconCode": "copy_outlined"
         },

@@ -4,31 +4,31 @@
     "phases": [
         {
             "id": "awaken",
-            "title": "Awaken Phase",
+            "title": "Despertar",
             "description": "Prepare suas cartas exauridas.",
             "iconCode": "refresh"
         },
         {
             "id": "beginning",
-            "title": "Beginning Phase",
+            "title": "Início do turno",
             "description": "Pontue battlefields controlados, canalize runes e compre uma carta.",
             "iconCode": "copy_outlined"
         },
         {
             "id": "action",
-            "title": "Action Phase",
+            "title": "Fase de ação",
             "description": "Jogue cartas, mova unidades e ative habilidades.",
             "iconCode": "back_hand_rounded"
         },
         {
             "id": "showdown",
-            "title": "Showdown Phase",
+            "title": "Confronto",
             "description": "Resolva batalhas e confrontos em battlefields.",
             "iconCode": "sports_mma"
         },
         {
             "id": "end",
-            "title": "End Phase",
+            "title": "Fase final",
             "description": "Resolva efeitos de fim de turno.",
             "iconCode": "dark_mode"
         }

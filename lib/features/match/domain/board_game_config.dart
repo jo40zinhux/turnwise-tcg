@@ -70,7 +70,7 @@ abstract final class BoardGameConfig {
       'one_piece' => const [
         BoardFlagSpec(
           flag: BoardTargetFlag.exerted,
-          label: 'Descansado (Rested)',
+          label: 'Descansado',
         ),
       ],
       'yugioh' => const [

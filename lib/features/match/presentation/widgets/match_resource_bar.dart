@@ -21,6 +21,7 @@ class MatchResourceBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final rows = <Widget>[];
 
     if (gameId == 'one_piece') {
@@ -40,7 +41,7 @@ class MatchResourceBar extends StatelessWidget {
 
     if (gameId == 'flesh_and_blood') {
       rows.add(_ResourceRow(
-        label: 'Action Points',
+        label: 'Pontos de ação',
         value: resources.actionPoints,
         onDecrement: () {
           HapticFeedback.selectionClick();
@@ -86,8 +87,11 @@ class MatchResourceBar extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surface,
         borderRadius: AppRadius.mdAll,
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,12 +129,13 @@ class _ResourceRow extends StatelessWidget {
           child: Text(label, style: AppTypography.bodyMuted(context)),
         ),
         IconButton(
-          visualDensity: VisualDensity.compact,
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
           onPressed: value > 0 ? onDecrement : null,
+          tooltip: 'Diminuir $label',
           icon: const Icon(Icons.remove_circle_outline, size: 22),
         ),
         SizedBox(
-          width: 28,
+          width: 32,
           child: Text(
             '$value',
             textAlign: TextAlign.center,
@@ -138,8 +143,9 @@ class _ResourceRow extends StatelessWidget {
           ),
         ),
         IconButton(
-          visualDensity: VisualDensity.compact,
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
           onPressed: onIncrement,
+          tooltip: 'Aumentar $label',
           icon: const Icon(Icons.add_circle_outline, size: 22),
         ),
       ],

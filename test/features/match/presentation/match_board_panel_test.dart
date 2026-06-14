@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:turnwise_tcg/core/theme/app_theme.dart';
 import 'package:turnwise_tcg/features/match/domain/board_target.dart';
 import 'package:turnwise_tcg/features/match/domain/match_board_state.dart';
 import 'package:turnwise_tcg/features/match/presentation/widgets/match_board_panel.dart';
 
 void main() {
-  testWidgets('MatchBoardPanel toggles target flags', (tester) async {
+  testWidgets('MatchBoardPanel shows collapsed summary before expanding',
+      (tester) async {
     MatchBoardState board = MatchBoardState(
       targets: const [
         BoardTarget(id: 'slot_0', label: 'Ativo'),
@@ -15,23 +15,115 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: AppTheme.darkTheme,
+        theme: ThemeData.dark(),
         home: Scaffold(
           body: MatchBoardPanel(
             gameId: 'pokemon',
             board: board,
             onChanged: (next) => board = next,
+            showIntroHint: true,
           ),
         ),
       ),
     );
 
     expect(find.text('Tabuleiro'), findsOneWidget);
+    expect(
+      find.text('Ativo · nenhum estado marcado'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Marca aqui o que está no tabuleiro físico — toca para expandir.'),
+      findsOneWidget,
+    );
+    expect(find.text('Ativo'), findsNothing);
+
+    await tester.tap(find.text('Tabuleiro'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Ativo'), findsOneWidget);
+    expect(find.text('Entrou em jogo neste turno'), findsOneWidget);
+  });
+
+  testWidgets('MatchBoardPanel toggles target flags when expanded',
+      (tester) async {
+    MatchBoardState board = MatchBoardState(
+      targets: const [
+        BoardTarget(id: 'slot_0', label: 'Ativo'),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: MatchBoardPanel(
+            gameId: 'pokemon',
+            board: board,
+            onChanged: (next) => board = next,
+            initialExpanded: true,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.text('Entrou em jogo neste turno'));
     await tester.pumpAndSettle();
 
     expect(board.targets.first.enteredThisTurn, isTrue);
+  });
+
+  testWidgets('MatchBoardPanel shows undo when canUndo is true', (tester) async {
+    var undoCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: MatchBoardPanel(
+            gameId: 'pokemon',
+            board: MatchBoardState(
+              targets: const [BoardTarget(id: 'slot_0', label: 'Ativo')],
+            ),
+            onChanged: (_) {},
+            initialExpanded: true,
+            canUndo: true,
+            onUndo: () => undoCount++,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.undo_rounded), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.undo_rounded));
+    await tester.pumpAndSettle();
+
+    expect(undoCount, 1);
+  });
+
+  testWidgets('MatchBoardPanel persists expansion callback', (tester) async {
+    var expanded = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: MatchBoardPanel(
+            gameId: 'pokemon',
+            board: MatchBoardState(
+              targets: const [BoardTarget(id: 'slot_0', label: 'Ativo')],
+            ),
+            onChanged: (_) {},
+            onExpandedChanged: (value) => expanded = value,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Tabuleiro'));
+    await tester.pumpAndSettle();
+
+    expect(expanded, isTrue);
   });
 }

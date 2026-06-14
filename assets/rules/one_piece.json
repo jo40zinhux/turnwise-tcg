@@ -4,37 +4,37 @@
     "phases": [
         {
             "id": "refresh",
-            "title": "Refresh Phase",
+            "title": "Preparar cartas",
             "description": "Desvire todas as cartas e DON!! utilizados.",
             "iconCode": "refresh"
         },
         {
             "id": "draw",
-            "title": "Draw Phase",
+            "title": "Fase de compra",
             "description": "Compre 1 carta do topo do baralho.",
             "iconCode": "copy_outlined"
         },
         {
             "id": "don",
-            "title": "DON!! Phase",
+            "title": "Fase DON!!",
             "description": "Adicione até 2 cartas DON!! da DON!! Deck para sua área de custo.",
             "iconCode": "bolt"
         },
         {
             "id": "main",
-            "title": "Main Phase",
+            "title": "Fase principal",
             "description": "Jogue personagens, eventos, equipe DON!! e ative efeitos.",
             "iconCode": "back_hand_rounded"
         },
         {
             "id": "battle",
-            "title": "Battle Phase",
+            "title": "Fase de combate",
             "description": "Ataque com Leader ou Characters e resolva batalhas.",
             "iconCode": "sports_mma"
         },
         {
             "id": "end",
-            "title": "End Phase",
+            "title": "Fase final",
             "description": "Resolva efeitos de fim de turno.",
             "iconCode": "dark_mode"
         }
@@ -141,7 +141,7 @@
             "flags": [
                 {
                     "flag": "exerted",
-                    "label": "Descansado (Rested)"
+                    "label": "Descansado"
                 }
             ]
         },
