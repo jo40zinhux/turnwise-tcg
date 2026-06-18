@@ -111,6 +111,21 @@
                 "id": "lorcana_no_challenge_turn1",
                 "message": "No teu primeiro turno não podes desafiar personagens oponentes."
             }
-        ]
+        ],
+        "lifeTracker": {
+            "enabled": true,
+            "counters": [
+                {
+                    "id": "lore",
+                    "label": "Lore",
+                    "playerStart": 0,
+                    "opponentStart": 0,
+                    "min": 0,
+                    "max": 20,
+                    "direction": "up",
+                    "iconCode": "auto_awesome"
+                }
+            ]
+        }
     }
 }

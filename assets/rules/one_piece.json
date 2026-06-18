@@ -156,6 +156,20 @@
                 "message": "Oponente jogou primeiro: você compra normalmente na Draw Phase.",
                 "whenWentFirst": false
             }
-        ]
+        ],
+        "lifeTracker": {
+            "enabled": true,
+            "counters": [
+                {
+                    "id": "life",
+                    "label": "Cartas de Vida",
+                    "playerStart": 5,
+                    "opponentStart": 5,
+                    "min": 0,
+                    "direction": "down",
+                    "iconCode": "sailing"
+                }
+            ]
+        }
     }
 }

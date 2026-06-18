@@ -32,6 +32,10 @@ class _MatchSummaryScreenState extends ConsumerState<MatchSummaryScreen> {
   MatchRecord get _record => widget.args.record;
   List<AchievementDefinition> get _achievements => widget.args.newlyUnlocked;
 
+  bool get _hasLifeSnapshot =>
+      (_record.lifePlayer != null && _record.lifePlayer!.isNotEmpty) ||
+      (_record.lifeOpponent != null && _record.lifeOpponent!.isNotEmpty);
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +77,10 @@ class _MatchSummaryScreenState extends ConsumerState<MatchSummaryScreen> {
                 ),
                 AppSpacing.gapLg,
                 _StatsCard(record: _record),
+                if (_hasLifeSnapshot) ...[
+                  AppSpacing.gapMd,
+                  _LifeSnapshotCard(record: _record),
+                ],
                 if (_record.notes != null &&
                     _record.notes!.trim().isNotEmpty) ...[
                   AppSpacing.gapMd,
@@ -312,6 +320,62 @@ class _StatRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _LifeSnapshotCard extends StatelessWidget {
+  final MatchRecord record;
+
+  const _LifeSnapshotCard({required this.record});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final player = record.lifePlayer ?? const {};
+    final opponent = record.lifeOpponent ?? const {};
+    final counterId =
+        player.keys.firstOrNull ?? opponent.keys.firstOrNull ?? 'life';
+    final playerValue = player[counterId];
+    final opponentValue = opponent[counterId];
+
+    if (playerValue == null && opponentValue == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.mdAll,
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Placar final', style: AppTypography.label(context)),
+            AppSpacing.gapSm,
+            if (playerValue != null)
+              _StatRow(
+                icon: Icons.person_outline_rounded,
+                label: 'Você',
+                value: '$playerValue',
+              ),
+            if (playerValue != null && opponentValue != null)
+              const Divider(height: AppSpacing.lg),
+            if (opponentValue != null)
+              _StatRow(
+                icon: Icons.groups_outlined,
+                label: 'Oponente',
+                value: '$opponentValue',
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

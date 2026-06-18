@@ -169,6 +169,20 @@
                 "id": "yugioh_no_attack_turn1",
                 "message": "Nenhum jogador pode declarar ataque no primeiro turno do duelo."
             }
-        ]
+        ],
+        "lifeTracker": {
+            "enabled": true,
+            "counters": [
+                {
+                    "id": "lp",
+                    "label": "Life Points",
+                    "playerStart": 8000,
+                    "opponentStart": 8000,
+                    "min": 0,
+                    "direction": "down",
+                    "iconCode": "diamond"
+                }
+            ]
+        }
     }
 }

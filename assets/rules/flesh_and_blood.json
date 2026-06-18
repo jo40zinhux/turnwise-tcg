@@ -5,7 +5,7 @@
         {
             "id": "start",
             "title": "Início do turno",
-            "description": "Ative efeitos de início de turno e verifique o estado.",
+            "description": "Ative efeitos de início de turno, desvire (ready) cartas e equipamentos.",
             "iconCode": "play_arrow"
         },
         {
@@ -17,7 +17,7 @@
         {
             "id": "end",
             "title": "Fase final",
-            "description": "Esvazie a pitch zone, envie equipamentos ao cemitério e compre até o intellect.",
+            "description": "Arsenal, esvazie pitch zone, equipamentos ao cemitério e compre até o intellect.",
             "iconCode": "pan_tool"
         }
     ],
@@ -47,7 +47,8 @@
         {
             "id": "defend",
             "name": "Defender",
-            "allowedPhases": ["action"],
+            "allowedPhases": [],
+            "opponentTurnOnly": true,
             "validations": [],
             "trackUsage": true
         },
@@ -67,6 +68,43 @@
             "errorMessage": "Você precisa de um Action Point para realizar {actionName}."
         }
     ],
+    "checkups": [
+        {
+            "id": "fab_start_ready",
+            "title": "Início do turno",
+            "message": "Desvire (ready) suas cartas e equipamentos no início do turno.",
+            "trigger": "on_phase_start",
+            "phaseIds": ["start"]
+        },
+        {
+            "id": "fab_end_arsenal",
+            "title": "Arsenal",
+            "message": "Coloque a carta do topo do deck no arsenal (face down).",
+            "trigger": "on_phase_start",
+            "phaseIds": ["end"]
+        },
+        {
+            "id": "fab_end_pitch",
+            "title": "Pitch zone",
+            "message": "Esvazie a pitch zone (cartas vão para o cemitério).",
+            "trigger": "on_phase_start",
+            "phaseIds": ["end"]
+        },
+        {
+            "id": "fab_end_equipment",
+            "title": "Equipamentos",
+            "message": "Envie equipamentos usados neste turno ao cemitério.",
+            "trigger": "on_phase_start",
+            "phaseIds": ["end"]
+        },
+        {
+            "id": "fab_end_draw",
+            "title": "Comprar",
+            "message": "Compre até o valor de Intellect no início do próximo turno.",
+            "trigger": "on_phase_start",
+            "phaseIds": ["end"]
+        }
+    ],
     "statusEffects": [],
     "metadata": {
         "themeColor": "redAccent",
@@ -82,6 +120,23 @@
                 "id": "fab_action_points",
                 "message": "Tens 1 Action Point por turno para jogar ações ou atacar (Go Again dá mais)."
             }
-        ]
+        ],
+        "lifeTracker": {
+            "enabled": true,
+            "startingPresets": [
+                {"label": "Clássico (40)", "playerStart": 40, "opponentStart": 40},
+                {"label": "Blitz (20)", "playerStart": 20, "opponentStart": 20}
+            ],
+            "counters": [
+                {
+                    "id": "life",
+                    "label": "Vida",
+                    "playerStart": 40,
+                    "opponentStart": 40,
+                    "min": 0,
+                    "direction": "down"
+                }
+            ]
+        }
     }
 }

@@ -104,6 +104,23 @@ class AppAnalytics {
     );
   }
 
+  Future<void> logLifeAdjusted({
+    required String gameId,
+    required String counterId,
+    required int delta,
+    required bool isPlayer,
+  }) async {
+    await _log(
+      AnalyticsEvents.lifeAdjusted,
+      {
+        'game_id': gameId,
+        'counter_id': counterId,
+        'delta': delta,
+        'is_player': isPlayer,
+      },
+    );
+  }
+
   Future<void> logGuestSignIn() async {
     await _log(AnalyticsEvents.guestSignIn, const {});
   }

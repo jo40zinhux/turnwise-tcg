@@ -80,6 +80,11 @@ void main() {
           expect(GameRulesMetadata.showResourceBarFor(gameId), expectsBar);
         });
 
+        test('has life tracker configured', () {
+          expect(rules.metadata.lifeTracker.hasCounters, isTrue);
+          expect(rules.metadata.lifeTracker.counters.first.label, isNotEmpty);
+        });
+
         test('phase titles are localized in Portuguese', () {
           final legacyEnglishTitle = RegExp(
             r' (Phase|Step)$|^(Untap|Upkeep|Combat|Draw|Main|Ready|Set|Start|End|Action|Beginning|Awaken|Showdown) ',

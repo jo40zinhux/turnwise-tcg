@@ -12,6 +12,8 @@ class MatchRecord {
   final String? notes;
   final TimerProfile? timerProfile;
   final int? roundsPlayed;
+  final Map<String, int>? lifePlayer;
+  final Map<String, int>? lifeOpponent;
   final SyncStatus syncStatus;
   final DateTime updatedAt;
 
@@ -24,6 +26,8 @@ class MatchRecord {
     this.notes,
     this.timerProfile,
     this.roundsPlayed,
+    this.lifePlayer,
+    this.lifeOpponent,
     this.syncStatus = SyncStatus.pending,
     required this.updatedAt,
   });
@@ -41,6 +45,8 @@ class MatchRecord {
     String? notes,
     TimerProfile? timerProfile,
     int? roundsPlayed,
+    Map<String, int>? lifePlayer,
+    Map<String, int>? lifeOpponent,
     SyncStatus? syncStatus,
     DateTime? updatedAt,
   }) {
@@ -53,6 +59,8 @@ class MatchRecord {
       notes: notes ?? this.notes,
       timerProfile: timerProfile ?? this.timerProfile,
       roundsPlayed: roundsPlayed ?? this.roundsPlayed,
+      lifePlayer: lifePlayer ?? this.lifePlayer,
+      lifeOpponent: lifeOpponent ?? this.lifeOpponent,
       syncStatus: syncStatus ?? this.syncStatus,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -69,8 +77,17 @@ class MatchRecord {
       notes: json['notes'] as String?,
       timerProfile: TimerProfile.fromStorageKey(json['timerProfile'] as String?),
       roundsPlayed: json['roundsPlayed'] as int?,
+      lifePlayer: _parseLifeMap(json['lifePlayer']),
+      lifeOpponent: _parseLifeMap(json['lifeOpponent']),
       syncStatus: SyncStatus.fromStorageKey(json['syncStatus'] as String?),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
+
+  static Map<String, int>? _parseLifeMap(dynamic raw) {
+    if (raw is! Map) return null;
+    return raw.map(
+      (key, value) => MapEntry(key.toString(), (value as num).toInt()),
     );
   }
 
@@ -84,6 +101,8 @@ class MatchRecord {
       if (notes != null) 'notes': notes,
       if (timerProfile != null) 'timerProfile': timerProfile!.storageKey,
       if (roundsPlayed != null) 'roundsPlayed': roundsPlayed,
+      if (lifePlayer != null) 'lifePlayer': lifePlayer,
+      if (lifeOpponent != null) 'lifeOpponent': lifeOpponent,
       'syncStatus': syncStatus.storageKey,
       'updatedAt': updatedAt.toIso8601String(),
     };

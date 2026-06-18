@@ -9,6 +9,7 @@ abstract final class AnalyticsEvents {
   static const actionReverted = 'action_reverted';
   static const coachTipDismissed = 'coach_tip_dismissed';
   static const matchSetupCompleted = 'match_setup_completed';
+  static const lifeAdjusted = 'life_adjusted';
   static const guestSignIn = 'guest_sign_in';
   static const googleSignIn = 'google_sign_in';
   static const appleSignIn = 'apple_sign_in';

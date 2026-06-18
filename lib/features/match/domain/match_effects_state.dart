@@ -1,7 +1,9 @@
 import 'active_effect.dart';
 import 'board_undo_entry.dart';
 import 'checkup_reminder.dart';
+import 'life_tracker_config.dart';
 import 'match_board_state.dart';
+import 'match_life_state.dart';
 import 'match_resources_state.dart';
 
 /// Effect + checkup runtime state carried by [MatchEngineState].
@@ -14,6 +16,8 @@ class MatchEffectsState {
   final bool? playerWentFirst;
 
   final MatchResourcesState resources;
+
+  final MatchLifeState life;
 
   final MatchBoardState board;
 
@@ -32,6 +36,7 @@ class MatchEffectsState {
     this.pendingCheckups = const [],
     this.playerWentFirst,
     this.resources = const MatchResourcesState(),
+    this.life = MatchLifeState.empty,
     this.board = const MatchBoardState(),
     this.boardUndoStack = const [],
     this.manualBoardUndoStack = const [],
@@ -42,9 +47,15 @@ class MatchEffectsState {
 
   bool get hasManualBoardUndo => manualBoardUndoStack.isNotEmpty;
 
-  static MatchEffectsState initialForGame(String gameId) {
+  static MatchEffectsState initialForGame(
+    String gameId, {
+    LifeTrackerConfig? lifeTracker,
+  }) {
     return MatchEffectsState(
       resources: MatchResourcesState.initialForGame(gameId),
+      life: lifeTracker != null && lifeTracker.hasCounters
+          ? MatchLifeState.initial(lifeTracker)
+          : MatchLifeState.empty,
       board: MatchBoardState.initialForGame(gameId),
     );
   }
@@ -71,6 +82,7 @@ class MatchEffectsState {
     List<CheckupReminder>? pendingCheckups,
     bool? playerWentFirst,
     MatchResourcesState? resources,
+    MatchLifeState? life,
     MatchBoardState? board,
     List<BoardUndoEntry>? boardUndoStack,
     List<MatchBoardState>? manualBoardUndoStack,
@@ -87,6 +99,7 @@ class MatchEffectsState {
           ? null
           : (playerWentFirst ?? this.playerWentFirst),
       resources: resources ?? this.resources,
+      life: life ?? this.life,
       board: board ?? this.board,
       boardUndoStack: boardUndoStack ?? this.boardUndoStack,
       manualBoardUndoStack:
@@ -147,6 +160,7 @@ class MatchEffectsState {
       resources: MatchResourcesState.fromJson(
         json['resources'] as Map<String, dynamic>?,
       ),
+      life: MatchLifeState.fromJson(json['life'] as Map<String, dynamic>?),
       board: MatchBoardState.fromJson(json['board'] as Map<String, dynamic>?),
       boardUndoStack: (json['boardUndoStack'] as List<dynamic>?)
               ?.map((e) => BoardUndoEntry.fromJson(e as Map<String, dynamic>))
@@ -169,6 +183,7 @@ class MatchEffectsState {
       'pendingCheckups': pendingCheckups.map((e) => e.toJson()).toList(),
       if (playerWentFirst != null) 'playerWentFirst': playerWentFirst,
       'resources': resources.toJson(),
+      'life': life.toJson(),
       'board': board.toJson(),
       'boardUndoStack': boardUndoStack.map((e) => e.toJson()).toList(),
       'manualBoardUndoStack':

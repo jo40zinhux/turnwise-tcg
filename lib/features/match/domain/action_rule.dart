@@ -8,6 +8,7 @@ class ActionRule {
   final bool trackUsage;
   final int cooldown;
   final bool requiresTarget;
+  final bool opponentTurnOnly;
   final Map<String, dynamic> metadata;
 
   const ActionRule({
@@ -18,6 +19,7 @@ class ActionRule {
     this.trackUsage = false,
     this.cooldown = 0,
     this.requiresTarget = false,
+    this.opponentTurnOnly = false,
     this.metadata = const {},
   });
 
@@ -25,7 +27,7 @@ class ActionRule {
     // Extract unknown keys into metadata
     final knownKeys = {
       'id', 'name', 'allowedPhases', 'validations',
-      'trackUsage', 'cooldown', 'requiresTarget'
+      'trackUsage', 'cooldown', 'requiresTarget', 'opponentTurnOnly',
     };
     final meta = <String, dynamic>{};
     json.forEach((key, value) {
@@ -40,6 +42,7 @@ class ActionRule {
       trackUsage: json['trackUsage'] as bool? ?? false,
       cooldown: json['cooldown'] as int? ?? 0,
       requiresTarget: json['requiresTarget'] as bool? ?? false,
+      opponentTurnOnly: json['opponentTurnOnly'] as bool? ?? false,
       metadata: meta,
     );
   }

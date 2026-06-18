@@ -50,20 +50,22 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
     if (wentFirst != null) return;
 
     _setupShown = true;
-    final selected = await showMatchSetupSheet(
+    final setup = await showMatchSetupSheet(
       context,
       gameId: widget.gameId,
     );
     if (!mounted) return;
 
-    if (selected == null) {
+    if (setup == null) {
       context.goNamed('home');
       return;
     }
 
-    ref.read(matchStateProvider(widget.gameId).notifier).setPlayerWentFirst(
-          selected,
-        );
+    final notifier = ref.read(matchStateProvider(widget.gameId).notifier);
+    notifier.setPlayerWentFirst(setup.playerWentFirst);
+    if (setup.initialLife != null) {
+      notifier.setInitialLife(setup.initialLife!);
+    }
   }
 
   Future<void> _ensureTimerProfile() async {
@@ -126,14 +128,15 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
                   final rules =
                       ref.read(gameRulesProvider(widget.gameId)).valueOrNull;
                   if (rules == null || !context.mounted) return;
-                  final selected = await showMatchSetupSheet(
+                  final setup = await showMatchSetupSheet(
                     context,
                     gameId: widget.gameId,
+                    mode: MatchSetupMode.edit,
                   );
-                  if (selected == null || !context.mounted) return;
+                  if (setup == null || !context.mounted) return;
                   ref
                       .read(matchStateProvider(widget.gameId).notifier)
-                      .setPlayerWentFirst(selected);
+                      .setPlayerWentFirst(setup.playerWentFirst);
               }
             },
             itemBuilder: (context) => [
@@ -202,6 +205,8 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
 
     final rules = ref.read(gameRulesProvider(widget.gameId)).valueOrNull;
     final gameName = rules?.name ?? widget.gameId;
+    final matchState = ref.read(matchStateProvider(widget.gameId));
+    final life = matchState.effectsState.life;
 
     final finishResult = await completeAndEndActiveMatch(
       ref,
@@ -213,6 +218,8 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
         startedAt: session?.startedAt,
         timerProfile: session?.timerProfile ?? timerState?.profile,
         roundsPlayed: roundsPlayed,
+        lifePlayer: life.player.isNotEmpty ? life.player : null,
+        lifeOpponent: life.opponent.isNotEmpty ? life.opponent : null,
       ),
     );
 

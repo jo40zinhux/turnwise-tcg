@@ -2,13 +2,29 @@ import 'action_rule.dart';
 
 /// Filters declarative actions for the active turn phase.
 abstract final class MatchActionFilter {
+  static List<ActionRule> forMatchContext({
+    required List<ActionRule> actions,
+    required String phaseId,
+    required bool isOpponentTurn,
+  }) {
+    return actions.where((action) {
+      if (isOpponentTurn) {
+        return action.opponentTurnOnly;
+      }
+      if (action.opponentTurnOnly) return false;
+      return action.allowedPhases.contains(phaseId);
+    }).toList();
+  }
+
   static List<ActionRule> forPhase(
     List<ActionRule> actions,
     String phaseId,
   ) {
-    return actions
-        .where((action) => action.allowedPhases.contains(phaseId))
-        .toList();
+    return forMatchContext(
+      actions: actions,
+      phaseId: phaseId,
+      isOpponentTurn: false,
+    );
   }
 
   static String? actionDisplayName(

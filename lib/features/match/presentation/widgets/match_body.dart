@@ -205,9 +205,10 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
         matchState.currentPhaseIndex.clamp(0, phases.length - 1);
     final currentPhaseId = phases[currentPhaseIndex].id;
     final isLastPhase = matchState.currentPhaseIndex == phases.length - 1;
-    final phaseActions = MatchActionFilter.forPhase(
-      widget.rules.actions,
-      currentPhaseId,
+    final phaseActions = MatchActionFilter.forMatchContext(
+      actions: widget.rules.actions,
+      phaseId: currentPhaseId,
+      isOpponentTurn: isOpponentTurn,
     );
     final contextualCoachTip = MatchCoachTips.activeTip(
       rules: widget.rules,
@@ -238,6 +239,20 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
           onCompleteOpponentTurn: isOpponentTurn
               ? notifier.completeOpponentTurn
               : null,
+          lifeTracker: widget.rules.metadata.lifeTracker,
+          effectsState: matchState.effectsState,
+          onLifeAdjust: ({
+            required counterId,
+            required isPlayer,
+            required delta,
+            required counter,
+          }) =>
+              notifier.adjustLife(
+            counterId: counterId,
+            isPlayer: isPlayer,
+            delta: delta,
+            counter: counter,
+          ),
         ),
         Expanded(
           child: CustomScrollView(

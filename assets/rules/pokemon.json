@@ -170,6 +170,21 @@
                 "message": "Primeiro turno (você): pode usar Apoiador, mas não pode evoluir.",
                 "whenWentFirst": false
             }
-        ]
+        ],
+        "lifeTracker": {
+            "enabled": true,
+            "counters": [
+                {
+                    "id": "prizes",
+                    "label": "Prêmios",
+                    "playerStart": 6,
+                    "opponentStart": 6,
+                    "min": 0,
+                    "max": 6,
+                    "direction": "down",
+                    "iconCode": "catching_pokemon"
+                }
+            ]
+        }
     }
 }

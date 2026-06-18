@@ -52,7 +52,29 @@ void main() {
       expect(repository.saved.length, 1);
       expect(record.syncStatus, SyncStatus.pending);
       expect(record.notes, 'close game');
+      expect(record.lifePlayer, isNull);
       expect(record.id, 'fixed-id');
+    });
+
+    test('persists life snapshot when provided', () async {
+      final repository = _FakeMatchHistoryRepository();
+      final useCase = CompleteMatchUseCase(
+        repository: repository,
+        getCurrentUserId: () => null,
+        generateId: () => 'life-id',
+      );
+
+      final record = await useCase.execute(
+        const CompleteMatchParams(
+          gameId: 'flesh_and_blood',
+          outcome: MatchOutcome.playerWin,
+          lifePlayer: {'life': 12},
+          lifeOpponent: {'life': 8},
+        ),
+      );
+
+      expect(record.lifePlayer?['life'], 12);
+      expect(record.lifeOpponent?['life'], 8);
     });
 
     test('marks record as synced when cloud upload succeeds', () async {

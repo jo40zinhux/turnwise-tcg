@@ -42,6 +42,8 @@ class CompleteMatchUseCase {
       notes: _normalizeNotes(params.notes),
       timerProfile: params.timerProfile,
       roundsPlayed: params.roundsPlayed,
+      lifePlayer: params.lifePlayer,
+      lifeOpponent: params.lifeOpponent,
       syncStatus: SyncStatus.pending,
       updatedAt: now,
     );

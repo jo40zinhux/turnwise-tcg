@@ -153,6 +153,21 @@
                 "id": "riftbound_ready_units",
                 "message": "Só unidades prontas podem mover ou atacar; exauridas aguardam o Awaken."
             }
-        ]
+        ],
+        "lifeTracker": {
+            "enabled": true,
+            "counters": [
+                {
+                    "id": "points",
+                    "label": "Pontos",
+                    "playerStart": 0,
+                    "opponentStart": 0,
+                    "min": 0,
+                    "max": 8,
+                    "direction": "up",
+                    "iconCode": "grass"
+                }
+            ]
+        }
     }
 }

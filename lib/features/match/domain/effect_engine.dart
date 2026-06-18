@@ -36,6 +36,8 @@ class EffectEngine {
       activeEffects: [...state.effectsState.activeEffects, active],
     );
 
+    effects = _applyResourceGrant(effects, definition);
+
     effects = _enqueueCheckupsForTrigger(
       effects,
       rules,
@@ -88,6 +90,24 @@ class EffectEngine {
     }
 
     return state.copyWith(effectsState: effects);
+  }
+
+  MatchEffectsState _applyResourceGrant(
+    MatchEffectsState effects,
+    EffectDefinition definition,
+  ) {
+    final grant = definition.params['grantResource'];
+    if (grant is! Map) return effects;
+
+    var resources = effects.resources;
+    final ap = grant['action_point'];
+    if (ap is num) {
+      resources = resources.copyWith(
+        actionPoints: resources.actionPoints + ap.toInt(),
+      );
+    }
+
+    return effects.copyWith(resources: resources);
   }
 
   MatchFeedback? validateActionBlock(

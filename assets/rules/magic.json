@@ -119,6 +119,23 @@
                 "id": "magic_summoning_sickness",
                 "message": "Criaturas que entraram em jogo neste turno não podem atacar (enjoo de invocação)."
             }
-        ]
+        ],
+        "lifeTracker": {
+            "enabled": true,
+            "startingPresets": [
+                {"label": "Standard / Modern (20)", "playerStart": 20, "opponentStart": 20},
+                {"label": "Commander (40)", "playerStart": 40, "opponentStart": 40}
+            ],
+            "counters": [
+                {
+                    "id": "life",
+                    "label": "Vida",
+                    "playerStart": 20,
+                    "opponentStart": 20,
+                    "min": 0,
+                    "direction": "down"
+                }
+            ]
+        }
     }
 }

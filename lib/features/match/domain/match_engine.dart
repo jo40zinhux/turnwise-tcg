@@ -2,6 +2,7 @@ import 'board_state_updater.dart';
 import 'board_undo_entry.dart';
 import 'condition_evaluator.dart';
 import 'action_rule.dart';
+import 'checkup_definition.dart';
 import 'checkup_reminder.dart';
 import 'effect_engine.dart';
 import 'game_rules.dart';
@@ -91,12 +92,28 @@ class MatchEngine {
     String actionId, {
     String? targetId,
   }) {
+    final action = rules.actions.firstWhere(
+      (a) => a.id == actionId,
+      orElse: () => throw Exception('Action not found: $actionId'),
+    );
+
     if (state.effectsState.isOpponentTurn) {
+      if (!action.opponentTurnOnly) {
+        return state.copyWith(
+          feedback: const MatchFeedback(
+            message:
+                'Aguarda o turno do oponente. Toca em "Oponente terminou" quando acabar.',
+            type: MatchFeedbackType.error,
+            reason: 'opponent_turn',
+          ),
+        );
+      }
+    } else if (action.opponentTurnOnly) {
       return state.copyWith(
         feedback: const MatchFeedback(
-          message: 'Aguarda o turno do oponente. Toca em "Oponente terminou" quando acabar.',
+          message: 'Defender só está disponível no turno do oponente.',
           type: MatchFeedbackType.error,
-          reason: 'opponent_turn',
+          reason: 'opponent_turn_only',
         ),
       );
     }
@@ -106,14 +123,9 @@ class MatchEngine {
       return state.copyWith(feedback: block);
     }
 
-    final action = rules.actions.firstWhere(
-      (a) => a.id == actionId,
-      orElse: () => throw Exception('Action not found: $actionId'),
-    );
-
     final currentPhaseId = rules.phases[state.currentPhaseIndex].id;
 
-    if (!action.allowedPhases.contains(currentPhaseId)) {
+    if (!action.opponentTurnOnly && !action.allowedPhases.contains(currentPhaseId)) {
       return state.copyWith(
         feedback: MatchFeedback(
           message: _phaseErrorMessage(action, rules),
@@ -312,13 +324,32 @@ class MatchEngine {
   ) {
     final phaseIndex = state.currentPhaseIndex.clamp(0, rules.phases.length - 1);
     final phaseId = rules.phases[phaseIndex].id;
+
+    // Process declarative phase-start checkups from rules JSON.
+    var next = state;
+    for (final checkup in rules.checkups) {
+      if (checkup.trigger != CheckupTrigger.onPhaseStart) continue;
+      if (checkup.phaseIds.isNotEmpty && !checkup.phaseIds.contains(phaseId)) {
+        continue;
+      }
+      next = _enqueueCheckup(
+        next,
+        CheckupReminder(
+          id: checkup.id,
+          title: checkup.title,
+          message: checkup.message,
+          relatedEffectIds: checkup.effectIds,
+        ),
+      );
+    }
+
     final reminder = PhaseReminderEvaluator.onPhaseEntered(
       rules: rules,
       phaseId: phaseId,
-      state: state,
+      state: next,
     );
-    if (reminder == null) return state;
-    return _enqueueCheckup(state, reminder);
+    if (reminder == null) return next;
+    return _enqueueCheckup(next, reminder);
   }
 
   MatchEngineState _enqueueCheckup(

@@ -60,9 +60,29 @@ void main() {
         effectsState: const MatchEffectsState(isOpponentTurn: true),
       );
 
-      final next = engine.attemptAction(state, rules, 'draw');
+      final next = engine.attemptAction(state, rules, 'play_basic');
       expect(next.feedback?.type.name, 'error');
       expect(next.feedback?.message, contains('oponente'));
+    });
+
+    test('FAB defend allowed only during opponent turn', () async {
+      final rules = await RulesTestHarness.loadRules('flesh_and_blood');
+
+      final onPlayerTurn = engine.attemptAction(
+        RulesTestHarness.stateWith(gameId: 'flesh_and_blood'),
+        rules,
+        'defend',
+      );
+      expect(onPlayerTurn.feedback?.reason, 'opponent_turn_only');
+
+      final onOpponentTurn = engine.attemptAction(
+        RulesTestHarness.stateWith(gameId: 'flesh_and_blood').copyWith(
+          effectsState: const MatchEffectsState(isOpponentTurn: true),
+        ),
+        rules,
+        'defend',
+      );
+      expect(onOpponentTurn.feedback?.type.name, 'success');
     });
   });
 }

@@ -22,6 +22,7 @@ class CheckupDefinition {
   final String message;
   final CheckupTrigger trigger;
   final List<String> effectIds;
+  final List<String> phaseIds;
   final int priority;
 
   const CheckupDefinition({
@@ -30,6 +31,7 @@ class CheckupDefinition {
     required this.message,
     required this.trigger,
     this.effectIds = const [],
+    this.phaseIds = const [],
     this.priority = 0,
   });
 
@@ -40,6 +42,7 @@ class CheckupDefinition {
       message: json['message'] as String,
       trigger: CheckupTrigger.fromStorageKey(json['trigger'] as String?),
       effectIds: List<String>.from(json['effectIds'] ?? const []),
+      phaseIds: List<String>.from(json['phaseIds'] ?? const []),
       priority: json['priority'] as int? ?? 0,
     );
   }

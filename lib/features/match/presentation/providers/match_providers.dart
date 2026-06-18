@@ -8,16 +8,17 @@ import '../../data/bundled_rules_datasource.dart';
 import '../../data/cached_rules_repository.dart';
 import '../../data/file_rules_cache_datasource.dart';
 import '../../domain/game_rules.dart';
+import '../../domain/life_counter_config.dart';
 import '../../domain/match_board_state.dart';
 import '../../domain/match_effects_state.dart';
 import '../../domain/match_engine.dart';
+import '../../domain/match_life_state.dart';
 import '../../domain/match_resources_state.dart';
 import '../../domain/match_engine_state.dart';
 import '../../domain/match_feedback.dart';
 import '../../domain/match_session_restore.dart';
 import '../../domain/rules_repository.dart';
 import '../services/match_session_persist_coordinator.dart';
-import '../../../timer/presentation/providers/match_timer_providers.dart';
 import 'match_session_providers.dart';
 
 final bundledRulesDataSourceProvider = Provider<BundledRulesDataSource>((ref) {
@@ -218,6 +219,42 @@ class MatchStateNotifier extends StateNotifier<MatchState> {
     _persistPhaseToSession();
   }
 
+  void updateLife(MatchLifeState life) {
+    state = MatchState(
+      engineState: state.engineState.copyWith(
+        effectsState: state.engineState.effectsState.copyWith(life: life),
+      ),
+    );
+    _persistPhaseToSession();
+  }
+
+  void adjustLife({
+    required String counterId,
+    required bool isPlayer,
+    required int delta,
+    required LifeCounterConfig counter,
+  }) {
+    final next = state.effectsState.life.adjust(
+      counterId: counterId,
+      isPlayer: isPlayer,
+      delta: delta,
+      config: counter,
+    );
+    updateLife(next);
+    unawaited(
+      _ref.read(appAnalyticsProvider).logLifeAdjusted(
+            gameId: gameId,
+            counterId: counterId,
+            delta: delta,
+            isPlayer: isPlayer,
+          ),
+    );
+  }
+
+  void setInitialLife(MatchLifeState life) {
+    updateLife(life);
+  }
+
   void setPlayerWentFirst(bool wentFirst) {
     state = MatchState(
       engineState: _engine.setPlayerWentFirst(state.engineState, wentFirst),
@@ -321,16 +358,23 @@ MatchEngineState _initialEngineState(Ref ref, String gameId) {
       ref.read(matchSessionRepositoryProvider).getActiveSession();
   final rulesAsync = ref.read(gameRulesProvider(gameId));
 
-  final phaseCount = rulesAsync.when(
-    data: (rules) => rules.phases.length,
-    loading: () => (session?.currentPhaseIndex ?? 0) + 1,
-    error: (_, __) => (session?.currentPhaseIndex ?? 0) + 1,
-  );
-
-  return MatchSessionRestore.engineState(
-    session: session,
-    gameId: gameId,
-    phaseCount: phaseCount,
+  return rulesAsync.when(
+    data: (rules) => MatchSessionRestore.engineState(
+      session: session,
+      gameId: gameId,
+      phaseCount: rules.phases.length,
+      lifeTracker: rules.metadata.lifeTracker,
+    ),
+    loading: () => MatchSessionRestore.engineState(
+      session: session,
+      gameId: gameId,
+      phaseCount: (session?.currentPhaseIndex ?? 0) + 1,
+    ),
+    error: (_, __) => MatchSessionRestore.engineState(
+      session: session,
+      gameId: gameId,
+      phaseCount: (session?.currentPhaseIndex ?? 0) + 1,
+    ),
   );
 }
 

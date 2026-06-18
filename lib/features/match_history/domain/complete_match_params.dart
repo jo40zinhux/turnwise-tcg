@@ -8,6 +8,8 @@ class CompleteMatchParams {
   final DateTime? startedAt;
   final TimerProfile? timerProfile;
   final int? roundsPlayed;
+  final Map<String, int>? lifePlayer;
+  final Map<String, int>? lifeOpponent;
 
   const CompleteMatchParams({
     required this.gameId,
@@ -16,5 +18,7 @@ class CompleteMatchParams {
     this.startedAt,
     this.timerProfile,
     this.roundsPlayed,
+    this.lifePlayer,
+    this.lifeOpponent,
   });
 }

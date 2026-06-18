@@ -1,5 +1,6 @@
 import 'board_metadata.dart';
 import 'coach_tip_definition.dart';
+import 'life_tracker_config.dart';
 import 'match_board_state.dart';
 
 /// Optional metadata from `assets/rules/{gameId}.json`.
@@ -8,12 +9,14 @@ class GameRulesMetadata {
   final String? firstTurnHint;
   final List<CoachTipDefinition> coachTips;
   final BoardMetadata board;
+  final LifeTrackerConfig lifeTracker;
 
   const GameRulesMetadata({
     this.setupPrompts = const [],
     this.firstTurnHint,
     this.coachTips = const [],
     this.board = const BoardMetadata(),
+    this.lifeTracker = const LifeTrackerConfig(),
   });
 
   /// Coin-flip setup is shown for every game unless explicitly opted out.
@@ -27,6 +30,9 @@ class GameRulesMetadata {
 
   static bool showBoardPanelFor(String gameId) =>
       MatchBoardState.initialForGame(gameId).targets.isNotEmpty;
+
+  static bool showLifeTrackerFor(LifeTrackerConfig config) =>
+      config.hasCounters;
 
   factory GameRulesMetadata.fromJson(Map<String, dynamic>? json) {
     if (json == null) return const GameRulesMetadata();
@@ -45,6 +51,9 @@ class GameRulesMetadata {
               .toList()
           : const [],
       board: BoardMetadata.fromJson(json['board'] as Map<String, dynamic>?),
+      lifeTracker: LifeTrackerConfig.fromJson(
+        json['lifeTracker'] as Map<String, dynamic>?,
+      ),
     );
   }
 }
