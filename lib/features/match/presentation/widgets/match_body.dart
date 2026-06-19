@@ -115,15 +115,19 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
   Future<void> _handleActionPressed(String actionId) async {
     final action =
         widget.rules.actions.firstWhere((a) => a.id == actionId);
+    final matchState = ref.read(matchStateProvider(widget.gameId));
 
-    if (!ActionEnforcement.needsTargetSelection(widget.rules, action)) {
+    if (!ActionEnforcement.shouldPromptForTarget(
+          rules: widget.rules,
+          action: action,
+          state: matchState.engineState,
+        )) {
       ref.read(matchStateProvider(widget.gameId).notifier).attemptAction(
             actionId,
           );
       return;
     }
 
-    final matchState = ref.read(matchStateProvider(widget.gameId));
     final selection = await showMatchTargetPickerSheet(
       context,
       gameId: widget.gameId,
@@ -339,7 +343,7 @@ class _MatchBodyState extends ConsumerState<MatchBody> {
                             canUndo: notifier.hasManualBoardUndo,
                             onUndo: notifier.revertLastBoardEdit,
                             initialExpanded:
-                                boardPrefs.isExpanded(widget.gameId),
+                boardPrefs.isExpanded(widget.gameId) || !boardPrefs.introSeen,
                             showIntroHint: !boardPrefs.introSeen,
                             onExpandedChanged: (expanded) async {
                               await boardPrefs.setExpanded(

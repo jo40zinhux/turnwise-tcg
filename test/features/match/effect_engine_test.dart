@@ -10,7 +10,6 @@ import 'package:turnwise_tcg/features/match/domain/match_engine.dart';
 import 'package:turnwise_tcg/features/match/domain/match_engine_state.dart';
 import 'package:turnwise_tcg/features/match/domain/match_feedback.dart';
 import 'package:turnwise_tcg/features/match/domain/turn_phase.dart';
-import 'package:turnwise_tcg/features/match/domain/validation_rule.dart';
 
 void main() {
   final effectEngine = EffectEngine(newInstanceId: () => 'inst-1');

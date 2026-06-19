@@ -1,5 +1,7 @@
 import 'action_rule.dart';
 import 'game_rules.dart';
+import 'match_engine_state.dart';
+import 'validation_evaluator.dart';
 import 'validation_rule.dart';
 
 /// How strongly the engine can enforce an action's validations.
@@ -37,6 +39,38 @@ class ActionEnforcement {
       if (validation?.type == 'condition') return true;
     }
     return false;
+  }
+
+  /// Target picker only when the action can still proceed without a pre-check.
+  ///
+  /// Skips the board sheet when enforced validations or effect locks already
+  /// block the action (e.g. first-turn attack ban, paralysis).
+  static bool shouldPromptForTarget({
+    required GameRules rules,
+    required ActionRule action,
+    required MatchEngineState state,
+  }) {
+    if (!needsTargetSelection(rules, action)) return false;
+
+    if (state.effectsState.lockedActionIds.contains(action.id)) {
+      return false;
+    }
+
+    for (final validationId in action.validations) {
+      final validation = _findValidation(rules, validationId);
+      if (validation == null) continue;
+      if (validation.type == 'condition') continue;
+
+      final block = ValidationEvaluator.blockMessage(
+        validation: validation,
+        action: action,
+        state: state,
+        targetId: null,
+      );
+      if (block != null) return false;
+    }
+
+    return true;
   }
 
   static ActionEnforcement analyze(GameRules rules, ActionRule action) {

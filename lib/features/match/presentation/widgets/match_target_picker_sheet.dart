@@ -89,81 +89,85 @@ class _MatchTargetPickerSheetState extends State<_MatchTargetPickerSheet> {
     );
 
     return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Escolhe o alvo',
-              style: AppTypography.headline(context),
-            ),
-            AppSpacing.gapXs,
-            Text(
-              widget.action.name,
-              style: AppTypography.bodyMuted(context),
-            ),
-            AppSpacing.gapMd,
-            if (_board.targets.isEmpty)
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               Text(
-                'Sem alvos no tabuleiro.',
+                'Escolhe o alvo',
+                style: AppTypography.headline(context),
+              ),
+              AppSpacing.gapXs,
+              Text(
+                widget.action.name,
                 style: AppTypography.bodyMuted(context),
-              )
-            else
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: AppRadius.mdAll,
-                  border: Border.all(
-                    color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+              ),
+              AppSpacing.gapMd,
+              if (_board.targets.isEmpty)
+                Text(
+                  'Sem alvos no tabuleiro.',
+                  style: AppTypography.bodyMuted(context),
+                )
+              else
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: AppRadius.mdAll,
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant
+                          .withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < _board.targets.length; i++) ...[
+                        if (i > 0)
+                          Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: theme.dividerTheme.color,
+                          ),
+                        _TargetPickerRow(
+                          target: _board.targets[i],
+                          selected: _selectedId == _board.targets[i].id,
+                          flagSpecs: flagSpecs,
+                          onSelect: () => setState(
+                            () => _selectedId = _board.targets[i].id,
+                          ),
+                          onTargetChanged: _updateTarget,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = 0; i < _board.targets.length; i++) ...[
-                      if (i > 0)
-                        Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: theme.dividerTheme.color,
-                        ),
-                      _TargetPickerRow(
-                        target: _board.targets[i],
-                        selected: _selectedId == _board.targets[i].id,
-                        flagSpecs: flagSpecs,
-                        onSelect: () =>
-                            setState(() => _selectedId = _board.targets[i].id),
-                        onTargetChanged: _updateTarget,
-                      ),
-                    ],
-                  ],
+              AppSpacing.gapMd,
+              FilledButton(
+                onPressed: _selectedId == null
+                    ? null
+                    : () {
+                        Navigator.of(context).pop(
+                          MatchTargetSelection(
+                            targetId: _selectedId!,
+                            board: _board,
+                          ),
+                        );
+                      },
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
                 ),
+                child: const Text('Confirmar alvo'),
               ),
-            AppSpacing.gapMd,
-            FilledButton(
-              onPressed: _selectedId == null
-                  ? null
-                  : () {
-                      Navigator.of(context).pop(
-                        MatchTargetSelection(
-                          targetId: _selectedId!,
-                          board: _board,
-                        ),
-                      );
-                    },
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-              ),
-              child: const Text('Confirmar alvo'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

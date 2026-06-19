@@ -3,6 +3,8 @@ import 'package:turnwise_tcg/features/match/domain/action_enforcement.dart';
 import 'package:turnwise_tcg/features/match/domain/action_rule.dart';
 import 'package:turnwise_tcg/features/match/domain/game_rules.dart';
 import 'package:turnwise_tcg/features/match/domain/turn_phase.dart';
+import 'package:turnwise_tcg/features/match/domain/match_effects_state.dart';
+import 'package:turnwise_tcg/features/match/domain/match_engine_state.dart';
 import 'package:turnwise_tcg/features/match/domain/validation_rule.dart';
 
 void main() {
@@ -74,6 +76,88 @@ void main() {
       final e = ActionEnforcement.analyze(rules, supporterAction);
       expect(e.hasEnforcedRules, isTrue);
       expect(e.isReminderOnly, isFalse);
+    });
+
+    test('shouldPromptForTarget skips evolve on player first turn', () {
+      const state = MatchEngineState(
+        currentPhaseIndex: 0,
+        effectsState: MatchEffectsState(turnNumber: 1),
+      );
+
+      expect(
+        ActionEnforcement.shouldPromptForTarget(
+          rules: rules,
+          action: evolveAction,
+          state: state,
+        ),
+        isFalse,
+      );
+    });
+
+    test('shouldPromptForTarget skips attack when first player turn 1', () {
+      const attackAction = ActionRule(
+        id: 'attack',
+        name: 'Atacar',
+        allowedPhases: ['attack'],
+        validations: ['first_player_attack_ban'],
+        requiresTarget: true,
+      );
+
+      final attackRules = GameRules(
+        gameId: 'pokemon',
+        name: 'Pokemon',
+        phases: const [
+          TurnPhase(
+            id: 'attack',
+            title: 'Attack',
+            description: '',
+            iconCode: 'sports_mma',
+          ),
+        ],
+        actions: const [attackAction],
+        validations: const [
+          ValidationRule(
+            id: 'first_player_attack_ban',
+            type: 'first_player_first_turn',
+            params: {},
+            errorMessage: 'Sem atacar no turno 1.',
+          ),
+        ],
+        effects: const [],
+      );
+
+      const state = MatchEngineState(
+        currentPhaseIndex: 0,
+        effectsState: MatchEffectsState(
+          turnNumber: 1,
+          playerWentFirst: true,
+        ),
+      );
+
+      expect(
+        ActionEnforcement.shouldPromptForTarget(
+          rules: attackRules,
+          action: attackAction,
+          state: state,
+        ),
+        isFalse,
+      );
+    });
+
+    test('shouldPromptForTarget still prompts evolve when turn allows it', () {
+      const state = MatchEngineState(
+        currentPhaseIndex: 0,
+        effectsState: MatchEffectsState(turnNumber: 2),
+      );
+
+      expect(
+        ActionEnforcement.shouldPromptForTarget(
+          rules: rules,
+          action: evolveAction,
+          state: state,
+        ),
+        isTrue,
+      );
     });
   });
 }

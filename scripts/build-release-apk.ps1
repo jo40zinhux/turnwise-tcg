@@ -4,9 +4,16 @@
 # Uso:
 #   Windows:  .\scripts\build-release-apk.ps1
 #   macOS:    ./scripts/build-release-apk.sh
+#
+# Versao: lida de pubspec.yaml (version: X.Y.Z+BUILD)
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot\..
+
+$pubspec = Get-Content pubspec.yaml -Raw
+if ($pubspec -match 'version:\s*([^\s]+)') {
+  Write-Host "TurnWise $($Matches[1])" -ForegroundColor Cyan
+}
 
 $keyProps = "android\key.properties"
 $keystore = "android\upload-keystore.jks"

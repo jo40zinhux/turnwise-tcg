@@ -19,7 +19,7 @@ class MatchChipStyle {
       backgroundColor: theme.colorScheme.surface,
       foregroundColor: theme.colorScheme.onSurface,
       borderSide: BorderSide(
-        color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
       ),
     );
   }
@@ -27,18 +27,18 @@ class MatchChipStyle {
   static MatchChipStyle selected(ThemeData theme) {
     final primary = theme.colorScheme.primary;
     return MatchChipStyle(
-      backgroundColor: primary.withOpacity(0.18),
+      backgroundColor: primary.withValues(alpha: 0.18),
       foregroundColor: primary,
-      borderSide: BorderSide(color: primary.withOpacity(0.6), width: 1.5),
+      borderSide: BorderSide(color: primary.withValues(alpha: 0.6), width: 1.5),
     );
   }
 
   static MatchChipStyle exhausted(ThemeData theme) {
     return MatchChipStyle(
-      backgroundColor: theme.colorScheme.surface.withOpacity(0.6),
-      foregroundColor: theme.colorScheme.onSurface.withOpacity(0.45),
+      backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.6),
+      foregroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.45),
       borderSide: BorderSide(
-        color: theme.colorScheme.outlineVariant.withOpacity(0.18),
+        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.18),
       ),
     );
   }
@@ -50,7 +50,7 @@ class MatchChipStyle {
     return MatchChipStyle(
       backgroundColor: accentMuted,
       foregroundColor: accent,
-      borderSide: BorderSide(color: accent.withOpacity(0.45)),
+      borderSide: BorderSide(color: accent.withValues(alpha: 0.45)),
     );
   }
 }

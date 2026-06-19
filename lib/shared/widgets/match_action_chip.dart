@@ -111,7 +111,7 @@ class MatchActionChip extends StatelessWidget {
               child: Icon(
                 Icons.info_outline_rounded,
                 size: 14,
-                color: theme.colorScheme.primary.withOpacity(0.85),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.85),
               ),
             ),
         ],
@@ -147,10 +147,10 @@ class MatchActionChip extends StatelessWidget {
   String? _tooltipMessage() {
     if (canUndoOnTap) return 'Toca para desfazer';
     if (onLongPress != null && isUsed) {
-      return 'Mantém premido para desfazer';
+      return 'Mantém pressionado para desfazer';
     }
     if (onLongPress != null && showReminderBadge) {
-      return 'Mantém premido para ver a regra';
+      return 'Mantém pressionado para ver a regra';
     }
     if (isExhausted) return 'Limite atingido neste turno';
     if (showReminderBadge) {

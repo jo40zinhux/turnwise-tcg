@@ -56,6 +56,25 @@ void main() {
       expect(checkups.first.trigger, CheckupTrigger.betweenTurns);
       expect(checkups.first.effectIds, ['poison']);
     });
+
+    test('before_attack checkup is scoped to attack phase', () {
+      final raw = [
+        {
+          'id': 'confusion',
+          'name': 'Confusion',
+          'type': 'status',
+          'trigger': 'before_attack',
+          'description': 'Flip coin before attack.',
+        },
+      ];
+      final effects = EffectsLibraryParser.parseEffects(raw);
+      final checkups =
+          EffectsLibraryParser.parseDerivedCheckups(effects, raw);
+
+      expect(checkups, hasLength(1));
+      expect(checkups.first.trigger, CheckupTrigger.onPhaseStart);
+      expect(checkups.first.phaseIds, ['attack']);
+    });
   });
 
   group('GameEffectsBundle assets', () {

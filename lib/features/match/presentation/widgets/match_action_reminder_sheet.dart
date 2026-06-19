@@ -17,12 +17,13 @@ Future<void> showMatchActionReminderSheet(
     ),
     builder: (ctx) {
       return SafeArea(
-        child: Padding(
-          padding: AppSpacing.screen,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: AppSpacing.screen,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               Row(
                 children: [
                   Icon(
@@ -46,7 +47,7 @@ Future<void> showMatchActionReminderSheet(
                   color: Theme.of(ctx)
                       .colorScheme
                       .surfaceContainerHighest
-                      .withOpacity(0.55),
+                      .withValues(alpha: 0.55),
                   borderRadius: AppRadius.mdAll,
                 ),
                 child: Text(
@@ -62,12 +63,16 @@ Future<void> showMatchActionReminderSheet(
               AppSpacing.gapMd,
               FilledButton(
                 onPressed: () => Navigator.of(ctx).pop(),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
                 child: const Text('Entendi'),
               ),
             ],
           ),
         ),
-      );
+      ),
+    );
     },
   );
 }

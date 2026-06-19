@@ -7,7 +7,6 @@ import 'package:turnwise_tcg/features/games/presentation/providers/game_catalog_
 import 'package:turnwise_tcg/features/home/presentation/providers/home_dashboard_providers.dart';
 import 'package:turnwise_tcg/features/match/data/shared_preferences_match_session_repository.dart';
 import 'package:turnwise_tcg/features/match/domain/match_session.dart';
-import 'package:turnwise_tcg/features/match/presentation/providers/match_session_providers.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

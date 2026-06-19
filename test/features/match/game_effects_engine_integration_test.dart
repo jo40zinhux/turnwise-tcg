@@ -6,6 +6,7 @@ import 'package:turnwise_tcg/features/match/data/file_rules_cache_datasource.dar
 import 'package:turnwise_tcg/features/match/domain/game_rules.dart';
 import 'package:turnwise_tcg/features/match/domain/match_engine.dart';
 import 'package:turnwise_tcg/features/match/domain/match_engine_state.dart';
+import 'package:turnwise_tcg/features/match/domain/match_effects_state.dart';
 import 'package:turnwise_tcg/features/match/domain/match_feedback.dart';
 
 class _InMemoryRulesCache extends FileRulesCacheDataSource {
@@ -105,5 +106,83 @@ void main() {
         isTrue,
       );
     });
+
+    test('pokemon confusion checkup only on attack phase with effect active',
+        () async {
+      final rules = await _loadRules('pokemon');
+      var state = MatchEngineState(
+        currentPhaseIndex: _phaseIndex(rules, 'draw'),
+        effectsState: const MatchEffectsState(playerWentFirst: true),
+      );
+
+      state = matchEngine.nextPhase(state, rules);
+      expect(state.currentPhaseIndex, _phaseIndex(rules, 'actions'));
+      expect(
+        state.effectsState.pendingCheckups
+            .any((c) => c.id == 'confusion_checkup'),
+        isFalse,
+      );
+
+      state = matchEngine.nextPhase(state, rules);
+      expect(state.currentPhaseIndex, _phaseIndex(rules, 'attack'));
+      expect(
+        state.effectsState.pendingCheckups
+            .any((c) => c.id == 'confusion_checkup'),
+        isFalse,
+      );
+
+      state = matchEngine.applyEffect(state, rules, 'confusion');
+      state = state.copyWith(currentPhaseIndex: _phaseIndex(rules, 'draw'));
+      state = matchEngine.nextPhase(state, rules);
+      expect(state.currentPhaseIndex, _phaseIndex(rules, 'actions'));
+      expect(
+        state.effectsState.pendingCheckups
+            .any((c) => c.id == 'confusion_checkup'),
+        isFalse,
+        reason: 'draw -> actions should not trigger before_attack',
+      );
+
+      state = matchEngine.nextPhase(state, rules);
+      expect(
+        state.effectsState.pendingCheckups
+            .any((c) => c.id == 'confusion_checkup'),
+        isTrue,
+      );
+    });
+
+    const allGames = [
+      'pokemon',
+      'magic',
+      'yugioh',
+      'lorcana',
+      'one_piece',
+      'flesh_and_blood',
+      'riftbound',
+    ];
+
+    for (final gameId in allGames) {
+      test(
+        '$gameId phase advance without effects skips effect-bound checkups',
+        () async {
+          final rules = await _loadRules(gameId);
+          var state = MatchEngineState(
+            currentPhaseIndex: 0,
+            effectsState: const MatchEffectsState(playerWentFirst: true),
+          );
+
+          for (var i = 0; i < rules.phases.length - 1; i++) {
+            state = matchEngine.nextPhase(state, rules);
+            final phantom = state.effectsState.pendingCheckups.where(
+              (c) => c.relatedEffectIds.isNotEmpty,
+            );
+            expect(
+              phantom,
+              isEmpty,
+              reason: 'phase ${rules.phases[state.currentPhaseIndex].id}',
+            );
+          }
+        },
+      );
+    }
   });
 }

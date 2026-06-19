@@ -104,7 +104,23 @@ class _MatchBoardPanelState extends State<MatchBoardPanel> {
 
   void _removeTarget(String targetId) {
     if (widget.board.targets.length <= BoardGameConfig.minTargets) return;
+
+    final label =
+        widget.board.targets.firstWhere((t) => t.id == targetId).label;
     widget.onChanged(widget.board.removeTarget(targetId));
+
+    if (!mounted || widget.onUndo == null) return;
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$label removido'),
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'Desfazer',
+          onPressed: widget.onUndo!,
+        ),
+      ),
+    );
   }
 
   void _addSlot() {
@@ -137,6 +153,7 @@ class _MatchBoardPanelState extends State<MatchBoardPanel> {
     return Semantics(
       container: true,
       expanded: _expanded,
+      explicitChildNodes: true,
       label: _expanded
           ? 'Tabuleiro expandido'
           : 'Tabuleiro recolhido. $collapsedSummary',
@@ -149,7 +166,7 @@ class _MatchBoardPanelState extends State<MatchBoardPanel> {
           color: theme.colorScheme.surface,
           borderRadius: AppRadius.mdAll,
           border: Border.all(
-            color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
           ),
         ),
         child: Column(

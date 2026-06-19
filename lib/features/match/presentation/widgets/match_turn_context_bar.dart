@@ -40,10 +40,10 @@ class MatchTurnContextBar extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withValues(alpha: 0.12),
           borderRadius: AppRadius.smAll,
           border: Border.all(
-            color: theme.colorScheme.primary.withOpacity(0.35),
+            color: theme.colorScheme.primary.withValues(alpha: 0.35),
           ),
         ),
         child: Row(

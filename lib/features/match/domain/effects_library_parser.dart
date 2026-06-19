@@ -35,6 +35,7 @@ abstract final class EffectsLibraryParser {
           message: description,
           trigger: checkupTrigger,
           effectIds: [json['id'] as String],
+          phaseIds: triggerKey == 'before_attack' ? const ['attack'] : const [],
         ),
       );
     }

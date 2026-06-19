@@ -332,6 +332,7 @@ class MatchEngine {
       if (checkup.phaseIds.isNotEmpty && !checkup.phaseIds.contains(phaseId)) {
         continue;
       }
+      if (!checkup.shouldFire(state.effectsState)) continue;
       next = _enqueueCheckup(
         next,
         CheckupReminder(

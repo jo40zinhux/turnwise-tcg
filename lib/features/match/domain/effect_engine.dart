@@ -359,9 +359,7 @@ class EffectEngine {
   }
 
   bool _shouldFireCheckup(CheckupDefinition checkup, MatchEffectsState effects) {
-    if (checkup.effectIds.isEmpty) return true;
-    return effects.nonExpiredEffects
-        .any((effect) => checkup.effectIds.contains(effect.definitionId));
+    return checkup.shouldFire(effects);
   }
 
   bool _hasRequiredEffects(TriggerDefinition trigger, MatchEffectsState effects) {

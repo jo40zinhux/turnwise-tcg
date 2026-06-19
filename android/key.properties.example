@@ -1,5 +1,0 @@
-# Copia para key.properties (não commitar) após criar o upload-keystore.jks
-storePassword=SUA_STORE_PASSWORD
-keyPassword=SUA_KEY_PASSWORD
-keyAlias=upload
-storeFile=../upload-keystore.jks

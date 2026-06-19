@@ -102,6 +102,45 @@ void main() {
     expect(undoCount, 1);
   });
 
+  testWidgets('MatchBoardPanel offers undo snackbar after removing a slot',
+      (tester) async {
+    var undoCount = 0;
+  MatchBoardState board = MatchBoardState(
+      targets: const [
+        BoardTarget(id: 'slot_0', label: 'Ativo'),
+        BoardTarget(id: 'slot_1', label: 'Banco'),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: MatchBoardPanel(
+            gameId: 'pokemon',
+            board: board,
+            onChanged: (next) => board = next,
+            initialExpanded: true,
+            onUndo: () => undoCount++,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.close_rounded).last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Banco removido'), findsOneWidget);
+    expect(find.text('Desfazer'), findsOneWidget);
+    expect(board.targets, hasLength(1));
+
+    await tester.tap(find.text('Desfazer'));
+    await tester.pumpAndSettle();
+
+    expect(undoCount, 1);
+  });
+
   testWidgets('MatchBoardPanel persists expansion callback', (tester) async {
     var expanded = false;
 

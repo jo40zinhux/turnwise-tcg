@@ -1,3 +1,5 @@
+import 'match_effects_state.dart';
+
 /// When a checkup reminder should appear.
 enum CheckupTrigger {
   betweenTurns('between_turns'),
@@ -45,5 +47,15 @@ class CheckupDefinition {
       phaseIds: List<String>.from(json['phaseIds'] ?? const []),
       priority: json['priority'] as int? ?? 0,
     );
+  }
+
+  /// Whether this reminder should surface given active effects.
+  ///
+  /// Checkups without [effectIds] are informational (e.g. FAB phase hints)
+  /// and always fire when their trigger matches.
+  bool shouldFire(MatchEffectsState effects) {
+    if (effectIds.isEmpty) return true;
+    return effects.nonExpiredEffects
+        .any((effect) => effectIds.contains(effect.definitionId));
   }
 }

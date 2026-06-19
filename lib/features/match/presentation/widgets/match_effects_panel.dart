@@ -144,7 +144,7 @@ class _LocksRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: semantic.warningMuted,
         borderRadius: AppRadius.smAll,
-        border: Border.all(color: semantic.warning.withOpacity(0.4)),
+        border: Border.all(color: semantic.warning.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [

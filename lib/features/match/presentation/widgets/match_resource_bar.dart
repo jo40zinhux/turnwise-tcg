@@ -90,7 +90,7 @@ class MatchResourceBar extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: AppRadius.mdAll,
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
         ),
       ),
       child: Column(

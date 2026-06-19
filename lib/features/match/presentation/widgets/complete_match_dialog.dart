@@ -151,11 +151,13 @@ class _OutcomeCard extends StatelessWidget {
     final spec = _OutcomeSpec.of(outcome, semantic);
 
     final background = isSelected
-        ? spec.accent.withOpacity(0.18)
+        ? spec.accent.withValues(alpha: 0.18)
         : theme.colorScheme.surface;
     final border = isSelected
         ? BorderSide(color: spec.accent, width: 1.5)
-        : BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.3));
+        : BorderSide(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          );
 
     return Semantics(
       selected: isSelected,

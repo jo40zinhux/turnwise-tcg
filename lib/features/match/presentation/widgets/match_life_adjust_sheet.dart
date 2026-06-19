@@ -271,6 +271,9 @@ class _PlayerRow extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: onDecrease,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(44),
+                  ),
                   child: Text(decreaseLabel),
                 ),
               ),
@@ -278,6 +281,9 @@ class _PlayerRow extends StatelessWidget {
               Expanded(
                 child: FilledButton(
                   onPressed: onIncrease,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(44),
+                  ),
                   child: Text(increaseLabel),
                 ),
               ),

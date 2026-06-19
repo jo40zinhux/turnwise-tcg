@@ -26,7 +26,7 @@ class MatchCheckupBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: semantic.infoMuted,
         borderRadius: AppRadius.mdAll,
-        border: Border.all(color: semantic.info.withOpacity(0.45)),
+        border: Border.all(color: semantic.info.withValues(alpha: 0.45)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,6 +50,7 @@ class MatchCheckupBanner extends StatelessWidget {
             onPressed: onDismiss,
             icon: const Icon(Icons.check_circle_outline),
             tooltip: 'Marcar como feito',
+            constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
           ),
         ],
       ),

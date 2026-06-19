@@ -21,12 +21,8 @@ class _FakeBundledRulesDataSource extends BundledRulesDataSource {
 }
 
 class _FakeBundledEffectsDataSource extends BundledEffectsDataSource {
-  final GameEffectsBundle? bundle;
-
-  _FakeBundledEffectsDataSource({this.bundle});
-
   @override
-  Future<GameEffectsBundle?> loadEffectsBundle(String gameId) async => bundle;
+  Future<GameEffectsBundle?> loadEffectsBundle(String gameId) async => null;
 }
 
 class _FakeFileRulesCacheDataSource extends FileRulesCacheDataSource {

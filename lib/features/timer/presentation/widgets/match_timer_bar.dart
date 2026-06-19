@@ -74,10 +74,10 @@ class _MatchTimerBarState extends ConsumerState<MatchTimerBar> {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.35),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: AppRadius.mdAll,
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -132,7 +132,7 @@ class _MatchTimerBarState extends ConsumerState<MatchTimerBar> {
                   value: progress,
                   minHeight: 5,
                   backgroundColor:
-                      theme.colorScheme.surfaceContainerHighest.withOpacity(0.6),
+                      theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
                   color: progressColor,
                 ),
               ),
@@ -220,7 +220,7 @@ class _ProfileChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.15),
+        color: theme.colorScheme.primary.withValues(alpha: 0.15),
         borderRadius: AppRadius.smAll,
       ),
       child: Text(
