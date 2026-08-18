@@ -11,7 +11,11 @@ export class QrCodeService {
     });
   }
 
-  eventUrl(slug: string): string {
-    return `${window.location.origin}/events/${slug}`;
+  eventPath(storeSlug: string, eventSlug: string): string {
+    return `/events/${storeSlug}/${eventSlug}`;
+  }
+
+  eventUrl(storeSlug: string, eventSlug: string): string {
+    return `${window.location.origin}${this.eventPath(storeSlug, eventSlug)}`;
   }
 }

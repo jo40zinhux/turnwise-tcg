@@ -75,7 +75,8 @@ export class RegisterPageComponent {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   readonly auth = inject(AuthService);
-  readonly slug = input.required<string>();
+  readonly storeSlug = input.required<string>();
+  readonly eventSlug = input.required<string>();
   readonly view = signal<PublicEventView | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -102,7 +103,9 @@ export class RegisterPageComponent {
       });
     }
     effect(() => {
-      void this.events.getPublic(this.slug()).then((data) => this.view.set(data));
+      void this.events
+        .getPublic(this.storeSlug(), this.eventSlug())
+        .then((data) => this.view.set(data));
     });
   }
 
@@ -115,7 +118,8 @@ export class RegisterPageComponent {
     const value = this.form.getRawValue();
     try {
       const result = await this.registrations.register({
-        eventSlug: this.slug(),
+        storeSlug: this.storeSlug(),
+        eventSlug: this.eventSlug(),
         fullName: value.fullName,
         email: value.email,
         phone: value.phone || undefined,

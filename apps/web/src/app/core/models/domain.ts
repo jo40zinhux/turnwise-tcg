@@ -46,6 +46,8 @@ export interface Store {
   slug: string;
   city: string;
   state: string;
+  locationName: string;
+  address: string;
   whatsapp: string;
   defaultRefundPolicy: RefundPolicy;
 }
@@ -169,6 +171,7 @@ export interface SignupInput {
 }
 
 export interface RegisterInput {
+  storeSlug: string;
   eventSlug: string;
   fullName: string;
   email: string;

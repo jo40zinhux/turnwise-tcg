@@ -52,11 +52,14 @@ export class HttpApiClient implements ApiClient {
   listGames(): Promise<Game[]> {
     return this.get('/games');
   }
-  getPublicEvent(slug: string): Promise<PublicEventView> {
-    return this.get(`/events/${slug}`);
+  getPublicEvent(storeSlug: string, eventSlug: string): Promise<PublicEventView> {
+    return this.get(`/events/${storeSlug}/${eventSlug}`);
   }
   register(input: RegisterInput): Promise<RegistrationView> {
-    return this.post(`/events/${input.eventSlug}/registrations`, input);
+    return this.post(
+      `/events/${input.storeSlug}/${input.eventSlug}/registrations`,
+      input,
+    );
   }
   claimGuestSession(
     registrationId: string,

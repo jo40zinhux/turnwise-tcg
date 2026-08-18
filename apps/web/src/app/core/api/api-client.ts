@@ -40,7 +40,7 @@ export interface ApiClient {
   addGameIdentifier(input: GameIdentifierInput): Promise<GameIdentifier>;
   listGames(): Promise<Game[]>;
 
-  getPublicEvent(slug: string): Promise<PublicEventView>;
+  getPublicEvent(storeSlug: string, eventSlug: string): Promise<PublicEventView>;
   register(input: RegisterInput): Promise<RegistrationView>;
   claimGuestSession(
     registrationId: string,

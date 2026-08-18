@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   EVENTS,
+  eventPath,
   STORE_DRAGAO,
   confirmDialog,
   login,
@@ -12,7 +13,7 @@ test.describe('Waitlist', () => {
   test('evento lotado impede vaga e mostra posição na espera', async ({
     page,
   }) => {
-    await page.goto(`/events/${EVENTS.magic}`);
+    await page.goto(eventPath(EVENTS.magic));
     await expect(statusChip(page, 'Lotado')).toBeVisible();
     await expect(page.getByText('0 disponíveis')).toBeVisible();
     await expect(page.getByText('3 na waitlist')).toBeVisible();

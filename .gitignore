@@ -77,3 +77,9 @@ apps/web/.angular/
 apps/web/dist/
 apps/web/test-results/
 apps/web/playwright-report/
+
+# TurnWise Events (API)
+apps/api/node_modules/
+apps/api/dist/
+apps/api/.env
+

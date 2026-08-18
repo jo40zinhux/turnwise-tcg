@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   EVENTS,
+  eventPath,
   PLAYER_ANA,
   acceptTerms,
   confirmDialog,
@@ -14,7 +15,7 @@ test.describe('Jogador — evento público', () => {
   test('acessa o evento, vê vagas e não vê nomes de participantes', async ({
     page,
   }) => {
-    await page.goto(`/events/${EVENTS.pokemon}`);
+    await page.goto(eventPath(EVENTS.pokemon));
     await expect(
       page.getByRole('heading', { name: 'Pokémon League Challenge' }),
     ).toBeVisible();
@@ -34,7 +35,7 @@ test.describe('Jogador — inscrição guest', () => {
     page,
   }) => {
     await registerGuest(page, {
-      slug: EVENTS.pokemon,
+      event: EVENTS.pokemon,
       name: 'Guest Playwright',
       email: uniqueEmail('guest'),
     });
@@ -50,7 +51,7 @@ test.describe('Jogador — inscrição guest', () => {
 
   test('pagamento no local permite desistência direta', async ({ page }) => {
     await registerGuest(page, {
-      slug: EVENTS.yugioh,
+      event: EVENTS.yugioh,
       name: 'Locals Guest',
       email: uniqueEmail('locals'),
     });

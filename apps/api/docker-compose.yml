@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: turnwise
+      POSTGRES_PASSWORD: turnwise
+      POSTGRES_DB: turnwise_events
+    volumes:
+      - turnwise_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U turnwise -d turnwise_events"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://turnwise:turnwise@postgres:5432/turnwise_events?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-homolog}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:4200}
+      ALLOW_SANDBOX_NOTIFICATIONS: ${ALLOW_SANDBOX_NOTIFICATIONS:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  turnwise_pgdata:

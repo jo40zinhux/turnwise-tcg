@@ -20,17 +20,19 @@ import { ToastService } from '../../../core/services/toast.service';
 export class QrPanelComponent {
   private readonly qr = inject(QrCodeService);
   private readonly toast = inject(ToastService);
-  readonly slug = input.required<string>();
+  readonly storeSlug = input.required<string>();
+  readonly eventSlug = input.required<string>();
   readonly src = signal('');
   readonly url = signal('');
 
   constructor() {
     effect(() => {
-      const slug = this.slug();
-      if (!slug) {
+      const storeSlug = this.storeSlug();
+      const eventSlug = this.eventSlug();
+      if (!storeSlug || !eventSlug) {
         return;
       }
-      this.url.set(this.qr.eventUrl(slug));
+      this.url.set(this.qr.eventUrl(storeSlug, eventSlug));
       void this.qr.toDataUrl(this.url()).then((value) => this.src.set(value));
     });
   }

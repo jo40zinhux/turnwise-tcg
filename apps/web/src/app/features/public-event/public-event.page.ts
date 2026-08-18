@@ -42,7 +42,7 @@ import { formatBrl, formatEventWhen, refundCopy } from '../../shared/pipes/forma
         </section>
         <div class="sticky-cta">
           @if (canRegister(data.event.status, data.event.allowWaitlist, data.capacity.available)) {
-            <a class="btn btn-primary btn-block" [routerLink]="['/events', data.event.slug, 'register']">
+            <a class="btn btn-primary btn-block" [routerLink]="['/events', data.store.slug, data.event.slug, 'register']">
               {{ data.capacity.available === 0 ? 'Entrar na waitlist' : 'Inscrever-se' }}
             </a>
           } @else {
@@ -56,7 +56,8 @@ import { formatBrl, formatEventWhen, refundCopy } from '../../shared/pipes/forma
 })
 export class PublicEventPageComponent {
   private readonly events = inject(EventService);
-  readonly slug = input.required<string>();
+  readonly storeSlug = input.required<string>();
+  readonly eventSlug = input.required<string>();
   readonly view = signal<PublicEventView | null>(null);
   readonly loading = signal(true);
   readonly error = signal(false);
@@ -66,8 +67,9 @@ export class PublicEventPageComponent {
 
   constructor() {
     effect(() => {
-      const slug = this.slug();
-      void this.load(slug);
+      const storeSlug = this.storeSlug();
+      const eventSlug = this.eventSlug();
+      void this.load(storeSlug, eventSlug);
     });
   }
 
@@ -88,11 +90,11 @@ export class PublicEventPageComponent {
     return status === EventStatus.FULL && waitlist;
   }
 
-  private async load(slug: string) {
+  private async load(storeSlug: string, eventSlug: string) {
     this.loading.set(true);
     this.error.set(false);
     try {
-      this.view.set(await this.events.getPublic(slug));
+      this.view.set(await this.events.getPublic(storeSlug, eventSlug));
     } catch {
       this.error.set(true);
     } finally {

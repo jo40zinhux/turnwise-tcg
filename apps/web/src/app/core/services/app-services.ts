@@ -6,8 +6,8 @@ import { RegisterInput } from '../models/domain';
 export class EventService {
   private readonly api = inject(API_CLIENT);
 
-  getPublic(slug: string) {
-    return this.api.getPublicEvent(slug);
+  getPublic(storeSlug: string, eventSlug: string) {
+    return this.api.getPublicEvent(storeSlug, eventSlug);
   }
 
   listGames() {

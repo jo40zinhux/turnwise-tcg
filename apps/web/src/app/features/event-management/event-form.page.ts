@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Game } from '../../core/models/domain';
 import { PaymentMode } from '../../core/models/enums';
-import { EventService } from '../../core/services/app-services';
+import { EventService, StoreService } from '../../core/services/app-services';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
@@ -25,8 +25,15 @@ import { ToastService } from '../../core/services/toast.service';
         <label class="field"><span>Descrição</span><textarea formControlName="description"></textarea></label>
         <label class="field"><span>Regras / instruções</span><textarea formControlName="rules"></textarea></label>
         <label class="field"><span>Data e horário</span><input formControlName="startsAt" type="datetime-local" /></label>
-        <label class="field"><span>Local</span><input formControlName="locationName" /></label>
-        <label class="field"><span>Endereço</span><input formControlName="address" /></label>
+        <label class="field">
+          <span>Local</span>
+          <input formControlName="locationName" />
+          <span class="subtle">Pré-preenchido com o local da loja. Altere se o evento for em outro endereço.</span>
+        </label>
+        <label class="field">
+          <span>Endereço</span>
+          <input formControlName="address" />
+        </label>
         <label class="field"><span>Vagas</span><input formControlName="maxParticipants" type="number" min="1" /></label>
         <label class="field"><span>Valor (R$)</span><input formControlName="price" type="number" min="0" step="0.01" /></label>
         <label class="field">
@@ -48,6 +55,7 @@ import { ToastService } from '../../core/services/toast.service';
 export class EventFormPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly events = inject(EventService);
+  private readonly stores = inject(StoreService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   readonly eventId = input<string>();
@@ -81,6 +89,8 @@ export class EventFormPageComponent {
       const id = this.eventId();
       if (id) {
         void this.load(id);
+      } else {
+        void this.prefillFromStore();
       }
     });
   }
@@ -114,6 +124,16 @@ export class EventFormPageComponent {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private async prefillFromStore() {
+    const store = await this.stores.current();
+    this.form.patchValue({
+      locationName: store.locationName || store.name,
+      address: store.address || `${store.city}/${store.state}`,
+      refundEnabled: store.defaultRefundPolicy.enabled,
+      feePercent: store.defaultRefundPolicy.feePercent,
+    });
   }
 
   private async load(id: string) {

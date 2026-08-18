@@ -121,9 +121,9 @@ export class MockApiClient implements ApiClient {
     return [...this.db.games];
   }
 
-  async getPublicEvent(slug: string): Promise<PublicEventView> {
+  async getPublicEvent(storeSlug: string, eventSlug: string): Promise<PublicEventView> {
     await wait();
-    const event = this.db.findEventBySlug(slug);
+    const event = this.db.findEventBySlug(storeSlug, eventSlug);
     if (!event || event.status === EventStatus.DRAFT) {
       throw new ApiError('Evento não encontrado.', 'NOT_FOUND', 404);
     }

@@ -166,8 +166,14 @@ export class InMemoryDb {
     return game;
   }
 
-  findEventBySlug(slug: string): Event | undefined {
-    return this.events.find((item) => item.slug === slug);
+  findEventBySlug(storeSlug: string, eventSlug: string): Event | undefined {
+    const store = this.stores.find((item) => item.slug === storeSlug);
+    if (!store) {
+      return undefined;
+    }
+    return this.events.find(
+      (item) => item.storeId === store.id && item.slug === eventSlug,
+    );
   }
 
   nextWaitlistPosition(eventId: string): number {
@@ -234,7 +240,7 @@ export class InMemoryDb {
   }
 
   register(input: RegisterInput, actor: User | null): RegistrationView {
-    const event = this.findEventBySlug(input.eventSlug);
+    const event = this.findEventBySlug(input.storeSlug, input.eventSlug);
     if (!event) {
       throw new Error('Evento não encontrado.');
     }
@@ -468,17 +474,18 @@ export class InMemoryDb {
   }
 
   createEvent(storeId: string, input: CreateEventInput): Event {
+    const store = this.requireStore(storeId);
     const event: Event = {
       id: id('evt'),
       storeId,
       gameId: input.gameId,
-      slug: this.uniqueSlug(input.name),
+      slug: this.uniqueSlug(storeId, input.name),
       name: input.name.trim(),
       description: input.description.trim(),
       rules: input.rules.trim(),
       startsAt: input.startsAt,
-      locationName: input.locationName.trim(),
-      address: input.address.trim(),
+      locationName: input.locationName.trim() || store.locationName,
+      address: input.address.trim() || store.address,
       maxParticipants: input.maxParticipants,
       priceCents: input.priceCents,
       paymentMode: input.paymentMode,
@@ -504,7 +511,7 @@ export class InMemoryDb {
         : event.refundPolicy,
     });
     if (input.name) {
-      event.slug = this.uniqueSlug(input.name, event.id);
+      event.slug = this.uniqueSlug(event.storeId, input.name, event.id);
     }
     return event;
   }
@@ -637,12 +644,17 @@ export class InMemoryDb {
     }
   }
 
-  private uniqueSlug(name: string, exceptId?: string): string {
+  private uniqueSlug(storeId: string, name: string, exceptId?: string): string {
     const base = slugify(name) || 'evento';
     let slug = base;
     let n = 2;
     while (
-      this.events.some((item) => item.slug === slug && item.id !== exceptId)
+      this.events.some(
+        (item) =>
+          item.storeId === storeId &&
+          item.slug === slug &&
+          item.id !== exceptId,
+      )
     ) {
       slug = `${base}-${n}`;
       n += 1;
@@ -662,6 +674,8 @@ export class InMemoryDb {
       slug: 'arena-nexus',
       city: 'São Paulo',
       state: 'SP',
+      locationName: 'Arena Nexus',
+      address: 'Rua Augusta, 1200 — Consolação, São Paulo',
       whatsapp: '5511999887766',
       defaultRefundPolicy: refundNexus,
     };
@@ -671,6 +685,8 @@ export class InMemoryDb {
       slug: 'dragao-de-aco',
       city: 'Curitiba',
       state: 'PR',
+      locationName: 'Dragão de Aço',
+      address: 'Av. Sete de Setembro, 800 — Centro, Curitiba',
       whatsapp: '5541999776655',
       defaultRefundPolicy: { enabled: false, feePercent: 100 },
     };

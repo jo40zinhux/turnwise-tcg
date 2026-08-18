@@ -20,7 +20,10 @@ test.describe('Loja', () => {
     await expect(page.getByRole('heading', { name: 'Novo evento' })).toBeVisible();
     await page.getByLabel('Nome', { exact: true }).fill(name);
     await page.getByLabel('Data e horário').fill('2026-09-15T19:00');
-    await page.getByLabel('Local', { exact: true }).fill('Arena Nexus');
+    await expect(page.getByLabel('Local', { exact: true })).toHaveValue(
+      'Arena Nexus',
+    );
+    await expect(page.getByLabel('Endereço')).toHaveValue(/Augusta/);
     await page.getByLabel('Vagas').fill('8');
     await page.getByLabel('Valor (R$)').fill('35');
     await page.getByRole('button', { name: 'Salvar' }).click();

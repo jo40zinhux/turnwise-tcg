@@ -18,9 +18,9 @@ import { RouterLink } from '@angular/router';
       </div>
       <section class="surface stack">
         <h3>Eventos demo</h3>
-        <a routerLink="/events/pokemon-league-challenge-nexus">Pokémon League Challenge · vagas abertas · Mercado Pago</a>
-        <a routerLink="/events/fnm-dragao-aco">Friday Night Magic · lotado · waitlist</a>
-        <a routerLink="/events/yugioh-locals-nexus">Yu-Gi-Oh! Locals · pagamento no local</a>
+        <a routerLink="/events/arena-nexus/pokemon-league-challenge-nexus">Pokémon League Challenge · vagas abertas · Mercado Pago</a>
+        <a routerLink="/events/dragao-de-aco/fnm-dragao-aco">Friday Night Magic · lotado · waitlist</a>
+        <a routerLink="/events/arena-nexus/yugioh-locals-nexus">Yu-Gi-Oh! Locals · pagamento no local</a>
       </section>
       <p class="subtle">Loja piloto: loja&#64;nexus.demo / demo1234</p>
     </main>

@@ -9,10 +9,14 @@ export const PLAYER_ANA = {
 };
 
 export const EVENTS = {
-  pokemon: 'pokemon-league-challenge-nexus',
-  magic: 'fnm-dragao-aco',
-  yugioh: 'yugioh-locals-nexus',
+  pokemon: { store: 'arena-nexus', slug: 'pokemon-league-challenge-nexus' },
+  magic: { store: 'dragao-de-aco', slug: 'fnm-dragao-aco' },
+  yugioh: { store: 'arena-nexus', slug: 'yugioh-locals-nexus' },
 };
+
+export function eventPath(event: { store: string; slug: string }): string {
+  return `/events/${event.store}/${event.slug}`;
+}
 
 export function uniqueEmail(prefix: string): string {
   return `${prefix}.${Date.now()}.${Math.random().toString(36).slice(2, 6)}@play.demo`;
@@ -35,9 +39,9 @@ export async function acceptTerms(page: Page) {
 
 export async function registerGuest(
   page: Page,
-  options: { slug: string; name: string; email: string },
+  options: { event: { store: string; slug: string }; name: string; email: string },
 ) {
-  await page.goto(`/events/${options.slug}/register`);
+  await page.goto(`${eventPath(options.event)}/register`);
   await expect(page.getByRole('heading', { name: 'Inscrição' })).toBeVisible();
   await page.getByLabel('Nome completo').fill(options.name);
   await page.getByLabel('E-mail').fill(options.email);

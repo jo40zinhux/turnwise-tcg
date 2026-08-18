@@ -6,7 +6,7 @@ test.describe('Pagamentos Mercado Pago', () => {
     page,
   }) => {
     await registerGuest(page, {
-      slug: EVENTS.pokemon,
+      event: EVENTS.pokemon,
       name: 'Pago Playwright',
       email: uniqueEmail('pay'),
     });
@@ -31,7 +31,7 @@ test.describe('Pagamentos Mercado Pago', () => {
 
   test('falha no checkout e permite tentar de novo', async ({ page }) => {
     await registerGuest(page, {
-      slug: EVENTS.pokemon,
+      event: EVENTS.pokemon,
       name: 'Falha Playwright',
       email: uniqueEmail('fail'),
     });

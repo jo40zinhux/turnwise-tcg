@@ -22,7 +22,28 @@ Assistente de turno para mesas presenciais de TCG (Flutter + Firebase).
    ```
 6. **Landing page** (download TestFlight / APK): pasta `web-page/`, deploy com `firebase deploy --only hosting` ou `.\scripts\deploy-landing.ps1` → https://turnwise-tcg.web.app
 
-## Executar
+## TurnWise Events (web)
+
+Inscrições e gestão de loja: Angular em `apps/web`, NestJS + Postgres em `apps/api`.
+
+Mesmo fluxo em Windows e macOS — Docker Desktop + `docker compose` para o Postgres:
+
+```bash
+cd apps/api
+# Windows:  .\scripts\setup.ps1
+# macOS:    ./scripts/setup.sh
+npm run start:dev
+```
+
+```bash
+cd apps/web
+# environment.ts → useMocks: false
+npm start
+```
+
+Detalhes: [`apps/api/README.md`](apps/api/README.md).
+
+## Executar (app Flutter)
 
 ```bash
 flutter pub get

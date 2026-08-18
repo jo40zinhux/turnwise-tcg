@@ -10,6 +10,8 @@ import { StoreService } from '../../core/services/app-services';
       @if (store(); as item) {
         <section class="surface stack">
           <h3>{{ item.name }}</h3>
+          <p class="muted">{{ item.locationName }}</p>
+          <p class="muted">{{ item.address }}</p>
           <p class="muted">{{ item.city }}/{{ item.state }}</p>
           <p>WhatsApp: {{ item.whatsapp }}</p>
           <p class="muted">

@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
-  useMocks: true,
+  /** true = InMemoryDb. false = NestJS em apps/api (proxy /api → :3000). */
+  useMocks: false,
   apiBaseUrl: '/api',
   appName: 'TurnWise Events',
 };

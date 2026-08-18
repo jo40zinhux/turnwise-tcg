@@ -23,6 +23,9 @@ import { formatBrl, formatEventWhen } from '../../shared/pipes/formatters';
         </div>
         <tw-capacity-meter [capacity]="data.capacity" />
         <p><strong>{{ formatPrice(data.event.priceCents) }}</strong></p>
+        @if (data.event.status !== draft) {
+          <p class="muted">/events/{{ data.store.slug }}/{{ data.event.slug }}</p>
+        }
         <div class="row">
           <a class="btn btn-primary" [routerLink]="['/app/events', data.event.id, 'participants']">Participantes</a>
           <a class="btn btn-surface" [routerLink]="['/app/events', data.event.id, 'share']">QR Code / link</a>

@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PLAYER
+  STORE_ADMIN
+  SUPER_ADMIN
+}
+
+enum StoreMemberRole {
+  OWNER
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  OPEN
+  FULL
+  CLOSED
+  CANCELLED
+  FINISHED
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  CONFIRMED
+  WAITLIST
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  FAILED
+  CANCELLED
+  PAY_ON_SITE
+}
+
+enum PaymentMethod {
+  MERCADO_PAGO
+  ON_SITE
+}
+
+enum PaymentMode {
+  ONLINE
+  PAY_ON_SITE
+  PLAYER_CHOICE
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String?
+  fullName        String
+  displayName     String
+  phone           String    @default("")
+  city            String?
+  state           String?
+  role            UserRole  @default(PLAYER)
+  acceptedTermsAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  memberships   StoreMember[]
+  identifiers   GameIdentifier[]
+  registrations Registration[]
+}
+
+model Store {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  city             String
+  state            String
+  locationName     String
+  address          String
+  whatsapp         String
+  refundEnabled    Boolean  @default(false)
+  refundFeePercent Int      @default(100)
+  refundNote       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  members       StoreMember[]
+  events        Event[]
+  registrations Registration[]
+}
+
+model StoreMember {
+  id      String          @id @default(cuid())
+  storeId String
+  userId  String
+  role    StoreMemberRole @default(ADMIN)
+  store   Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, userId])
+}
+
+model Game {
+  id          String           @id
+  name        String
+  accent      String
+  events      Event[]
+  identifiers GameIdentifier[]
+}
+
+model GameIdentifier {
+  id     String @id @default(cuid())
+  userId String
+  gameId String
+  type   String
+  value  String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game   Game   @relation(fields: [gameId], references: [id])
+}
+
+model Event {
+  id               String      @id @default(cuid())
+  storeId          String
+  gameId           String
+  slug             String
+  name             String
+  description      String
+  rules            String
+  startsAt         DateTime
+  locationName     String
+  address          String
+  maxParticipants  Int
+  priceCents       Int
+  paymentMode      PaymentMode
+  allowWaitlist    Boolean     @default(true)
+  status           EventStatus @default(DRAFT)
+  imageUrl         String?
+  refundEnabled    Boolean
+  refundFeePercent Int
+  refundNote       String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  store         Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  game          Game           @relation(fields: [gameId], references: [id])
+  registrations Registration[]
+
+  @@unique([storeId, slug])
+  @@index([storeId, status])
+}
+
+model Registration {
+  id               String             @id @default(cuid())
+  eventId          String
+  userId           String
+  storeId          String
+  status           RegistrationStatus
+  waitlistPosition Int?
+  guestAccessToken String             @unique
+  createdAt        DateTime           @default(now())
+  cancelledAt      DateTime?
+
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store   Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  payment Payment?
+
+  @@index([eventId, status])
+  @@index([userId])
+  @@index([storeId])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  registrationId    String        @unique
+  status            PaymentStatus
+  method            PaymentMethod
+  amountCents       Int
+  preferenceId      String?
+  initPoint         String?
+  externalReference String?
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+}

@@ -36,14 +36,14 @@ export const routes: Routes = [
           import('./features/legal/privacy.page').then((m) => m.PrivacyPageComponent),
       },
       {
-        path: 'events/:slug',
+        path: 'events/:storeSlug/:eventSlug',
         loadComponent: () =>
           import('./features/public-event/public-event.page').then(
             (m) => m.PublicEventPageComponent,
           ),
       },
       {
-        path: 'events/:slug/register',
+        path: 'events/:storeSlug/:eventSlug/register',
         loadComponent: () =>
           import('./features/public-event/register.page').then(
             (m) => m.RegisterPageComponent,
